@@ -12,6 +12,7 @@ import {
 import Collapsible from 'react-native-collapsible';
 import { router } from "expo-router";
 import FooterComponent from '@/components/partials/FooterComponent';
+
 export default function PayrollLanding() {
   const { width } = useWindowDimensions();
   const [expandedSection, setExpandedSection] = useState<number | null>(null);
@@ -38,7 +39,7 @@ export default function PayrollLanding() {
     <ScrollView style={styles.container}>
       {/* Header Section */}
       <View style={styles.header}>
-        <Text style={styles.title}>Nómina, RRHH, beneficios.</Text>
+        <Text style={styles.title} >Nómina, RRHH, beneficios.</Text>
         <Text style={styles.subtitle}>Simplificado.</Text>
         <Text style={styles.description}>
           Únase a más de 200.000 pequeñas y medianas empresas que confían en Gusto
@@ -48,7 +49,7 @@ export default function PayrollLanding() {
           <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>Cómo funciona Gusto</Text>
           </TouchableOpacity>
-          <TouchableOpacity  onPress={() => router.navigate('/(admin)/indexAdmin')} style={[styles.button, styles.secondaryButton]}>
+          <TouchableOpacity  onPress={() => router.navigate('/(employee)/indexEmplo')} style={[styles.button, styles.secondaryButton]}>
             <Text style={styles.secondaryButtonText}>Crear una cuenta</Text>
           </TouchableOpacity>
         </View>
@@ -71,7 +72,7 @@ export default function PayrollLanding() {
 
         {/* Central Image */}
         <Image
-          source={{ uri: '/placeholder.svg?height=400&width=600' }}
+          source={require('../../assets/images/descarga.png')}
           style={[styles.centralImage, isMobile ? styles.centralImageMobile : null]}
           resizeMode="contain"
         />
