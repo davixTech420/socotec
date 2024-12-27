@@ -1,0 +1,31 @@
+. Automatización de Cálculos de Nómina
+Cálculo automático de salarios: Basado en horas trabajadas, salario fijo, bonificaciones, deducciones, horas extras y otros factores.
+Deductibles y retenciones automáticas: Calcula automáticamente impuestos (según legislación local), retenciones para seguridad social, pensiones y otros descuentos como préstamos, seguros, etc.
+Horas extras y días festivos: Sistema que calcule automáticamente las horas extras, trabajando en función de las políticas laborales locales.
+Bonificaciones e incentivos: Crea reglas automáticas para calcular bonificaciones por desempeño, metas alcanzadas, antigüedad, entre otras.
+
+
+
+
+Generación de Reportes
+Reportes de nómina detallados: Genera reportes de la nómina para cada empleado que incluya salario bruto, deducciones, impuestos, salario neto, etc.
+Reportes fiscales: Reportes preparados para entregar a las autoridades fiscales, que incluyan todas las retenciones y contribuciones.
+Reportes de tendencias: Análisis de costos laborales y otros indicadores para mejorar la eficiencia y tomar decisiones basadas en datos (por ejemplo, gastos mensuales de nómina, variación de horas extras, etc.).
+
+
+
+
+. Cumplimiento Legal
+	Actualización automática de leyes fiscales y laborales: Un sistema que esté actualizado con las leyes laborales y fiscales locales. Esto es crucial para cumplir con las normativas sin tener que revisar constantemente.
+Generación de recibos de pago electrónicos: Los recibos de pago deben ser generados y entregados electrónicamente, permitiendo a los empleados acceder a ellos fácilmente a través de un portal.
+Cumplimiento con regulaciones de seguridad social: El sistema debe calcular y gestionar las contribuciones a la seguridad social y otros fondos obligatorios.
+
+
+
+7. Gestión de Permisos y Vacaciones
+Calendario de ausencias: Los empleados pueden ver y solicitar sus días libres directamente desde un calendario, mientras que los managers o responsables pueden aprobar o rechazar las solicitudes en tiempo real.
+Política de vacaciones personalizada: Implementa políticas flexibles para vacaciones, días personales, permisos médicos, etc., según la antigüedad o el cargo del empleado.
+Aprobaciones de vacaciones: Un sistema de aprobación simple para gestionar las solicitudes de tiempo libre. La herramienta también puede mostrar automáticamente las fechas de las vacaciones ya tomadas y los días restantes.
+
+
+

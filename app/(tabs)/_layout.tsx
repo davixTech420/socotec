@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Image,Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -11,6 +11,12 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   return (
+    <>
+    
+
+   
+
+
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: "white",
@@ -21,7 +27,7 @@ export default function TabLayout() {
           borderRadius: 20,
           left: 35,
           right: 35,
-          backgroundColor: "#00bcf3",
+          backgroundColor: "#00ACE8",
           ...Platform.select({
             web: {
               top: 15,
@@ -37,6 +43,7 @@ export default function TabLayout() {
           }),
         }
       }}>
+     
       <Tabs.Screen
         name="index"
         options={{
@@ -66,5 +73,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </>
   );
 }

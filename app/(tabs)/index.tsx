@@ -1,272 +1,274 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  StyleSheet,
+  ScrollView,
   View,
   Text,
   Image,
-  ScrollView,
-  TouchableOpacity,
-  useWindowDimensions,
+  StyleSheet,
   Platform,
+  Pressable,
+  useWindowDimensions,
 } from 'react-native';
-import Collapsible from 'react-native-collapsible';
-import { router } from "expo-router";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import FooterComponent from '@/components/partials/FooterComponent';
 
-export default function PayrollLanding() {
+const UIKitLanding = () => {
   const { width } = useWindowDimensions();
-  const [expandedSection, setExpandedSection] = useState<number | null>(null);
-  
   const isWeb = Platform.OS === 'web';
   const isMobile = width < 768;
 
-  const features = [
-    {
-      title: 'La nómina se realiza con una única vista',
-      content: 'Gestione toda su nómina de manera eficiente y sencilla desde una sola pantalla.'
-    },
-    {
-      title: 'Sincronizar horas con nómina',
-      content: 'Integre automáticamente las horas trabajadas con el cálculo de la nómina.'
-    },
-    {
-      title: 'Registro de impuestos estatales en los 50 estados',
-      content: 'Mantenga el cumplimiento fiscal en todos los estados con actualizaciones automáticas.'
-    }
+  const templates = [
+    { id: 1, title: 'Multiplatform', image: '/placeholder.svg?height=300&width=400' },
+    { id: 2, title: 'Mobile App', image: '/placeholder.svg?height=300&width=400' },
+    { id: 3, title: 'Desktop App', image: '/placeholder.svg?height=300&width=400' },
+    { id: 4, title: 'Agency', image: '/placeholder.svg?height=300&width=400' },
+    { id: 5, title: 'Lead Capture', image: '/placeholder.svg?height=300&width=400' },
+    { id: 6, title: 'Press', image: '/placeholder.svg?height=300&width=400' },
+    { id: 7, title: 'Directory', image: '/placeholder.svg?height=300&width=400' },
+    { id: 8, title: 'Dental', image: '/placeholder.svg?height=300&width=400' },
+    { id: 9, title: 'Real Estate', image: '/placeholder.svg?height=300&width=400' },
   ];
 
-  return (
-    <ScrollView style={styles.container}>
-      {/* Header Section */}
-      <View style={styles.header}>
-        <Text style={styles.title} >Nómina, RRHH, beneficios.</Text>
-        <Text style={styles.subtitle}>Simplificado.</Text>
-        <Text style={styles.description}>
-          Únase a más de 200.000 pequeñas y medianas empresas que confían en Gusto
-        </Text>
-        
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Cómo funciona Gusto</Text>
-          </TouchableOpacity>
-          <TouchableOpacity  onPress={() => router.navigate('/(employee)/indexEmplo')} style={[styles.button, styles.secondaryButton]}>
-            <Text style={styles.secondaryButtonText}>Crear una cuenta</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+  const stats = [
+    { number: '70+', title: 'Custom/Extended Components' },
+    { number: '35+', title: 'Pre-Built Page Examples' },
+    { number: '100+', title: 'Custom/Extended Utilities' },
+  ];
 
-      {/* Main Content Section */}
-      <View style={[styles.mainContent, isMobile ? styles.mainContentMobile : null]}>
-        {/* Left Icons */}
-        <View style={styles.iconContainer}>
-          <View style={styles.iconCircle}>
-            <Text style={styles.icon}>⚙️</Text>
-          </View>
-          <View style={styles.iconCircle}>
-            <Text style={styles.icon}>⏰</Text>
-          </View>
-          <View style={styles.iconCircle}>
-            <Text style={styles.icon}>🦷</Text>
-          </View>
-        </View>
-
-        {/* Central Image */}
-        <Image
-          source={require('../../assets/images/descarga.png')}
-          style={[styles.centralImage, isMobile ? styles.centralImageMobile : null]}
-          resizeMode="contain"
-        />
-
-        {/* Right Icons */}
-        <View style={styles.iconContainer}>
-          <View style={styles.iconCircle}>
-            <Text style={styles.icon}>❤️</Text>
-          </View>
-          <View style={styles.iconCircle}>
-            <Text style={styles.icon}>➕</Text>
-          </View>
-          <View style={styles.iconCircle}>
-            <Text style={styles.icon}>🛡️</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Features Section */}
-      <View style={styles.featuresSection}>
-        <Text style={styles.featuresSectionTitle}>
-          Ejecute la nómina en minutos con tecnología inteligente.
-        </Text>
-        
-        {features.map((feature, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.featureItem}
-            onPress={() => setExpandedSection(expandedSection === index ? null : index)}
-          >
-            <Text style={styles.featureTitle}>{feature.title}</Text>
-            <Collapsible collapsed={expandedSection !== index}>
-              <Text style={styles.featureContent}>{feature.content}</Text>
-            </Collapsible>
-          </TouchableOpacity>
-        ))}
-
-        <TouchableOpacity style={styles.linkButton}>
-          <Text style={styles.linkText}>Consultar más sobre Gusto global →</Text>
-        </TouchableOpacity>
-      </View>
-        <FooterComponent />
-    </ScrollView>
+  const renderButton = (title: string, primary = false) => (
+    <Pressable
+      style={[
+        styles.button,
+        primary ? styles.primaryButton : styles.secondaryButton,
+        Platform.select({
+          web: styles.webButton,
+          default: null,
+        }),
+      ]}
+    >
+      <Text style={[
+        styles.buttonText,
+        primary ? styles.primaryButtonText : styles.secondaryButtonText
+      ]}>
+        {title}
+      </Text>
+    </Pressable>
   );
-}
+
+  return (
+    <>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        {/* Hero Section */}
+        <View style={[styles.hero, isMobile && styles.heroMobile]}>
+          <View style={styles.heroContent}>
+            <Text style={styles.heroTitle}>
+              Build your next project faster with SB UI Kit Pro
+            </Text>
+            <Text style={styles.heroSubtitle}>
+              Welcome to SB UI Kit Pro, a toolkit for building beautiful web interfaces,
+              created by the development team at Start Bootstrap.
+            </Text>
+            <View style={styles.buttonContainer}>
+              {renderButton('Registrate', true)}
+              {renderButton('Documentation')}
+            </View>
+          </View>
+          <View style={[styles.heroImage, isMobile && styles.heroImageMobile]}>
+            <Image
+              source={require("@/assets/images/descarga.png")}
+              style={styles.illustration}
+              resizeMode="contain"
+            />
+          </View>
+        </View>
+
+        {/* Templates Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Landing Pages</Text>
+          <Text style={styles.sectionSubtitle}>
+            After purchasing SB UI Kit Pro, you will gain access to these professionally coded, pre-built landing page templates!
+          </Text>
+          <View style={styles.templatesGrid}>
+            {templates.map((template) => (
+              <View key={template.id} style={[
+                styles.templateCard,
+                isMobile && styles.templateCardMobile
+              ]}>
+                <Image
+                  source={{ uri: template.image }}
+                  style={styles.templateImage}
+                  resizeMode="cover"
+                />
+                <Text style={styles.templateTitle}>{template.title}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Stats Section */}
+        <View style={styles.statsSection}>
+          {stats.map((stat, index) => (
+            <View key={index} style={styles.statCard}>
+              <Text style={styles.statNumber}>{stat.number}</Text>
+              <Text style={styles.statTitle}>{stat.title}</Text>
+            </View>
+          ))}
+        </View>
+        <FooterComponent />
+      </ScrollView>
+    </SafeAreaView>
+     
+     </>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f7f8',
+    backgroundColor: '#fff',
   },
-  header: {
+  scrollView: {
+    flex: 1,
+  },
+  hero: {
+    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
     padding: 20,
-    alignItems: 'center',
-    marginTop: 40,
+    paddingTop: 40,
+    paddingBottom: 40,
+    backgroundColor: '#f8f9fa',
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
+  heroMobile: {
+    flexDirection: 'column',
   },
-  subtitle: {
-    fontSize: 32,
+  heroContent: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingRight: Platform.OS === 'web' ? 40 : 0,
+  },
+  heroTitle: {
+    fontSize: 36,
     fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
     marginBottom: 16,
+    color: '#1a1f71',
   },
-  description: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#666',
+  heroSubtitle: {
+    fontSize: 18,
+    color: '#6c757d',
     marginBottom: 24,
-    maxWidth: 500,
   },
   buttonContainer: {
     flexDirection: 'row',
-    gap: 16,
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+    gap: 12,
   },
   button: {
-    backgroundColor: '#008080',
-    paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8,
-    minWidth: 200,
+    paddingHorizontal: 24,
+    borderRadius: 6,
+    marginRight: 12,
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    textAlign: 'center',
-    fontWeight: '600',
+  webButton: {
+    cursor: 'pointer',
+  },
+  primaryButton: {
+    backgroundColor: '#0061f2',
   },
   secondaryButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: '#f8f9fa',
     borderWidth: 1,
-    borderColor: '#008080',
+    borderColor: '#dee2e6',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  primaryButtonText: {
+    color: '#ffffff',
   },
   secondaryButtonText: {
-    color: '#008080',
-    fontSize: 16,
-    textAlign: 'center',
-    fontWeight: '600',
+    color: '#212529',
   },
-  mainContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  heroImage: {
+    flex: 1,
     alignItems: 'center',
-    padding: 20,
-    maxWidth: 1200,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  mainContentMobile: {
-    flexDirection: 'column',
-    gap: 20,
-  },
-  iconContainer: {
-    gap: 16,
-    alignItems: 'center',
-  },
-  iconCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'white',
     justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
   },
-  icon: {
-    fontSize: 24,
+  heroImageMobile: {
+    marginTop: 20,
   },
-  centralImage: {
-    width: '60%',
+  illustration: {
+    width: '100%',
     height: 400,
-    maxWidth: 800,
   },
-  centralImageMobile: {
-    width: '100%',
-    height: 300,
+  section: {
+    padding: 40,
   },
-  featuresSection: {
-    padding: 20,
-    maxWidth: 800,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  featuresSectionTitle: {
+  sectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 24,
-  },
-  featureItem: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 8,
+    textAlign: 'center',
     marginBottom: 12,
+    color: '#1a1f71',
+  },
+  sectionSubtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 40,
+    color: '#6c757d',
+  },
+  templatesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 20,
+  },
+  templateCard: {
+    width: Platform.OS === 'web' ? '30%' : '100%',
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 4,
+    elevation: 3,
   },
-  featureTitle: {
+  templateCardMobile: {
+    width: '100%',
+  },
+  templateImage: {
+    width: '100%',
+    height: 200,
+  },
+  templateTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    padding: 16,
+    textAlign: 'center',
   },
-  featureContent: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#666',
+  statsSection: {
+    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+    justifyContent: 'space-around',
+    padding: 40,
+    backgroundColor: '#f8f9fa',
+    gap: 20,
   },
-  linkButton: {
-    marginTop: 16,
+  statCard: {
+    alignItems: 'center',
+    flex: Platform.OS === 'web' ? 1 : undefined,
   },
-  linkText: {
-    color: '#008080',
+  statNumber: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#0061f2',
+    marginBottom: 8,
+  },
+  statTitle: {
     fontSize: 16,
-    textDecorationLine: 'underline',
+    color: '#6c757d',
+    textAlign: 'center',
   },
 });
+
+export default UIKitLanding;
 

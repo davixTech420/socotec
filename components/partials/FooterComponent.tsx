@@ -103,7 +103,7 @@ export default function MinimalistFooter() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#00bcf3',
+    backgroundColor: '#00ACE8',
     paddingTop: 20,
     paddingBottom: 10,
   },

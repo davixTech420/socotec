@@ -1,50 +1,82 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { Ionicons } from '@expo/vector-icons'; 
+import indexAdmin from './indexAdmin';
+import inventario from './inventario';
+import prueba from './prueba';
+const Drawer = createDrawerNavigator();
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function App() {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: "white",
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: {
-          borderRadius: 20,
-          left: 35,
-          right: 35,
-          backgroundColor: "#00bcf3",
-          ...Platform.select({
-            web: {
-              top: 15,
-              position: "absolute",
-            },
-            android: {
-              bottom: 0,
-              position: "absolute",
-            },
-            default: {
-              
-            },
-          }),
-        }
-      }}>
-      <Tabs.Screen
-        name="indexAdmin"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+    <>
+      <Drawer.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#00bcf3',
+          },
+          headerTintColor: 'white',
+          drawerStyle: {
+            backgroundColor: '#00bcf3',
+            width: 250,
+          },
+          drawerActiveTintColor: 'white',
+          drawerInactiveTintColor: '#d1d1d1',
         }}
-      />
-     
-    </Tabs>
+      >
+        <Drawer.Screen
+          name="Home"
+          component={indexAdmin}
+          options={{
+            title: 'Dashboard',
+            drawerIcon: ({ color }) => <Ionicons name="calculator" size={24} color={color} />,
+          }}
+        />
+         <Drawer.Screen
+          name="Inventario"
+          component={inventario}
+          options={{
+            title: 'Inventario',
+            drawerIcon: ({ color }) => <Ionicons name="calculator" size={24} color={color} />,
+          }}
+        />
+         <Drawer.Screen
+          name="Prueba"
+          component={prueba}
+          options={{
+            title: 'prueba',
+            drawerIcon: ({ color }) => <Ionicons name="calculator" size={24} color={color} />,
+          }}
+        />
+         
+      </Drawer.Navigator>
+      </>
   );
 }
+
+
+
+const styles = StyleSheet.create({
+  closeButton: {
+    position: 'absolute',
+    bottom: 40,
+    left: '50%',
+    transform: [{ translateX: -75 }], // Centrar el botón
+    backgroundColor: '#ff4d4d',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    elevation: 5, // Sombra en Android
+    shadowColor: '#000', // Sombra en iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+});
