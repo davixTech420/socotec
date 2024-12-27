@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import indexEmplo from './indexEmplo';
+import indexEmplo from './DashboardE';
 import calculator from './calculator';
 import { Ionicons } from '@expo/vector-icons'; // Asegúrate de tener esta biblioteca instalada
 import calendar from './calendar';
@@ -14,7 +14,7 @@ export default function App() {
   return (
     <>
       <Drawer.Navigator
-        initialRouteName="Home"
+        initialRouteName="DashboardE"
         screenOptions={{
           headerStyle: {
             backgroundColor: '#00bcf3',
@@ -29,7 +29,7 @@ export default function App() {
         }}
       >
         <Drawer.Screen
-          name="Home"
+          name="DashboardE"
           component={indexEmplo}
           options={{
             title: 'Dashboard',

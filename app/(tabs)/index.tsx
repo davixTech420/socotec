@@ -6,11 +6,12 @@ import {
   Image,
   StyleSheet,
   Platform,
-  Pressable,
+  TouchableOpacity,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FooterComponent from '@/components/partials/FooterComponent';
+import { router } from "expo-router";
 
 const UIKitLanding = () => {
   const { width } = useWindowDimensions();
@@ -35,25 +36,7 @@ const UIKitLanding = () => {
     { number: '100+', title: 'Custom/Extended Utilities' },
   ];
 
-  const renderButton = (title: string, primary = false) => (
-    <Pressable
-      style={[
-        styles.button,
-        primary ? styles.primaryButton : styles.secondaryButton,
-        Platform.select({
-          web: styles.webButton,
-          default: null,
-        }),
-      ]}
-    >
-      <Text style={[
-        styles.buttonText,
-        primary ? styles.primaryButtonText : styles.secondaryButtonText
-      ]}>
-        {title}
-      </Text>
-    </Pressable>
-  );
+ 
 
   return (
     <>
@@ -70,8 +53,46 @@ const UIKitLanding = () => {
               created by the development team at Start Bootstrap.
             </Text>
             <View style={styles.buttonContainer}>
-              {renderButton('Registrate', true)}
-              {renderButton('Documentation')}
+
+            <TouchableOpacity
+            onPress={() => router.navigate("/singUp")}
+      style={[
+        styles.button,
+       styles.primaryButton ,
+        Platform.select({
+          web: styles.webButton,
+          default: null,
+        }),
+      ]}
+    >
+      <Text style={[
+        styles.buttonText,
+        styles.primaryButtonText
+      ]}>
+        Registrarse
+      </Text>
+    </TouchableOpacity>
+    <TouchableOpacity
+            onPress={() => router.navigate("/(employee)/DashboardE")}
+      style={[
+        styles.button,
+       styles.secondaryButton ,
+        Platform.select({
+          web: styles.webButton,
+          default: null,
+        }),
+      ]}
+    >
+      <Text style={[
+        styles.buttonText,
+        styles.secondaryButtonText
+      ]}>
+        Documentacion
+      </Text>
+    </TouchableOpacity>
+              
+              
+         
             </View>
           </View>
           <View style={[styles.heroImage, isMobile && styles.heroImageMobile]}>

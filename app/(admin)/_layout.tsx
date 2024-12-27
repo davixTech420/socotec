@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons'; 
-import indexAdmin from './indexAdmin';
+import indexAdmin from './Dashboard';
 import inventario from './inventario';
 import prueba from './prueba';
 const Drawer = createDrawerNavigator();
@@ -12,7 +12,7 @@ export default function App() {
   return (
     <>
       <Drawer.Navigator
-        initialRouteName="Home"
+        initialRouteName="Dashboard"
         screenOptions={{
           headerStyle: {
             backgroundColor: '#00bcf3',
@@ -27,7 +27,7 @@ export default function App() {
         }}
       >
         <Drawer.Screen
-          name="Home"
+          name="Dashboard"
           component={indexAdmin}
           options={{
             title: 'Dashboard',
@@ -43,7 +43,7 @@ export default function App() {
           }}
         />
          <Drawer.Screen
-          name="Prueba"
+          name="prueba"
           component={prueba}
           options={{
             title: 'prueba',

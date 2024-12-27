@@ -3,7 +3,8 @@ import { StyleSheet, View, Text, TextInput,Image, Platform, useWindowDimensions,
 import Animated, { FadeIn, SlideInLeft, SlideInRight } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import FooterComponent from '@/components/partials/FooterComponent';
-export default function ModernLoginScreen() {
+import { router } from "expo-router";
+export default function singIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { width } = useWindowDimensions();
@@ -83,7 +84,7 @@ export default function ModernLoginScreen() {
 
             <View style={styles.signupContainer}>
               <Text style={styles.noAccountText}>No tienes una cuenta?</Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => router.navigate("/singUp")}>
                 <Text style={styles.signupText}>Crear Cuenta</Text>
               </TouchableOpacity>
             </View>
@@ -95,8 +96,6 @@ export default function ModernLoginScreen() {
           </View>
         </Animated.View>
       </Container>
-
-      <FooterComponent/>
     </View>
   
     </>
