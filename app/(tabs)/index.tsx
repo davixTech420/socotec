@@ -55,7 +55,7 @@ const UIKitLanding = () => {
             <View style={styles.buttonContainer}>
 
             <TouchableOpacity
-            onPress={() => router.navigate("/singUp")}
+            onPress={() => router.navigate("/(admin)/Dashboard")}
       style={[
         styles.button,
        styles.primaryButton ,

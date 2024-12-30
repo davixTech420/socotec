@@ -13,6 +13,7 @@ export default function App() {
     <>
       <Drawer.Navigator
         initialRouteName="Dashboard"
+       
         screenOptions={{
           headerStyle: {
             backgroundColor: '#00bcf3',
@@ -35,7 +36,7 @@ export default function App() {
           }}
         />
          <Drawer.Screen
-          name="Inventario"
+          name="inventario"
           component={inventario}
           options={{
             title: 'Inventario',

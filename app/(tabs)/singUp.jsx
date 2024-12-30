@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput,Image, Platform, useWindowDimensions,TouchableOpacity } from 'react-native';
-import Animated, { FadeIn, SlideInLeft, SlideInRight } from 'react-native-reanimated';
+import { StyleSheet, View, Text, TextInput,Image, useWindowDimensions,TouchableOpacity } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import FooterComponent from '@/components/partials/FooterComponent';
 import { router } from "expo-router";
@@ -8,24 +8,18 @@ export default function singUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { width } = useWindowDimensions();
-  const isWideScreen = width >= 768;
+  const flexDirection = width >= 768 ? 'row' : 'column';
 
-  const Container = Platform.OS === 'web' ? View : Animated.View;
+  const Container = Animated.View;
 
   return (
     <>  
     <View style={styles.container}>
-      <Container style={[
-        styles.card,
-        isWideScreen ? styles.cardWide : styles.cardMobile
-      ]}>
+      <Container style={[styles.card, { flexDirection }]}>
         {/* Left Side */}
         <Animated.View 
-          entering={SlideInLeft.duration(1000)}
-          style={[
-            styles.leftSide,
-            !isWideScreen && styles.leftSideMobile
-          ]}
+          entering={FadeIn.duration(1000)}
+          style={styles.leftSide}
         >
           <View style={styles.leftContent}>
             <Text style={styles.welcomeText}>Bienvenidos soocotec colombia</Text>
@@ -40,11 +34,8 @@ export default function singUp() {
 
         {/* Right Side */}
         <Animated.View 
-          entering={SlideInRight.duration(1000)}
-          style={[
-            styles.rightSide,
-            !isWideScreen && styles.rightSideMobile
-          ]}
+          entering={FadeIn.duration(1000)}
+          style={styles.rightSide}
         >
           <View style={styles.rightContent}>
           <View style={styles.signupContainer}> 
@@ -119,25 +110,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-  },
-  cardWide: {
-    flexDirection: 'row',
     width: '100%',
     maxWidth: 1000,
-    height: 500,
-  },
-  cardMobile: {
-    width: '100%',
-    maxWidth: 400,
   },
   leftSide: {
     flex: 1,
     backgroundColor: '#1a75ff',
     padding: 32,
     justifyContent: 'center',
-  },
-  leftSideMobile: {
-    padding: 24,
   },
   leftContent: {
     alignItems: 'flex-start',
@@ -171,9 +151,6 @@ const styles = StyleSheet.create({
     padding: 32,
     backgroundColor: 'white',
     justifyContent: 'center',
-  },
-  rightSideMobile: {
-    padding: 24,
   },
   rightContent: {
     width: '100%',
