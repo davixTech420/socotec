@@ -1,114 +1,182 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput,Image, Platform, useWindowDimensions,TouchableOpacity } from 'react-native';
-import Animated, { FadeIn, SlideInLeft, SlideInRight } from 'react-native-reanimated';
+import { View, Image, useWindowDimensions, ScrollView, Alert } from 'react-native';
+import { Provider, TextInput, Button, Text, useTheme } from 'react-native-paper';
+import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import FooterComponent from '@/components/partials/FooterComponent';
 import { router } from "expo-router";
-export default function singIn() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { width } = useWindowDimensions();
-  const isWideScreen = width >= 768;
+import { emailRegistro } from "@/services/publicServices";
+import { AlertaIcono, AlertaScroll } from "../../components/alerta";
 
-  const Container = Platform.OS === 'web' ? View : Animated.View;
+const SignUp = () => {
+  const { width } = useWindowDimensions();
+  const theme = useTheme();
+  const isMobile = width < 768;
+  const inputScale = useSharedValue(1);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
+
+//estas son los estados para abrir las alertas o dialogos de la vista de  inicio de sesion o login
+const [isOpen, setIsOpen] = useState(false);
+const [isOpenError, setIsOpenError] = useState(false);
+  const [isOpenSucces, setIsOpenSucces] = useState(false);
+  const handleNameChange = (text) => {
+    const lettersOnly = text.replace(/[^A-Za-z\s]/g, '');
+    setName(lettersOnly);
+  };
+
+  const handlePhoneChange = (text) => {
+    const numbersOnly = text.replace(/[^0-9]/g, '').slice(0, 10);
+    setPhone(numbersOnly);
+  };
+
+  const animatedInputStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: inputScale.value }],
+  }));
+
+  const handleFocus = () => {
+    inputScale.value = withSpring(1.05);
+  };
+
+  const handleBlur = () => {
+    inputScale.value = withSpring(1);
+  };
+
+  const validateForm = () => {
+    let newErrors = {};
+    
+    if (!email) newErrors.email = 'El email es requerido';
+    else if (!/^[a-zA-Z0-9._%+-]+@socotec\.com$/.test(email)) newErrors.email = 'Email inválido';
+    if (!password) newErrors.password = 'La contraseña es requerida';
+    else if (password.length < 8) newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (validateForm()) {
+      //se envian los datos al endpoint
+      emailRegistro({ name, phone, email, password }).then((response) => {
+        console.log(response);
+        setIsOpenSucces(true);
+      }).catch((error) => { console.log(error); setIsOpenError(true); });
+
+    }
+  };
+
+  const renderLeftSide = () => (
+    <Animated.View
+      entering={FadeIn.duration(1000)}
+      style={styles.leftSide}
+    >
+      <View style={styles.leftContent}>
+        <Text style={styles.welcomeText}>Bienvenidos a Socotec Colombia</Text>
+        <Text style={styles.communityText}>
+          Únete a nuestra comunidad de más de{'\n'}10,000 suscriptores y aprende cosas nuevas
+        </Text>
+        {!isMobile && (
+          <Button mode="outlined" style={styles.signInButton} labelStyle={styles.signInButtonText}  onPress={()=> router.navigate("/singUp")}> 
+            Crear Cuenta
+          </Button>
+        )}
+      </View>
+    </Animated.View>
+  );
+
+  const renderInput = (label, value, onChangeText, icon, error, keyboardType = 'default', secureTextEntry = false, right) => (
+    <Animated.View style={animatedInputStyle}>
+      <TextInput
+        label={label}
+        value={value}
+        onChangeText={onChangeText}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        cursorColor='#00ACE8'
+        underlineColor='#00ACE8'
+        outlineColor='#00ACE8'
+        activeUnderlineColor='#00ACE8'
+        left={<TextInput.Icon icon={() => <Ionicons name={icon} size={20} color="#00ACE8" />} />}
+        error={!!error}
+        keyboardType={keyboardType}
+        secureTextEntry={secureTextEntry}
+        style={styles.input}
+        right={right}
+      />
+      {error && <Text style={styles.errorText}>{error}</Text>}
+    </Animated.View>
+  );
 
   return (
-    <>  
-    <View style={styles.container}>
-      <Container style={[
-        styles.card,
-        isWideScreen ? styles.cardWide : styles.cardMobile
-      ]}>
-        {/* Left Side */}
-        <Animated.View 
-          entering={SlideInLeft.duration(1000)}
-          style={[
-            styles.leftSide,
-            !isWideScreen && styles.leftSideMobile
-          ]}
-        >
-          <View style={styles.leftContent}>
-            <Text style={styles.welcomeText}>Bienvenidos soocotec colombia</Text>
-            <Text style={styles.communityText}>
-              Join our community that have more than{'\n'}10000 subscribers and learn new things
-            </Text>
-            <TouchableOpacity style={styles.signInButton}>
-              <Text style={styles.signInButtonText}>Crear Cuenta</Text>
-            </TouchableOpacity>
-          </View>
+    <>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Animated.View style={[styles.card, isMobile ? styles.cardMobile : {}]}>
+          {!isMobile && renderLeftSide()}
+          <Animated.View
+            entering={FadeIn.duration(1000)}
+            style={styles.rightSide}
+          >
+            <View style={styles.rightContent}>
+              <View style={styles.formContainer}>
+                <View>
+                  <View style={styles.signupContainer}>
+                    <Text style={styles.beOneText}>¡Bienvenido!</Text>
+                    <Image style={styles.logo} source={require("@/assets/images/favicon.png")} />
+                  </View>
+                  {renderInput("Email", email, setEmail, "mail-outline", errors.email, "email-address")}
+                  {renderInput("Contraseña", password, setPassword, "lock-closed-outline", errors.password, "default", true, <TextInput.Icon icon="eye" />)}
+                </View>
+                <View>
+                  <Button buttonColor='#00ACE8' mode="contained" onPress={handleSubmit} style={styles.loginButton}>
+                    Crear Cuenta
+                  </Button>
+
+                  <View style={styles.signupContainer}>
+                    <Text style={styles.noAccountText}>¿No tienes una cuenta?</Text>
+                    <Button mode="text" onPress={() => router.navigate("/singUp")} labelStyle={styles.signupText}>
+                      Crear cuenta
+                    </Button>
+                  </View>
+                  <View style={styles.signupContainer}>
+                    <Button mode="text" style={styles.signupText} labelStyle={styles.signupText} onPress={() => setIsOpen(true)}>¿Haz olvidado tu contraseña?</Button>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </Animated.View>
         </Animated.View>
+      </ScrollView>
+      <AlertaIcono onOpen={isOpenError} onClose={() => setIsOpenError(false)} icon="alert" title="Error" text="El correo no existe" actions={<>
+        <Button onPress={() => setIsOpenError(false)}>Cerrar</Button>
+      </>
+      } />
+      <AlertaIcono onOpen={isOpenSucces} onClose={() => setIsOpenSucces(false)} icon="check" title="Exito" text="Correo de confirmacion enviado exitosamente" actions={<>
+        <Button onPress={() => setIsOpenSucces(false)}>Cerrar</Button>
+      </>
+      } />
 
-        {/* Right Side */}
-        <Animated.View 
-          entering={SlideInRight.duration(1000)}
-          style={[
-            styles.rightSide,
-            !isWideScreen && styles.rightSideMobile
-          ]}
-        >
-          <View style={styles.rightContent}>
-          <View style={styles.signupContainer}> 
 
-          <Text style={styles.beOneText}>Comenzemos!</Text>
-          <Image style={{  width:30,height:30  }}  source={require("@/assets/images/favicon.png")}/>
 
-          </View>
-            
-            
-            <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="elka@qq.com"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
 
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="PASSWORD"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
-            </View>
-
-            <TouchableOpacity style={styles.loginButton}>
-              <Text style={styles.loginButtonText}>Iniciar sesion</Text>
-            </TouchableOpacity>
-
-            <View style={styles.signupContainer}>
-              <Text style={styles.noAccountText}>No tienes una cuenta?</Text>
-              <TouchableOpacity onPress={() => router.navigate("/singUp")}>
-                <Text style={styles.signupText}>Crear Cuenta</Text>
-              </TouchableOpacity>
-            </View>
-            <View  style={styles.signupContainer} >
-            <TouchableOpacity>
-                <Text style={styles.signupText}>Restablecer contraseña</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Animated.View>
-      </Container>
-    </View>
-  
+<AlertaScroll onOpen={isOpen} onClose={() => setIsOpen(false)} title="Recuperar Contraseña" content={<View style={{ padding:20}}>
+{renderInput("Email", email, setEmail, "mail-outline", errors.email, "email-address")}
+</View>} actions={<View style={{flexDirection:'row',justifyContent:'space-around',flex:1}}>
+        <Button textColor='black' onPress={() => setIsOpen(false)}>Cerrar</Button>
+        <Button mode='contained' buttonColor='#00ACE8' onPress={() => setIsOpen(false)}>Enviar email</Button>
+      </View>
+      } />
     </>
   );
-}
+};
 
-const styles = StyleSheet.create({
+const styles = {
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#d1f9ff',
     alignItems: 'center',
     justifyContent: 'center',
-  
+    padding: 16,
   },
   card: {
     backgroundColor: 'white',
@@ -119,15 +187,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-  },
-  cardWide: {
-    flexDirection: 'row',
     width: '100%',
     maxWidth: 1000,
-    height: 500,
+    flexDirection: 'row',
+    height: "80%",
   },
   cardMobile: {
-    width: '100%',
+    flexDirection: 'column',
     maxWidth: 400,
   },
   leftSide: {
@@ -135,9 +201,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a75ff',
     padding: 32,
     justifyContent: 'center',
-  },
-  leftSideMobile: {
-    padding: 24,
   },
   leftContent: {
     alignItems: 'flex-start',
@@ -155,25 +218,18 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   signInButton: {
-    borderWidth: 2,
     borderColor: 'white',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 25,
+    borderWidth: 2,
   },
   signInButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '600',
   },
   rightSide: {
     flex: 1,
     padding: 32,
     backgroundColor: 'white',
     justifyContent: 'center',
-  },
-  rightSideMobile: {
-    padding: 24,
   },
   rightContent: {
     width: '100%',
@@ -187,41 +243,14 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     textAlign: 'center',
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 25,
-    paddingHorizontal: 16,
-    height: 50,
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
-  },
   loginButton: {
-    backgroundColor: '#1a75ff',
-    paddingVertical: 12,
-    borderRadius: 25,
     marginTop: 16,
     marginBottom: 24,
-  },
-  loginButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
   },
   signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 8,
+    alignItems: 'center',
   },
   noAccountText: {
     color: '#666',
@@ -230,7 +259,23 @@ const styles = StyleSheet.create({
   signupText: {
     color: '#1a75ff',
     fontSize: 14,
-    fontWeight: '600',
   },
-});
-
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  formContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  input: {
+    marginBottom: 16,
+  },
+  logo: {
+    width: 50,
+    height: 50,
+  },
+};
+export default SignUp;

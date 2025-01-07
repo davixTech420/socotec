@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import {StyleSheet } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons'; 
 import indexAdmin from './Dashboard';
@@ -12,8 +11,7 @@ export default function App() {
   return (
     <>
       <Drawer.Navigator
-        initialRouteName="Dashboard"
-       
+        initialRouteName="Dashboard" 
         screenOptions={{
           headerStyle: {
             backgroundColor: '#00bcf3',
@@ -51,14 +49,10 @@ export default function App() {
             drawerIcon: ({ color }) => <Ionicons name="calculator" size={24} color={color} />,
           }}
         />
-         
       </Drawer.Navigator>
       </>
   );
 }
-
-
-
 const styles = StyleSheet.create({
   closeButton: {
     position: 'absolute',

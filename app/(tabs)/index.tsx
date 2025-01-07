@@ -1,125 +1,157 @@
-import React from 'react';
-import {
-  ScrollView,
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Platform,
-  TouchableOpacity,
-  useWindowDimensions,
-} from 'react-native';
+import React, { useEffect } from 'react';
+import { ScrollView, View, StyleSheet, Platform, useWindowDimensions, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import FooterComponent from '@/components/partials/FooterComponent';
 import { router } from "expo-router";
+import Animated, { 
+  useSharedValue, 
+  useAnimatedProps, 
+  withTiming, 
+  FadeInLeft, 
+  FadeInRight,
+  FadeIn
+} from 'react-native-reanimated';
+import { Card, Title, Paragraph, Button, Text, Chip, ProgressBar, List } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import FooterComponent from '@/components/partials/FooterComponent';
+
+const AnimatedText = Animated.createAnimatedComponent(Text);
+
+const FeatureCard = ({ title, icon, description, color }) => (
+  <Card style={[styles.card, { backgroundColor: color }]}>
+    <Card.Content style={styles.cardContent}>
+      <MaterialCommunityIcons name={icon} size={48} color="#ffffff" style={styles.icon} />
+      <Title style={styles.cardTitle}>{title}</Title>
+      <Paragraph style={styles.cardDescription}>{description}</Paragraph>
+    </Card.Content>
+  </Card>
+);
+
+const AnimatedStatistic = ({ number, title, icon }) => {
+  const animatedValue = useSharedValue(0);
+
+  useEffect(() => {
+    animatedValue.value = withTiming(parseInt(number), { duration: 2000 });
+  }, []);
+
+  const animatedProps = useAnimatedProps(() => ({
+    text: `${Math.floor(animatedValue.value)}%`,
+  }));
+
+  return (
+    <View style={styles.statCard}>
+      <MaterialCommunityIcons name={icon} size={36} color="#0061f2" style={styles.statIcon} />
+      <AnimatedText style={styles.statNumber} animatedProps={animatedProps} />
+      <Text style={styles.statTitle}>{title}</Text>
+    </View>
+  );
+};
 
 const UIKitLanding = () => {
   const { width } = useWindowDimensions();
-  const isWeb = Platform.OS === 'web';
   const isMobile = width < 768;
-  const templates = [
-    { id: 1, title: 'Multiplatform', image: '/placeholder.svg?height=300&width=400' },
-    { id: 2, title: 'Mobile App', image: '/placeholder.svg?height=300&width=400' },
-    { id: 3, title: 'Desktop App', image: '/placeholder.svg?height=300&width=400' },
-    { id: 4, title: 'Agency', image: '/placeholder.svg?height=300&width=400' },
-    { id: 5, title: 'Lead Capture', image: '/placeholder.svg?height=300&width=400' },
-    { id: 6, title: 'Press', image: '/placeholder.svg?height=300&width=400' },
-    { id: 7, title: 'Directory', image: '/placeholder.svg?height=300&width=400' },
-    { id: 8, title: 'Dental', image: '/placeholder.svg?height=300&width=400' },
-    { id: 9, title: 'Real Estate', image: '/placeholder.svg?height=300&width=400' },
+
+  const features = [
+    { 
+      title: 'Automatización de Cálculos', 
+      icon: 'calculator-variant',
+      description: 'Cálculo automático de salarios, deducciones, horas extras y más.',
+      color: '#4CAF50'
+    },
+    { 
+      title: 'Generación de Reportes', 
+      icon: 'file-chart',
+      description: 'Reportes detallados de nómina, fiscales y análisis de tendencias.',
+      color: '#2196F3'
+    },
+    { 
+      title: 'Cumplimiento Legal', 
+      icon: 'gavel',
+      description: 'Actualización automática de leyes fiscales y laborales.',
+      color: '#FFC107'
+    },
+    { 
+      title: 'Gestión de Permisos', 
+      icon: 'calendar-check',
+      description: 'Solicitud y aprobación de vacaciones con políticas personalizadas.',
+      color: '#9C27B0'
+    },
   ];
 
   const stats = [
-    { number: '70+', title: 'Custom/Extended Components' },
-    { number: '35+', title: 'Pre-Built Page Examples' },
-    { number: '100+', title: 'Custom/Extended Utilities' },
+    { number: '99', title: 'Precisión en Cálculos', icon: 'check-circle' },
+    { number: '50', title: 'Ahorro de Tiempo', icon: 'clock-fast' },
+    { number: '100', title: 'Cumplimiento Legal', icon: 'shield-check' },
+  ];
+
+  const benefits = [
+    'Reducción de errores en cálculos de nómina',
+    'Ahorro de tiempo en procesos administrativos',
+    'Mejora en la satisfacción de los empleados',
+    'Cumplimiento actualizado con regulaciones fiscales',
+    'Acceso a datos en tiempo real para toma de decisiones'
   ];
 
   return (
-    <>
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
         {/* Hero Section */}
-        <View style={[styles.hero, isMobile && styles.heroMobile]}>
-          <View style={styles.heroContent}>
-            <Text style={styles.heroTitle}>
-              Build your next project faster with SB UI Kit Pro
-            </Text>
-            <Text style={styles.heroSubtitle}>
-              Welcome to SB UI Kit Pro, a toolkit for building beautiful web interfaces,
-              created by the development team at Start Bootstrap.
-            </Text>
-            <View style={styles.buttonContainer}>
-
-            <TouchableOpacity
-            onPress={() => router.navigate("/(admin)/Dashboard")}
-      style={[
-        styles.button,
-       styles.primaryButton ,
-        Platform.select({
-          web: styles.webButton,
-          default: null,
-        }),
-      ]}
-    >
-      <Text style={[
-        styles.buttonText,
-        styles.primaryButtonText
-      ]}>
-        Registrarse
-      </Text>
-    </TouchableOpacity>
-    <TouchableOpacity
-            onPress={() => router.navigate("/(employee)/DashboardE")}
-      style={[
-        styles.button,
-       styles.secondaryButton ,
-        Platform.select({
-          web: styles.webButton,
-          default: null,
-        }),
-      ]}
-    >
-      <Text style={[
-        styles.buttonText,
-        styles.secondaryButtonText
-      ]}>
-        Documentacion
-      </Text>
-    </TouchableOpacity>
-              
-              
-         
-            </View>
-          </View>
-          <View style={[styles.heroImage, isMobile && styles.heroImageMobile]}>
-            <Image
-              source={require("@/assets/images/descarga.png")}
-              style={styles.illustration}
-              resizeMode="contain"
-            />
-          </View>
-        </View>
-
-        {/* Templates Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Landing Pages</Text>
-          <Text style={styles.sectionSubtitle}>
-            After purchasing SB UI Kit Pro, you will gain access to these professionally coded, pre-built landing page templates!
-          </Text>
-          <View style={styles.templatesGrid}>
-            {templates.map((template) => (
-              <View key={template.id} style={[
-                styles.templateCard,
-                isMobile && styles.templateCardMobile
-              ]}>
-                <Image
-                  source={{ uri: template.image }}
-                  style={styles.templateImage}
-                  resizeMode="cover"
-                />
-                <Text style={styles.templateTitle}>{template.title}</Text>
+        <ImageBackground 
+          source={{ uri: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80' }} 
+          style={styles.heroBackground}
+        >
+          <View style={[styles.hero, isMobile && styles.heroMobile]}>
+            <Animated.View 
+              entering={FadeInLeft.duration(1000)} 
+              style={styles.heroContent}
+            >
+              <Title style={styles.heroTitle}>
+                Socotec Colombia
+              </Title>
+              <Paragraph style={styles.heroSubtitle}>
+                Automatice, simplifique y optimice todos sus procesos con nuestra plataforma integral de última generación.
+              </Paragraph>
+              <View style={styles.chipContainer}>
+                <Chip icon="check" style={styles.chip}>Preciso</Chip>
+                <Chip icon="flash" style={styles.chip}>Rápido</Chip>
+                <Chip icon="shield" style={styles.chip}>Seguro</Chip>
               </View>
+              <View style={styles.buttonContainer}>
+                <Button 
+                  mode="contained" 
+                  onPress={() => router.navigate("/singIn")}
+                  style={styles.primaryButton}
+                  icon="rocket-launch"
+                >
+                  Comenzar Ahora
+                </Button>
+                <Button 
+                  mode="outlined" 
+                  onPress={() => router.navigate("/(employee)/DashboardE")}
+                  style={styles.secondaryButton}
+                  icon="play-circle"
+                >
+                  Ver Demo
+                </Button>
+              </View>
+            </Animated.View>
+            <Animated.View 
+              entering={FadeInRight.duration(1000)} 
+              style={[styles.heroImage, isMobile && styles.heroImageMobile]}
+            >
+              <MaterialCommunityIcons name="account-cash" size={200} color="#ffffff" />
+            </Animated.View>
+          </View>
+        </ImageBackground>
+
+        {/* Features Section */}
+        <View style={styles.section}>
+          <Title style={styles.sectionTitle}>Características Principales</Title>
+          <Paragraph style={styles.sectionSubtitle}>
+            Descubra cómo nuestra plataforma puede transformar su trabajo
+          </Paragraph>
+          <View style={styles.featuresGrid}>
+            {features.map((feature, index) => (
+              <FeatureCard key={index} {...feature} />
             ))}
           </View>
         </View>
@@ -127,34 +159,85 @@ const UIKitLanding = () => {
         {/* Stats Section */}
         <View style={styles.statsSection}>
           {stats.map((stat, index) => (
-            <View key={index} style={styles.statCard}>
-              <Text style={styles.statNumber}>{stat.number}</Text>
-              <Text style={styles.statTitle}>{stat.title}</Text>
-            </View>
+            <AnimatedStatistic key={index} {...stat} />
           ))}
         </View>
+
+        {/* Benefits Section */}
+        <Animated.View entering={FadeIn.duration(1000)} style={styles.benefitsSection}>
+          <Title style={styles.benefitsTitle}>Beneficios de Nuestra Solución</Title>
+          <Card style={styles.benefitsCard}>
+            <Card.Content>
+              {benefits.map((benefit, index) => (
+                <List.Item
+                  key={index}
+                  title={benefit}
+                  left={props => <List.Icon {...props} icon="star" color="#FFC107" />}
+                />
+              ))}
+            </Card.Content>
+          </Card>
+        </Animated.View>
+
+        {/* Progress Section */}
+        <View style={styles.progressSection}>
+          <Title style={styles.progressTitle}>Mejore sus Procesos de Nómina</Title>
+          <View style={styles.progressItem}>
+            <Text style={styles.progressLabel}>Eficiencia en Cálculos</Text>
+            <ProgressBar progress={0.9} color="#4CAF50" style={styles.progressBar} />
+          </View>
+          <View style={styles.progressItem}>
+            <Text style={styles.progressLabel}>Reducción de Errores</Text>
+            <ProgressBar progress={0.95} color="#2196F3" style={styles.progressBar} />
+          </View>
+          <View style={styles.progressItem}>
+            <Text style={styles.progressLabel}>Satisfacción del Empleado</Text>
+            <ProgressBar progress={0.85} color="#FFC107" style={styles.progressBar} />
+          </View>
+        </View>
+
+        {/* CTA Section */}
+        <Card style={styles.ctaCard}>
+          <Card.Content>
+            <Title style={styles.ctaTitle}>¿Listo para revolucionar su gestión de nómina?</Title>
+            <Paragraph style={styles.ctaParagraph}>
+              Únase a miles de empresas que ya han optimizado sus procesos de nómina con nuestra plataforma líder en el mercado.
+            </Paragraph>
+          </Card.Content>
+          <Card.Actions style={styles.ctaActions}>
+            <Button 
+              mode="contained" 
+              onPress={() => router.navigate("/(admin)/Dashboard")}
+              icon="rocket-launch"
+            >
+              Iniciar Prueba Gratuita
+            </Button>
+          </Card.Actions>
+        </Card>
+
         <FooterComponent />
       </ScrollView>
     </SafeAreaView>
-     
-     </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f9fa',
   },
   scrollView: {
     flex: 1,
   },
+  heroBackground: {
+    width: '100%',
+  },
   hero: {
     flexDirection: Platform.OS === 'web' ? 'row' : 'column',
     padding: 20,
-    paddingTop: 40,
-    paddingBottom: 40,
-    backgroundColor: '#f8f9fa',
+    paddingTop: 60,
+    paddingBottom: 60,
+    backgroundColor: 'rgba(0, 97, 242, 0.8)',
   },
   heroMobile: {
     flexDirection: 'column',
@@ -165,46 +248,34 @@ const styles = StyleSheet.create({
     paddingRight: Platform.OS === 'web' ? 40 : 0,
   },
   heroTitle: {
-    fontSize: 36,
+    fontSize: 42,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#1a1f71',
+    color: '#ffffff',
   },
   heroSubtitle: {
     fontSize: 18,
-    color: '#6c757d',
+    color: '#ffffff',
     marginBottom: 24,
+  },
+  chipContainer: {
+    flexDirection: 'row',
+    marginBottom: 24,
+  },
+  chip: {
+    marginRight: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   buttonContainer: {
     flexDirection: 'row',
     gap: 12,
   },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 6,
-    marginRight: 12,
-  },
-  webButton: {
-    cursor: 'pointer',
-  },
   primaryButton: {
-    backgroundColor: '#0061f2',
+    backgroundColor: '#FFC107',
   },
   secondaryButton: {
-    backgroundColor: '#f8f9fa',
-    borderWidth: 1,
-    borderColor: '#dee2e6',
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  primaryButtonText: {
-    color: '#ffffff',
-  },
-  secondaryButtonText: {
-    color: '#212529',
+    borderColor: '#ffffff',
+    borderWidth: 2,
   },
   heroImage: {
     flex: 1,
@@ -214,66 +285,62 @@ const styles = StyleSheet.create({
   heroImageMobile: {
     marginTop: 20,
   },
-  illustration: {
-    width: '100%',
-    height: 400,
-  },
   section: {
     padding: 40,
   },
   sectionTitle: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
     color: '#1a1f71',
   },
   sectionSubtitle: {
-    fontSize: 16,
+    fontSize: 18,
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 32,
     color: '#6c757d',
   },
-  templatesGrid: {
+  featuresGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 20,
   },
-  templateCard: {
-    width: Platform.OS === 'web' ? '30%' : '100%',
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  card: {
+    width: 300,
+    margin: 10,
   },
-  templateCardMobile: {
-    width: '100%',
+  cardContent: {
+    alignItems: 'center',
+    padding: 20,
   },
-  templateImage: {
-    width: '100%',
-    height: 200,
+  icon: {
+    marginBottom: 10,
   },
-  templateTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    padding: 16,
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
     textAlign: 'center',
+    marginBottom: 10,
+    color: '#ffffff',
+  },
+  cardDescription: {
+    textAlign: 'center',
+    color: '#ffffff',
   },
   statsSection: {
     flexDirection: Platform.OS === 'web' ? 'row' : 'column',
     justifyContent: 'space-around',
     padding: 40,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f1f8ff',
     gap: 20,
   },
   statCard: {
     alignItems: 'center',
-    flex: Platform.OS === 'web' ? 1 : undefined,
+  },
+  statIcon: {
+    marginBottom: 8,
   },
   statNumber: {
     fontSize: 36,
@@ -285,6 +352,61 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6c757d',
     textAlign: 'center',
+  },
+  benefitsSection: {
+    padding: 40,
+    backgroundColor: '#ffffff',
+  },
+  benefitsTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 24,
+    color: '#1a1f71',
+  },
+  benefitsCard: {
+    elevation: 4,
+  },
+  progressSection: {
+    padding: 40,
+    backgroundColor: '#f8f9fa',
+  },
+  progressTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 24,
+    color: '#1a1f71',
+  },
+  progressItem: {
+    marginBottom: 16,
+  },
+  progressLabel: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#6c757d',
+  },
+  progressBar: {
+    height: 8,
+    borderRadius: 4,
+  },
+  ctaCard: {
+    margin: 20,
+    backgroundColor: '#0061f2',
+  },
+  ctaTitle: {
+    color: '#ffffff',
+    textAlign: 'center',
+    fontSize: 24,
+  },
+  ctaParagraph: {
+    color: '#ffffff',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  ctaActions: {
+    justifyContent: 'center',
+    marginTop: 20,
   },
 });
 

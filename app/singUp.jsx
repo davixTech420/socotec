@@ -5,7 +5,7 @@ import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from '
 import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 import { emailRegistro } from "@/services/publicServices";
-import { AlertaIcono } from "../../components/alerta";
+import { AlertaIcono } from "../components/alerta";
 
 const SignUp = () => {
   const { width } = useWindowDimensions();
@@ -82,7 +82,7 @@ const SignUp = () => {
         </Text>
         {!isMobile && (
           <Button mode="outlined" style={styles.signInButton} labelStyle={styles.signInButtonText}>
-            Crear Cuenta
+            Iniciar Sesión
           </Button>
         )}
       </View>
@@ -97,7 +97,11 @@ const SignUp = () => {
         onChangeText={onChangeText}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        left={<TextInput.Icon icon={() => <Ionicons name={icon} size={20} color={theme.colors.primary} />} />}
+        left={<TextInput.Icon icon={() => <Ionicons name={icon} size={20} color="#00ACE8" />} />}
+        underlineColor='#00ACE8'
+        outlineColor='#00ACE8'
+        cursorColor='#00ACE8'
+        activeUnderlineColor='#00ACE8'
         error={!!error}
         keyboardType={keyboardType}
         secureTextEntry={secureTextEntry}
@@ -132,14 +136,14 @@ const SignUp = () => {
                 </View>
 
                 <View>
-                  <Button mode="contained" onPress={handleSubmit} style={styles.loginButton}>
+                  <Button mode="contained"  buttonColor='#00ACE8' onPress={handleSubmit} style={styles.loginButton}>
                     Crear Cuenta
                   </Button>
 
                   <View style={styles.signupContainer}>
                     <Text style={styles.noAccountText}>¿Ya tienes una cuenta?</Text>
-                    <Button mode="text" onPress={() => router.navigate("/login")} labelStyle={styles.signupText}>
-                      Iniciar Sesión
+                    <Button mode="text" onPress={() => router.navigate("/singIn")} labelStyle={styles.signupText}>
+                      Iniciar sesión
                     </Button>
                   </View>
                 </View>
@@ -265,8 +269,8 @@ const styles = {
     marginBottom: 16,
   },
   logo: {
-    width: 30,
-    height: 30,
+    width: 50,
+    height: 50,
   },
 };
 export default SignUp;
