@@ -17,7 +17,6 @@ const UIKitLanding = () => {
   const { width } = useWindowDimensions();
   const isWeb = Platform.OS === 'web';
   const isMobile = width < 768;
-
   const templates = [
     { id: 1, title: 'Multiplatform', image: '/placeholder.svg?height=300&width=400' },
     { id: 2, title: 'Mobile App', image: '/placeholder.svg?height=300&width=400' },
@@ -35,8 +34,6 @@ const UIKitLanding = () => {
     { number: '35+', title: 'Pre-Built Page Examples' },
     { number: '100+', title: 'Custom/Extended Utilities' },
   ];
-
- 
 
   return (
     <>

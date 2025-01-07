@@ -155,7 +155,7 @@ export default function AnalyticsDashboard() {
           ))}
         </Animated.View>
       </View>
-      <PaperProvider>
+      <PaperProvider theme={{ dark: false, mode: 'exact' }}>
       <View style={{ flex: 1, padding: 16 }}>
       <TablaComponente
           data={data}

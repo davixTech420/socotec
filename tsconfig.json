@@ -12,7 +12,5 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts",
-    "nativewind-env.d.ts"
-, "components/tablaComponent.jsx"  ]
+    "expo-env.d.ts", "app/(tabs)/singUp.jsx"  ]
 }

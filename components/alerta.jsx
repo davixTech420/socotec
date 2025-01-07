@@ -1,7 +1,19 @@
-import React from 'react'
+import React from 'react';
+import { Text,Dialog,Button } from 'react-native-paper';	
 
-export default function alerta() {
+export function AlertaIcono(props) {
   return (
-    <div>alerta</div>
+  
+      <Dialog  visible={props.onOpen} onDismiss={props.onClose} >
+        <Dialog.Icon icon={props.icon} />
+        <Dialog.Title >{props.title}</Dialog.Title>
+        <Dialog.Content>
+          <Text variant="bodyMedium">{props.text}</Text>
+        </Dialog.Content>
+        <Dialog.Actions>
+          {props.actions}
+        </Dialog.Actions>
+      </Dialog>
+   
   )
 }

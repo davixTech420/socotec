@@ -27,13 +27,7 @@ const prueba = () => {
   return (
     <PaperProvider>
       <SafeAreaView style={styles.container}>
-        <tablaComponent
-          data={data}
-          columns={columns}
-          searchKeys={['name', 'email']}
-          perPage={3}
-          /* onGenerateReport={handleGenerateReport} */
-        />
+       
       </SafeAreaView>
     </PaperProvider>
   );
