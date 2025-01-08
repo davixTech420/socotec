@@ -4,9 +4,6 @@ Deductibles y retenciones automáticas: Calcula automáticamente impuestos (seg�
 Horas extras y días festivos: Sistema que calcule automáticamente las horas extras, trabajando en función de las políticas laborales locales.
 Bonificaciones e incentivos: Crea reglas automáticas para calcular bonificaciones por desempeño, metas alcanzadas, antigüedad, entre otras.
 
-
-
-
 Generación de Reportes
 Reportes de nómina detallados: Genera reportes de la nómina para cada empleado que incluya salario bruto, deducciones, impuestos, salario neto, etc.
 Reportes fiscales: Reportes preparados para entregar a las autoridades fiscales, que incluyan todas las retenciones y contribuciones.
@@ -29,3 +26,26 @@ Aprobaciones de vacaciones: Un sistema de aprobación simple para gestionar las 
 
 
 
+
+
+
+Claro, te proporcionaré una demo básica de cómo podría funcionar un sistema ERP para una empresa de arquitectura. Esta demo estará dividida en diferentes módulos para que puedas ver cómo se integran las diferentes funcionalidades.
+Módulo 1: Gestión de Proyectos
+Pantalla de inicio: Un dashboard que muestra todos los proyectos actuales, con información como el nombre del proyecto, el estado, el presupuesto y la fecha de entrega.
+Crear proyecto: Un formulario para crear nuevos proyectos, donde se pueden ingresar detalles como el nombre del cliente, el tipo de proyecto, el presupuesto y las fechas de inicio y entrega.
+Asignar recursos: Una pantalla para asignar recursos (empleados, materiales, equipos) a cada proyecto.
+Módulo 2: Gestión de Recursos Humanos
+Gestión de empleados: Un sistema para gestionar la información de los empleados, incluyendo sus datos personales, habilidades, experiencia laboral y historial de proyectos.
+Nóminas y beneficios: Un módulo para gestionar las nóminas, beneficios y deducciones de los empleados.
+Módulo 3: Gestión de Finanzas
+Contabilidad general: Un módulo para registrar y gestionar las transacciones financieras de la empresa, incluyendo ingresos, gastos, activos y pasivos.
+Gestión de cuentas por cobrar y pagar: Un sistema para gestionar las facturas, pagos y cuentas por cobrar y pagar.
+Presupuestos y proyecciones: Un módulo para crear y gestionar presupuestos y proyecciones financieras.
+Módulo 4: Gestión de Almacén y Compras
+Gestión de inventario: Un sistema para gestionar el inventario de materiales y suministros, incluyendo la cantidad, ubicación y estado.
+Compras y proveedores: Un módulo para gestionar las compras, incluyendo la selección de proveedores, la creación de pedidos y la gestión de recepciones.
+Gestión de órdenes de compra: Un sistema para gestionar las órdenes de compra, incluyendo la creación, aprobación y seguimiento.
+Módulo 5: Informes y Análisis
+Informes personalizados: Un módulo para crear informes personalizados basados en los datos del sistema.
+Análisis de datos: Un sistema para analizar los datos del sistema y proporcionar insights y recomendaciones.
+Tableros de control: Un módulo para crear tableros de control personalizados que muestran los indicadores clave de rendimiento (KPI) de la empresa.

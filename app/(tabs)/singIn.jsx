@@ -18,9 +18,9 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
 
-//estas son los estados para abrir las alertas o dialogos de la vista de  inicio de sesion o login
-const [isOpen, setIsOpen] = useState(false);
-const [isOpenError, setIsOpenError] = useState(false);
+  //estas son los estados para abrir las alertas o dialogos de la vista de  inicio de sesion o login
+  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenError, setIsOpenError] = useState(false);
   const [isOpenSucces, setIsOpenSucces] = useState(false);
   const handleNameChange = (text) => {
     const lettersOnly = text.replace(/[^A-Za-z\s]/g, '');
@@ -46,7 +46,7 @@ const [isOpenError, setIsOpenError] = useState(false);
 
   const validateForm = () => {
     let newErrors = {};
-    
+
     if (!email) newErrors.email = 'El email es requerido';
     else if (!/^[a-zA-Z0-9._%+-]+@socotec\.com$/.test(email)) newErrors.email = 'Email inválido';
     if (!password) newErrors.password = 'La contraseña es requerida';
@@ -77,7 +77,7 @@ const [isOpenError, setIsOpenError] = useState(false);
           Únete a nuestra comunidad de más de{'\n'}10,000 suscriptores y aprende cosas nuevas
         </Text>
         {!isMobile && (
-          <Button mode="outlined" style={styles.signInButton} labelStyle={styles.signInButtonText}  onPress={()=> router.navigate("/singUp")}> 
+          <Button mode="outlined" style={styles.signInButton} labelStyle={styles.signInButtonText} onPress={() => router.navigate("/singUp")}>
             Crear Cuenta
           </Button>
         )}
@@ -129,7 +129,7 @@ const [isOpenError, setIsOpenError] = useState(false);
                 </View>
                 <View>
                   <Button buttonColor='#00ACE8' mode="contained" onPress={handleSubmit} style={styles.loginButton}>
-                    Crear Cuenta
+                    Iniciar sesion
                   </Button>
 
                   <View style={styles.signupContainer}>
@@ -155,13 +155,9 @@ const [isOpenError, setIsOpenError] = useState(false);
         <Button onPress={() => setIsOpenSucces(false)}>Cerrar</Button>
       </>
       } />
-
-
-
-
-<AlertaScroll onOpen={isOpen} onClose={() => setIsOpen(false)} title="Recuperar Contraseña" content={<View style={{ padding:20}}>
-{renderInput("Email", email, setEmail, "mail-outline", errors.email, "email-address")}
-</View>} actions={<View style={{flexDirection:'row',justifyContent:'space-around',flex:1}}>
+      <AlertaScroll onOpen={isOpen} onClose={() => setIsOpen(false)} title="Recuperar Contraseña" content={<View style={{ padding: 20 }}>
+        {renderInput("Email", email, setEmail, "mail-outline", errors.email, "email-address")}
+      </View>} actions={<View style={{ flexDirection: 'row', justifyContent: 'space-around', flex: 1 }}>
         <Button textColor='black' onPress={() => setIsOpen(false)}>Cerrar</Button>
         <Button mode='contained' buttonColor='#00ACE8' onPress={() => setIsOpen(false)}>Enviar email</Button>
       </View>

@@ -57,14 +57,34 @@ const SignUp = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+ /*  const handleSubmit = async () => {
     if (validateForm()) {
       //se envian los datos al endpoint
-      emailRegistro({ name, phone, email, password }).then((response) => {
+       await emailRegistro({ name, phone, email, password }).then((response) => {
         console.log(response);
-        setIsOpenSucces(true);
+        response === "Correo enviado con exito" ? setIsOpenSucces(true) : setIsOpenError(true);
       }).catch((error) => { console.log(error); setIsOpenError(true); });
+    }
+  }; */
 
+  const handleSubmit = async () => {
+    if (validateForm()) {
+      try {
+        
+        const response = await emailRegistro({ name, phone, email, password });
+  
+        // Suponiendo que la respuesta es un objeto JSON con una propiedad "message"
+        if (response.data.status === 200) {
+          setIsOpenSucces(true);
+        } else {
+          setIsOpenError(true);
+          console.error('Error:', response.data);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+       
+        setIsOpenError(true);
+      }
     }
   };
 
