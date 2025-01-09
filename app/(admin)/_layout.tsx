@@ -8,8 +8,10 @@ import prueba from './prueba';
 const Drawer = createDrawerNavigator();
 
 export default function App() {
+  
   return (
     <>
+    
       <Drawer.Navigator
         initialRouteName="Dashboard" 
         screenOptions={{
@@ -50,6 +52,7 @@ export default function App() {
           }}
         />
       </Drawer.Navigator>
+    
       </>
   );
 }

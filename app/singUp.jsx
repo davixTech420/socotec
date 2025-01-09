@@ -13,9 +13,9 @@ const SignUp = () => {
   const isMobile = width < 768;
   const inputScale = useSharedValue(1);
 
-  const [name, setName] = useState('');
+  const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [telefono, setTelefono] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
 
@@ -24,12 +24,12 @@ const SignUp = () => {
   const [isOpenSucces, setIsOpenSucces] = useState(false);
   const handleNameChange = (text) => {
     const lettersOnly = text.replace(/[^A-Za-z\s]/g, '');
-    setName(lettersOnly);
+    setNombre(lettersOnly);
   };
 
   const handlePhoneChange = (text) => {
     const numbersOnly = text.replace(/[^0-9]/g, '').slice(0, 10);
-    setPhone(numbersOnly);
+    setTelefono(numbersOnly);
   };
 
   const animatedInputStyle = useAnimatedStyle(() => ({
@@ -46,11 +46,11 @@ const SignUp = () => {
 
   const validateForm = () => {
     let newErrors = {};
-    if (!name.trim()) newErrors.name = 'El nombre es requerido';
+    if (!nombre.trim()) newErrors.nombre = 'El nombre es requerido';
     if (!email) newErrors.email = 'El email es requerido';
     else if (!/^[a-zA-Z0-9._%+-]+@socotec\.com$/.test(email)) newErrors.email = 'Email inválido';
-    if (!phone) newErrors.phone = 'El teléfono es requerido';
-    else if (phone.length !== 10) newErrors.phone = 'El teléfono debe tener 10 dígitos';
+    if (!telefono) newErrors.telefono = 'El teléfono es requerido';
+    else if (telefono.length !== 10) newErrors.telefono = 'El teléfono debe tener 10 dígitos';
     if (!password) newErrors.password = 'La contraseña es requerida';
     else if (password.length < 8) newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
     setErrors(newErrors);
@@ -71,7 +71,7 @@ const SignUp = () => {
     if (validateForm()) {
       try {
         
-        const response = await emailRegistro({ name, phone, email, password });
+        const response = await emailRegistro({ nombre, telefono, email, password });
   
         // Suponiendo que la respuesta es un objeto JSON con una propiedad "message"
         if (response.data.status === 200) {
@@ -149,9 +149,9 @@ const SignUp = () => {
                     <Text style={styles.beOneText}>¡Bienvenido!</Text>
                     <Image style={styles.logo} source={require("@/assets/images/favicon.png")} />
                   </View>
-                  {renderInput("Nombre", name, handleNameChange, "person-outline", errors.name)}
+                  {renderInput("Nombre", nombre, handleNameChange, "person-outline", errors.nombre)}
                   {renderInput("Email", email, setEmail, "mail-outline", errors.email, "email-address")}
-                  {renderInput("Teléfono", phone, handlePhoneChange, "call-outline", errors.phone, "phone-pad")}
+                  {renderInput("Teléfono", telefono, handlePhoneChange, "call-outline", errors.telefono, "phone-pad")}
                   {renderInput("Contraseña", password, setPassword, "lock-closed-outline", errors.password, "default", true, <TextInput.Icon icon="eye" />)}
                 </View>
 

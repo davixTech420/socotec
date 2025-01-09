@@ -10,6 +10,7 @@ import { Provider } from "react-native-paper";
 
 
 
+
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -29,7 +30,10 @@ export default function RootLayout() {
     return null;
   }
   return (
+
+    
     <Provider theme={{ dark: false, mode: 'exact' }}>
+      
       <ThemeProvider value={DefaultTheme}>
       <Stack
       screenOptions={{
@@ -39,10 +43,13 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(admin)" options={{ headerShown: false }} />
         <Stack.Screen name="(employee)" options={{ headerShown: false }} />
+        <Stack.Screen name="singUp" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
+    
     </Provider>
+    
   )
 }

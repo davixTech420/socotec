@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from "expo-router";
 import Animated, { 
   useSharedValue, 
-  useAnimatedProps, 
   withTiming, 
   FadeInLeft, 
   FadeInRight,
@@ -33,14 +32,12 @@ const AnimatedStatistic = ({ number, title, icon }) => {
     animatedValue.value = withTiming(parseInt(number), { duration: 2000 });
   }, []);
 
-  const animatedProps = useAnimatedProps(() => ({
-    text: `${Math.floor(animatedValue.value)}%`,
-  }));
-
   return (
     <View style={styles.statCard}>
       <MaterialCommunityIcons name={icon} size={36} color="#0061f2" style={styles.statIcon} />
-      <AnimatedText style={styles.statNumber} animatedProps={animatedProps} />
+      <AnimatedText style={styles.statNumber}>
+        {animatedValue.value.toFixed(0)}%
+      </AnimatedText>
       <Text style={styles.statTitle}>{title}</Text>
     </View>
   );

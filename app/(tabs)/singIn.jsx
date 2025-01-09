@@ -4,7 +4,7 @@ import { Provider, TextInput, Button, Text, useTheme } from 'react-native-paper'
 import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
-import { emailRegistro } from "@/services/publicServices";
+import { login } from "@/services/publicServices";
 import { AlertaIcono, AlertaScroll } from "../../components/alerta";
 
 const SignUp = () => {
@@ -12,25 +12,20 @@ const SignUp = () => {
   const theme = useTheme();
   const isMobile = width < 768;
   const inputScale = useSharedValue(1);
-  const [name, setName] = useState('');
+ 
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+
   const [password, setPassword] = useState('');
+  //estos son los errores errors son los helpertext
+  //message es el mensaje que devuel
   const [errors, setErrors] = useState({});
+  const [messageApi, setMessageApi] = useState('');
 
   //estas son los estados para abrir las alertas o dialogos de la vista de  inicio de sesion o login
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenError, setIsOpenError] = useState(false);
   const [isOpenSucces, setIsOpenSucces] = useState(false);
-  const handleNameChange = (text) => {
-    const lettersOnly = text.replace(/[^A-Za-z\s]/g, '');
-    setName(lettersOnly);
-  };
-
-  const handlePhoneChange = (text) => {
-    const numbersOnly = text.replace(/[^0-9]/g, '').slice(0, 10);
-    setPhone(numbersOnly);
-  };
+  
 
   const animatedInputStyle = useAnimatedStyle(() => ({
     transform: [{ scale: inputScale.value }],
@@ -58,11 +53,10 @@ const SignUp = () => {
   const handleSubmit = () => {
     if (validateForm()) {
       //se envian los datos al endpoint
-      emailRegistro({ name, phone, email, password }).then((response) => {
+      login({  email, password }).then((response) => {
         console.log(response);
-        setIsOpenSucces(true);
-      }).catch((error) => { console.log(error); setIsOpenError(true); });
-
+        response.success == true ? setIsOpenSucces(true) : setIsOpenError(true);
+      }).catch((error) => { console.log(error); setIsOpenError(true);});
     }
   };
 
@@ -147,7 +141,7 @@ const SignUp = () => {
           </Animated.View>
         </Animated.View>
       </ScrollView>
-      <AlertaIcono onOpen={isOpenError} onClose={() => setIsOpenError(false)} icon="alert" title="Error" text="El correo no existe" actions={<>
+      <AlertaIcono onOpen={isOpenError} onClose={() => setIsOpenError(false)} icon="alert" title="Error" text="Credenciales incorrectas" actions={<>
         <Button onPress={() => setIsOpenError(false)}>Cerrar</Button>
       </>
       } />
