@@ -50,9 +50,20 @@ export default function TabLayout() {
         options={{
           title:'Login',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account" size={28} color={color} />,
+
         }}
       /> 
        
+       <Tabs.Screen
+        name="singUp"
+        options={{
+          href:null,
+          title:'Registrar',
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account" size={28} color={color} />,
+
+        }}
+      /> 
+
     </Tabs>
     </>
   );

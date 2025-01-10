@@ -5,7 +5,7 @@ import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from '
 import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 import { emailRegistro } from "@/services/publicServices";
-import { AlertaIcono } from "../components/alerta";
+import { AlertaIcono } from "../../components/alerta";
 
 const SignUp = () => {
   const { width } = useWindowDimensions();
