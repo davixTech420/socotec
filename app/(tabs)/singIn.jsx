@@ -4,8 +4,9 @@ import { Provider, TextInput, Button, Text, useTheme } from 'react-native-paper'
 import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
-import { login } from "@/services/publicServices";
+import { login, forgotPassword } from "@/services/publicServices";
 import { AlertaIcono, AlertaScroll } from "../../components/alerta";
+
 
 const SignUp = () => {
   const { width } = useWindowDimensions();
@@ -25,6 +26,8 @@ const SignUp = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenError, setIsOpenError] = useState(false);
   const [isOpenSucces, setIsOpenSucces] = useState(false);
+
+  
   
 
   const animatedInputStyle = useAnimatedStyle(() => ({
@@ -58,6 +61,16 @@ const SignUp = () => {
         response.success == true ? setIsOpenSucces(true) : setIsOpenError(true);
       }).catch((error) => { console.log(error); setIsOpenError(true);});
     }
+  };
+
+
+  const handleSubmitForgotPassword = () => {
+      //se envian los datos al endpoint
+      forgotPassword({  email }).then((response) => {
+        console.log(response);
+        response.success == true ? setIsOpenSucces(true) : setIsOpenError(true);
+      }).catch((error) => { console.log(error); setIsOpenError(true);});
+    
   };
 
   const renderLeftSide = () => (
@@ -153,7 +166,7 @@ const SignUp = () => {
         {renderInput("Email", email, setEmail, "mail-outline", errors.email, "email-address")}
       </View>} actions={<View style={{ flexDirection: 'row', justifyContent: 'space-around', flex: 1 }}>
         <Button textColor='black' onPress={() => setIsOpen(false)}>Cerrar</Button>
-        <Button mode='contained' buttonColor='#00ACE8' onPress={() => setIsOpen(false)}>Enviar email</Button>
+        <Button mode='contained' buttonColor='#00ACE8' onPress={handleSubmitForgotPassword}>Enviar email</Button>
       </View>
       } />
     </>

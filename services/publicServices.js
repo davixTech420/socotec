@@ -28,3 +28,16 @@ export const login = async (user) => {
     return { success: false, message: error.message || 'Error desconocido' };
   }
 };
+
+
+export const forgotPassword = async (user) => {
+  try {
+    await axios.post(`${baseUrl}/emailPassword`, user).then((response) => {
+      console.log(response);
+    }).catch((error) => {
+      console.log(error);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};

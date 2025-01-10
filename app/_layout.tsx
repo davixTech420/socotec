@@ -44,6 +44,7 @@ export default function RootLayout() {
         <Stack.Screen name="(admin)" options={{ headerShown: false }} />
         <Stack.Screen name="(employee)" options={{ headerShown: false }} />
         <Stack.Screen name="singUp" options={{ headerShown: false }} />
+        <Stack.Screen name="forgotPass" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
