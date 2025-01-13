@@ -1,17 +1,43 @@
-import React from 'react';
+import React,{useEffect,useState} from 'react';
 import {StyleSheet } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons'; 
 import indexAdmin from './Dashboard';
 import inventario from './inventario';
 import prueba from './prueba';
-const Drawer = createDrawerNavigator();
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { jwtDecode } from 'jwt-decode';
+import { router } from 'expo-router';
 
+
+const Drawer = createDrawerNavigator();
 export default function App() {
-  
+/* 
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  useEffect(() => {
+    const checkAuthorization = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        try {
+          const decodedToken = jwtDecode(token);
+          if (decodedToken?.role) {
+            setIsAuthorized(true);
+          } else {
+            router.navigate('/');
+          }
+        } catch (error) {
+          console.error('Error decoding token:', error);
+          router.navigate('/');
+        }
+      } else {
+        router.navigate('/');
+      }
+    };
+    checkAuthorization();
+  }, [ router]); */
+
   return (
     <>
-    
       <Drawer.Navigator
         initialRouteName="Dashboard" 
         screenOptions={{
@@ -52,7 +78,6 @@ export default function App() {
           }}
         />
       </Drawer.Navigator>
-    
       </>
   );
 }
