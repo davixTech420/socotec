@@ -1,135 +1,216 @@
-import { useState, useEffect } from "react";
-import { useLocalSearchParams } from 'expo-router';
-import { View, Text,Image } from 'react-native';
-import { TextInput, Button, useTheme } from 'react-native-paper';
-import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-const ForgotPass = () => {
-  const { token } = useLocalSearchParams(); // Extrae el token dinámico
+import React, { useState,useEffect } from 'react';
+import { StyleSheet, View, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { TextInput, Button, Text, useTheme, HelperText } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { router, useLocalSearchParams } from "expo-router";
+import { jwtDecode } from 'jwt-decode';
+import { changePassword } from "@/services/publicServices";
 
+const PasswordResetScreen = () => {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const theme = useTheme();
+//este linea recibe el token que se asigna a la url
+  const {token} = useLocalSearchParams();
+  //validamos si el otken es valido y si existe
+ 
 
-  const [password,setPassword] = useState('');
-  const [pass2,setPass2] = useState('');
-  const errors = useState({});
- const inputScale = useSharedValue(1);
-  const animatedInputStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: inputScale.value }],
-  }));
-
-  if (!token) {
-    return (
-      <View>
-        <Text>Error: No se encontró un token válido. Verifica la URL.</Text>
-      </View>
-    );
-  }
-
-
-   const handleFocus = () => {
-      inputScale.value = withSpring(1.05);
-    };
-
-
-
- const handleBlur = () => {
-    inputScale.value = withSpring(1);
+  const handleResetPassword = async () => {
+    setIsSubmitting(true);
+    await changePassword({ password, token }).then((response) => {
+      console.log(response);
+      response.success == true ? router.navigate("/singIn") : setIsSubmitting(false);
+    }).catch((error) => { console.log(error); setIsSubmitting(false); });
+    // Aquí iría la lógica para cambiar la contraseña
+    setTimeout(() => {
+      setIsSubmitting(false);
+      // Mostrar mensaje de éxito o error
+    }, 2000);
   };
 
-  const validateForm = () => {
-    let newErrors = {};
-
-    
-    if (!password) newErrors.password = 'La contraseña es requerida';
-    else if (password.length < 8) newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const passwordsMatch = password === confirmPassword;
+  const isPasswordValid = password.length >= 8;
 
 
-  const renderInput = (label, value, onChangeText, icon, error, keyboardType = 'default', secureTextEntry = false, right) => (
-    <Animated.View style={animatedInputStyle}>
-      <TextInput
-        label={label}
-        value={value}
-        onChangeText={onChangeText}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        cursorColor='#00ACE8'
-        underlineColor='#00ACE8'
-        outlineColor='#00ACE8'
-        activeUnderlineColor='#00ACE8'
-        left={<TextInput.Icon icon={() => <Ionicons name={icon} size={20} color="#00ACE8" />} />}
-        error={!!error}
-        keyboardType={keyboardType}
-        secureTextEntry={secureTextEntry}
-        style={{ marginBottom: 16 }}
-        right={right}
-      />
-      {error && <Text style={styles.errorText}>{error}</Text>}
-    </Animated.View>
-  );
+
+
+
+
+  useEffect(() => {
+    if (!token) {
+      router.replace('/');
+      return;
+    }
+    try {
+      const decodedToken = jwtDecode(token);
+      if (!decodedToken || Date.now() >= decodedToken.exp * 1000) {
+        router.navigate('/');
+      }
+    } catch (error) {
+      router.navigate('/');
+    }
+  }, [token, router]);
 
   return (
-    <View>
-<Animated.View
-            entering={FadeIn.duration(1000)}
-            style={styles.rightSide}
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Animated.View
+          entering={FadeInDown.duration(1000).springify()} 
+          style={styles.iconContainer}
+        >
+          <MaterialCommunityIcons name="lock-reset" size={80} color="#00ACE8" />
+        </Animated.View>
+        
+        <Animated.View 
+          entering={FadeInUp.duration(1000).springify()} 
+          style={styles.formContainer}
+        >
+          <Text style={styles.title}>Restablecer Contraseña</Text>
+          <Text style={styles.subtitle}>Crea una nueva contraseña segura para tu cuenta</Text>
+
+          <TextInput
+            label="Nueva Contraseña"
+            underlineColor='#00ACE8'
+        outlineColor='#00ACE8'
+        cursorColor='#00ACE8'
+        activeUnderlineColor='#00ACE8'
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+             mode="underlined"
+            right={
+              <TextInput.Icon 
+                icon={showPassword ? "eye-off" : "eye"} 
+                onPress={() => setShowPassword(!showPassword)}
+                 color="#00ACE8"
+              />
+            }
+            style={styles.input}
+          />
+          <HelperText type="info" visible={true}>
+            La contraseña debe tener al menos 8 caracteres
+          </HelperText>
+
+          <TextInput
+            label="Confirmar Nueva Contraseña"
+          
+            underlineColor='#00ACE8'
+            outlineColor='#00ACE8'
+            cursorColor='#00ACE8'
+            activeUnderlineColor='#00ACE8'
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!showConfirmPassword}
+            mode="underlined"
+            right={
+              <TextInput.Icon 
+                icon={showConfirmPassword ? "eye-off" : "eye"} 
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                color="#00ACE8"
+              />
+            }
+            style={styles.input}
+          />
+          <HelperText type="error" visible={!passwordsMatch && confirmPassword !== ''}>
+            Las contraseñas no coinciden
+          </HelperText>
+
+          <Button 
+            mode="contained"
+            buttonColor='#00ACE8'
+
+            onPress={handleResetPassword} 
+            loading={isSubmitting}
+            disabled={isSubmitting || !passwordsMatch || !isPasswordValid}
+            style={styles.button}
           >
-            <View style={styles.rightContent}>
-              <View style={styles.formContainer}>
-                <View>
-                  <View style={styles.signupContainer}>
-                    <Text style={styles.beOneText}>Restablecer contraseña</Text>
-                    <Image style={styles.logo} source={require("@/assets/images/favicon.png")} />
-                  </View>
-                  {renderInput("Contraseña nueva", password, setPassword, "lock-closed-outline", errors.password, "default", true, <TextInput.Icon icon="eye" />)}
+            Cambiar Contraseña
+          </Button>
 
-
-                  {renderInput("Repite contraseña", pass2, setPass2, "lock-closed-outline", errors.password, "default", true, <TextInput.Icon icon="eye" />)}
-                </View>
-                <View>
-                  <Button buttonColor='#00ACE8' mode="contained"  style={styles.loginButton}>
-                    Restablecer Contraseña
-                  </Button>
-
-                  
-                  
-                </View>
-              </View>
-            </View>
-          </Animated.View>
-     
-    </View>
+          <Text style={styles.securityInfo}>
+            Para mayor seguridad, tu contraseña debe incluir:
+          </Text>
+          <View style={styles.securityList}>
+            <Text style={styles.securityItem}>• Al menos 8 caracteres</Text>
+            <Text style={styles.securityItem}>• Una letra mayúscula</Text>
+            <Text style={styles.securityItem}>• Una letra minúscula</Text>
+            <Text style={styles.securityItem}>• Un número</Text>
+            <Text style={styles.securityItem}>• Un carácter especial</Text>
+          </View>
+        </Animated.View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
-const styles = {
-  rightSide: {
+
+const styles = StyleSheet.create({
+  container: {
     flex: 1,
-    padding: 32,
-    backgroundColor: 'white',
+    backgroundColor: '#f5f5f5',
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
+    padding: 20,
   },
-  rightContent: {
-    width: '100%',
-    maxWidth: 300,
-    alignSelf: 'center',
+  iconContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  beOneText: {
+  formContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 32,
+    marginBottom: 10,
     textAlign: 'center',
   },
-  loginButton: {
-    marginTop: 16,
-    marginBottom: 24,
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 20,
+    textAlign: 'center',
   },
-  signupContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
-}
+  input: {
+    marginBottom: 5,
+  },
+  button: {
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  securityInfo: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  securityList: {
+    marginLeft: 10,
+  },
+  securityItem: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
+  },
+});
 
-export default ForgotPass;
+export default PasswordResetScreen;
+

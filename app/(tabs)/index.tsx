@@ -123,7 +123,7 @@ const UIKitLanding = () => {
                 </Button>
                 <Button 
                   mode="outlined" 
-                  onPress={() => router.navigate("/(forgotPass)/DashboardE")}
+                  onPress={() => router.navigate("/(forgotPass)/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQsImlhdCI6MTczNjc4NTk3NywiZXhwIjoxNzM2Nzg2NTc3fQ.-rcNIq_3OUcmEWlaYyN2uEAH9Yo7VjG6rg1wTuEHe94")}
                   style={styles.secondaryButton}
                   icon="play-circle"
                 >

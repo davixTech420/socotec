@@ -4,7 +4,8 @@ import { router } from "expo-router";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.4.204:${port}/api/public`;
+const baseUrl = `http://10.48.5.114:${port}/api/public`;
+//end point para enviar el email recien se registra un usuario
 export const emailRegistro = async (user) => {
   try {
     const response = await axios.post(`${baseUrl}/emailRegistro`, user);
@@ -14,7 +15,7 @@ export const emailRegistro = async (user) => {
   }
 };
 
-
+//end point para logearse y crear el token de inicio
 export const login = async (user) => {
   try {
     const response = await axios.post(`${baseUrl}/login`, user);
@@ -30,9 +31,24 @@ export const login = async (user) => {
 };
 
 
+
+//end point para enviar el email de recuperacion
 export const forgotPassword = async (user) => {
   try {
     await axios.post(`${baseUrl}/emailPassword`, user).then((response) => {
+      console.log(response);
+    }).catch((error) => {
+      console.log(error);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+export const changePassword = async (user) => {
+  try {
+    await axios.post(`${baseUrl}/forgotPassword`, user).then((response) => {
       console.log(response);
     }).catch((error) => {
       console.log(error);

@@ -4,7 +4,7 @@ import { Provider, TextInput, Button, Text, useTheme } from 'react-native-paper'
 import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
-import { login, forgotPassword } from "@/services/publicServices";
+import { login, forgotPassword} from "@/services/publicServices";
 import { AlertaIcono, AlertaScroll } from "../../components/alerta";
 
 

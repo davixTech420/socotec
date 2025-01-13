@@ -43,13 +43,11 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(admin)" options={{ headerShown: false }} />
         <Stack.Screen name="(employee)" options={{ headerShown: false }} />
-        
-        <Stack.Screen name="forgotPass/[token]" options={{ headerShown: false }} />
+        <Stack.Screen name="(forgotPass)/[token]" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
-    
     </Provider>
     
   )

@@ -101,7 +101,7 @@ const SignUp = () => {
           Únete a nuestra comunidad de más de{'\n'}10,000 suscriptores y aprende cosas nuevas
         </Text>
         {!isMobile && (
-          <Button mode="outlined" style={styles.signInButton} labelStyle={styles.signInButtonText}>
+          <Button onPress={() => router.navigate("/singIn")} mode="outlined" style={styles.signInButton} labelStyle={styles.signInButtonText}>
             Iniciar Sesión
           </Button>
         )}
@@ -134,7 +134,6 @@ const SignUp = () => {
 
   return (
     <>
-
       <ScrollView contentContainerStyle={styles.container}>
         <Animated.View style={[styles.card, isMobile ? styles.cardMobile : {}]}>
           {!isMobile && renderLeftSide()}
