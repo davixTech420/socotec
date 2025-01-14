@@ -4,8 +4,8 @@ import { LineChart, ProgressChart } from 'react-native-chart-kit';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Svg, Path } from 'react-native-svg';
 import TablaComponente from "../../components/tablaComponent";
-import {PaperProvider} from "react-native-paper";
-
+import {PaperProvider,Button} from "react-native-paper";
+import { useProtectedRoute,useAuth } from "@/context/userContext";
 
 const data = [
   { id: 1, nombre: 'Juan', edad: 30, ciudad: 'Madrid' },
@@ -25,6 +25,10 @@ const columns = [
 
 
 export default function AnalyticsDashboard() {
+
+
+
+
   const screenWidth = Dimensions.get('window').width;
   const lineChartData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -51,6 +55,20 @@ export default function AnalyticsDashboard() {
     { number: '3', title: 'Completion', color: '#7B52FF' },
   ];
 
+
+
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // La redirección ya está manejada en la función logout
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -60,6 +78,7 @@ export default function AnalyticsDashboard() {
           style={styles.card}
         >
           <Text style={styles.cardTitle}>Total Revenue</Text>
+          <Button onPress={handleLogout}>cerrar sesion</Button>
           <Text style={styles.amount}>$3,580</Text>
           <View style={styles.ratingContainer}>
             {'★★★★☆'.split('').map((star, index) => (

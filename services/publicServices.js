@@ -1,6 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { useAuth } from "@/context/userContext";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
@@ -16,18 +17,24 @@ export const emailRegistro = async (user) => {
 };
 
 //end point para logearse y crear el token de inicio
-export const login = async (user) => {
-  try {
-    const response = await axios.post(`${baseUrl}/login`, user);
-    if (response.data && response.data.token) {
-      await AsyncStorage.setItem('userToken', response.data.token);
-      return  router.navigate("/(admin)/Dashboard") /* { success: true, token: response.data.token } */;
-    } else {
-      return { success: false, message: 'No se recibió token' };
+export const useLogin = () => {
+  const { login } = useAuth();
+  const loginUser = async (user) => {
+    try {
+      const response = await axios.post(`${baseUrl}/login`, user);
+      if (response.data && response.data.token) {
+        await login(response?.data.token);
+        router.replace("/(admin)/Dashboard");
+        return { success: true };
+      } else {
+        return { success: false, message: 'No se recibió token' };
+      }
+    } catch (error) {
+      return { success: false, message: error.message || 'Error desconocido' };
     }
-  } catch (error) {
-    return { success: false, message: error.message || 'Error desconocido' };
-  }
+  };
+
+  return loginUser;
 };
 
 

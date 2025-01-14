@@ -1,16 +1,22 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack,router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect,useState } from 'react';
+import React ,{ useEffect,useState,useContext } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Provider } from "react-native-paper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthProvider } from '@/context/userContext';
+
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
+
+
+ 
+
+
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -25,6 +31,7 @@ export default function RootLayout() {
     return null;
   }
   return (
+      <AuthProvider>
     <Provider theme={{ dark: false, mode: 'exact' }}>
       <ThemeProvider value={DefaultTheme}>
       <Stack
@@ -35,11 +42,14 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(admin)" options={{ headerShown: false }} />
         <Stack.Screen name="(employee)" options={{ headerShown: false }} />
+       
         <Stack.Screen name="(forgotPass)/[token]" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
     </Provider>
+    </AuthProvider>
   )
 }
+

@@ -4,7 +4,7 @@ import { Provider, TextInput, Button, Text, useTheme } from 'react-native-paper'
 import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
-import { login, forgotPassword} from "@/services/publicServices";
+import { login, forgotPassword,useLogin} from "@/services/publicServices";
 import { AlertaIcono, AlertaScroll } from "../../components/alerta";
 
 
@@ -13,7 +13,7 @@ const SignUp = () => {
   const theme = useTheme();
   const isMobile = width < 768;
   const inputScale = useSharedValue(1);
- 
+  const loginUser = useLogin();
   const [email, setEmail] = useState('');
 
   const [password, setPassword] = useState('');
@@ -29,7 +29,7 @@ const SignUp = () => {
 
   
   
-
+ 
   const animatedInputStyle = useAnimatedStyle(() => ({
     transform: [{ scale: inputScale.value }],
   }));
@@ -56,7 +56,7 @@ const SignUp = () => {
   const handleSubmit = () => {
     if (validateForm()) {
       //se envian los datos al endpoint
-      login({  email, password }).then((response) => {
+      loginUser({  email, password }).then((response) => {
         console.log(response);
         response.success == true ? setIsOpenSucces(true) : setIsOpenError(true);
       }).catch((error) => { console.log(error); setIsOpenError(true);});

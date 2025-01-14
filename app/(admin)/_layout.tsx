@@ -5,36 +5,17 @@ import { Ionicons } from '@expo/vector-icons';
 import indexAdmin from './Dashboard';
 import inventario from './inventario';
 import prueba from './prueba';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { jwtDecode } from 'jwt-decode';
-import { router } from 'expo-router';
-
-
 const Drawer = createDrawerNavigator();
+import { useProtectedRoute } from "@/context/userContext";
 export default function App() {
-/* 
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  useEffect(() => {
-    const checkAuthorization = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-        try {
-          const decodedToken = jwtDecode(token);
-          if (decodedToken?.role) {
-            setIsAuthorized(true);
-          } else {
-            router.navigate('/');
-          }
-        } catch (error) {
-          console.error('Error decoding token:', error);
-          router.navigate('/');
-        }
-      } else {
-        router.navigate('/');
-      }
-    };
-    checkAuthorization();
-  }, [ router]); */
+
+
+  const isAuthenticated = useProtectedRoute('/singIn'); // Redirige a '/login' si no está autenticado
+
+  if (!isAuthenticated) {
+    return null; // O un componente de carga
+  }
+
 
   return (
     <>

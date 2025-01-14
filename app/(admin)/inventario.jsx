@@ -3,6 +3,9 @@ import { View,  StyleSheet,Text,TouchableOpacity,Button } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import TablaComponente from "../../components/tablaComponent";
 import {AntDesign,MaterialCommunityIcons} from '@expo/vector-icons';
+import { getUsers } from "../../services/adminServices";
+
+
 const data = [
   { id: 1, nombre: 'Juan', edad: 30, ciudad: 'Madrid' },
   { id: 2, nombre: 'María', edad: 25, ciudad: 'Barcelona' },
@@ -22,6 +25,12 @@ const columns = [
 ];
 
 const inventario = () => {
+
+
+  useEffect(() => {
+    console.log(getUsers());
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={{ h:"auto"}}>
