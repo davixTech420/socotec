@@ -2,10 +2,9 @@ import React from 'react';
 import { StyleSheet, View, Text, ScrollView, Dimensions } from 'react-native';
 import { LineChart, ProgressChart } from 'react-native-chart-kit';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { Svg, Path } from 'react-native-svg';
 import TablaComponente from "../../components/tablaComponent";
 import {PaperProvider,Button} from "react-native-paper";
-import { useProtectedRoute,useAuth } from "@/context/userContext";
+
 
 const data = [
   { id: 1, nombre: 'Juan', edad: 30, ciudad: 'Madrid' },
@@ -57,16 +56,7 @@ export default function AnalyticsDashboard() {
 
 
 
-  const { logout } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      // La redirección ya está manejada en la función logout
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
-  };
+  
 
 
   return (
@@ -78,7 +68,7 @@ export default function AnalyticsDashboard() {
           style={styles.card}
         >
           <Text style={styles.cardTitle}>Total Revenue</Text>
-          <Button onPress={handleLogout}>cerrar sesion</Button>
+          
           <Text style={styles.amount}>$3,580</Text>
           <View style={styles.ratingContainer}>
             {'★★★★☆'.split('').map((star, index) => (

@@ -25,11 +25,23 @@ const columns = [
 ];
 
 const inventario = () => {
-
+const [usuarios,setUsuarios] = useState({});
 
   useEffect(() => {
-    console.log(getUsers());
+    const fetchData = async () => {
+      try {
+        const response = await getUsers();
+        setUsuarios(response);
+        
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
   }, []);
+
+console.log(usuarios);
+
 
   return (
     <View style={styles.container}>

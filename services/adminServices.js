@@ -8,16 +8,24 @@ const baseUrl = `http://10.48.5.114:${port}/api/admin`;
  
 //end point para enviar el email recien se registra un usuario
 export const getUsers = async () => {
-  try {
-    return response = await axios.get(`${baseUrl}/users`,
-        {
-          headers: {
-            Authorization: await AsyncStorage.getItem("userToken"),
-            'Content-Type': 'application/json'
-          }
-        });
-  } catch (error) {
-    console.log(error);
-  }
-};
+    try {
+      const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
+  
+      if (!token) {
+        console.error('No se encontró el token');
+        return; // O maneja el error como desees
+      }
+  
+      const response = await axios.get(`${baseUrl}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      return response.data; // Retorna los datos de la respuesta
+    } catch (error) {
+      console.error('Error al obtener usuarios:', error);
+    }
+  };
 

@@ -1,82 +1,94 @@
-import React,{useEffect,useState} from 'react';
-import {StyleSheet } from 'react-native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { Ionicons } from '@expo/vector-icons'; 
-import indexAdmin from './Dashboard';
-import inventario from './inventario';
-import prueba from './prueba';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import Dashboard from './Dashboard';
+import Inventario from './inventario';
+import Prueba from './prueba';
+import { useProtectedRoute, useAuth } from "@/context/userContext";
+
 const Drawer = createDrawerNavigator();
-import { useProtectedRoute } from "@/context/userContext";
-export default function App() {
 
-
-  const isAuthenticated = useProtectedRoute('/singIn'); // Redirige a '/login' si no está autenticado
-
-  if (!isAuthenticated) {
-    return null; // O un componente de carga
-  }
-
+function CustomDrawerContent(props) {
+  const { logout } = useAuth();
+  const handleSignOut = () => {
+    logout();
+  };
 
   return (
-    <>
-      <Drawer.Navigator
-        initialRouteName="Dashboard" 
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#00bcf3',
-          },
-          headerTintColor: 'white',
-          drawerStyle: {
-            backgroundColor: '#00bcf3',
-            width: 250,
-          },
-          drawerActiveTintColor: 'white',
-          drawerInactiveTintColor: '#d1d1d1',
-        }}
-      >
-        <Drawer.Screen
-          name="Dashboard"
-          component={indexAdmin}
-          options={{
-            title: 'Dashboard',
-            drawerIcon: ({ color }) => <Ionicons name="calculator" size={24} color={color} />,
-          }}
-        />
-         <Drawer.Screen
-          name="inventario"
-          component={inventario}
-          options={{
-            title: 'Inventario',
-            drawerIcon: ({ color }) => <Ionicons name="calculator" size={24} color={color} />,
-          }}
-        />
-         <Drawer.Screen
-          name="prueba"
-          component={prueba}
-          options={{
-            title: 'prueba',
-            drawerIcon: ({ color }) => <Ionicons name="calculator" size={24} color={color} />,
-          }}
-        />
-      </Drawer.Navigator>
-      </>
+    <View style={{ flex: 1 }}>
+      <DrawerContentScrollView {...props}>
+        <DrawerItemList {...props} />
+      </DrawerContentScrollView>
+      <TouchableOpacity style={styles.closeButton} onPress={handleSignOut}>
+        <MaterialCommunityIcons name="logout" size={24} color="white" />
+        <Text style={styles.closeButtonText}>Cerrar Sesión</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
+
+export default function App() {
+  const isAuthenticated = useProtectedRoute('/signIn');
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return (
+    <Drawer.Navigator
+      initialRouteName="Dashboard"
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#00bcf3',
+        },
+        headerTintColor: 'white',
+        drawerStyle: {
+          backgroundColor: '#00bcf3',
+          width: 250,
+        },
+        drawerActiveTintColor: 'white',
+        drawerInactiveTintColor: '#d1d1d1',
+      }}
+    >
+      <Drawer.Screen
+        name="Dashboard"
+        component={Dashboard}
+        options={{
+          title: 'Dashboard',
+          drawerIcon: ({ color }) => <Ionicons name="home-outline" size={24} color={color} />,
+        }}
+      />
+      <Drawer.Screen
+        name="Inventario"
+        component={Inventario}
+        options={{
+          title: 'Inventario',
+          drawerIcon: ({ color }) => <Ionicons name="list-outline" size={24} color={color} />,
+        }}
+      />
+      <Drawer.Screen
+        name="Prueba"
+        component={Prueba}
+        options={{
+          title: 'Prueba',
+          drawerIcon: ({ color }) => <Ionicons name="flask-outline" size={24} color={color} />,
+        }}
+      />
+    </Drawer.Navigator>
+  );
+}
+
 const styles = StyleSheet.create({
   closeButton: {
-    position: 'absolute',
-    bottom: 40,
-    left: '50%',
-    transform: [{ translateX: -75 }], // Centrar el botón
     backgroundColor: '#ff4d4d',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 30,
-    elevation: 5, // Sombra en Android
-    shadowColor: '#000', // Sombra en iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    margin: 16,
+    padding: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent:"space-around"
   },
   closeButtonText: {
     color: 'white',
@@ -84,3 +96,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+

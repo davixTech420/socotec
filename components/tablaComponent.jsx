@@ -13,7 +13,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import Animated, { FadeInUp, Layout } from 'react-native-reanimated';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 
 const TablaComponente = ({
   data,
@@ -85,14 +85,14 @@ const TablaComponente = ({
   if (error) {
     return (
       <View style={styles.centerContainer}>
-        <MaterialCommunityIcons name="alert-circle-outline" size={48} color={theme.colors.error} />
+        <MaterialCommunityIcons name="alert-circle-outline" size={48} color="red" />
         <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>
       </View>
     );
   }
 
   return (
-    <Animated.View 
+    <Animated.View
       entering={FadeInUp}
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
@@ -175,9 +175,19 @@ const TablaComponente = ({
                     {renderCell(column, item)}
                   </DataTable.Cell>
                 ))}
-<DataTable.Cell>
-  sdsad
-</DataTable.Cell>
+                <DataTable.Cell>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                    <Button>
+                      <MaterialCommunityIcons name="delete" size={20} color="#FF0000" />
+                    </Button>
+                    <Button>
+                      <FontAwesome name="edit" size={20} color="#00ACE8" />
+                    </Button>
+                    <Button>
+                      <MaterialCommunityIcons name="toggle-switch" size={20} color="black" />
+                    </Button>
+                  </View>
+                </DataTable.Cell>
               </DataTable.Row>
             </Animated.View>
           ))
