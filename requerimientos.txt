@@ -77,7 +77,7 @@ Campo	Tipo	Descripción
 id	INT (PK)	Identificador único del proyecto.
 nombre	VARCHAR(200)	Nombre del proyecto.
 descripcion	TEXT	Descripción detallada del proyecto.
-fecha_inicio	DATE	Fecha de inicio del proyecto.
+fecha_inicio	DATE	Fecha de inicio del proyecto..
 fecha_fin	DATE	Fecha estimada de finalización.
 lider_id	INT (FK)	Empleado que lidera el proyecto.
 4. Tabla: EmpleadoProyecto

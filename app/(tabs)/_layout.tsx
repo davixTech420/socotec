@@ -4,11 +4,16 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
-
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useAuth } from '@/context/userContext';
+
+
+
+
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { isAuthenticated } = useAuth();
   return (
     <>
     <Tabs
@@ -46,10 +51,12 @@ export default function TabLayout() {
         }}
       />
        <Tabs.Screen
+      
         name="singIn"
         options={{
-          title:'Login',
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account" size={28} color={color} />,
+          href:isAuthenticated?"/(admin)/Dashboard":"/(tabs)/singIn",
+          title:isAuthenticated?'Dashboard':'Login',
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name={isAuthenticated?"view-dashboard":"account"} size={28} color={color} />,
 
         }}
       /> 
@@ -60,7 +67,6 @@ export default function TabLayout() {
           href:null,
           title:'Registrar',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account" size={28} color={color} />,
-
         }}
       /> 
 

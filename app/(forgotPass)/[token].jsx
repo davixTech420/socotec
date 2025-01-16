@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { TextInput, Button, Text, useTheme, HelperText } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -14,10 +14,23 @@ const PasswordResetScreen = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const theme = useTheme();
-//este linea recibe el token que se asigna a la url
-  const {token} = useLocalSearchParams();
+  //este linea recibe el token que se asigna a la url
+  const { token } = useLocalSearchParams();
   //validamos si el otken es valido y si existe
- 
+  useEffect(() => {
+    if (!token) {
+      router.replace('/');
+      return;
+    }
+    try {
+      const decodedToken = jwtDecode(token);
+      if (!decodedToken || Date.now() >= decodedToken.exp * 1000) {
+        router.navigate('/');
+      }
+    } catch (error) {
+      router.navigate('/');
+    }
+  }, [token, router]);
 
   const handleResetPassword = async () => {
     setIsSubmitting(true);
@@ -35,41 +48,21 @@ const PasswordResetScreen = () => {
   const passwordsMatch = password === confirmPassword;
   const isPasswordValid = password.length >= 8;
 
-
-
-
-
-
-  useEffect(() => {
-    if (!token) {
-      router.replace('/');
-      return;
-    }
-    try {
-      const decodedToken = jwtDecode(token);
-      if (!decodedToken || Date.now() >= decodedToken.exp * 1000) {
-        router.navigate('/');
-      }
-    } catch (error) {
-      router.navigate('/');
-    }
-  }, [token, router]);
-
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Animated.View
-          entering={FadeInDown.duration(1000).springify()} 
+          entering={FadeInDown.duration(1000).springify()}
           style={styles.iconContainer}
         >
           <MaterialCommunityIcons name="lock-reset" size={80} color="#00ACE8" />
         </Animated.View>
-        
-        <Animated.View 
-          entering={FadeInUp.duration(1000).springify()} 
+
+        <Animated.View
+          entering={FadeInUp.duration(1000).springify()}
           style={styles.formContainer}
         >
           <Text style={styles.title}>Restablecer Contraseña</Text>
@@ -78,18 +71,18 @@ const PasswordResetScreen = () => {
           <TextInput
             label="Nueva Contraseña"
             underlineColor='#00ACE8'
-        outlineColor='#00ACE8'
-        cursorColor='#00ACE8'
-        activeUnderlineColor='#00ACE8'
+            outlineColor='#00ACE8'
+            cursorColor='#00ACE8'
+            activeUnderlineColor='#00ACE8'
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
-             mode="underlined"
+            mode="underlined"
             right={
-              <TextInput.Icon 
-                icon={showPassword ? "eye-off" : "eye"} 
+              <TextInput.Icon
+                icon={showPassword ? "eye-off" : "eye"}
                 onPress={() => setShowPassword(!showPassword)}
-                 color="#00ACE8"
+                color="#00ACE8"
               />
             }
             style={styles.input}
@@ -100,7 +93,7 @@ const PasswordResetScreen = () => {
 
           <TextInput
             label="Confirmar Nueva Contraseña"
-          
+
             underlineColor='#00ACE8'
             outlineColor='#00ACE8'
             cursorColor='#00ACE8'
@@ -110,8 +103,8 @@ const PasswordResetScreen = () => {
             secureTextEntry={!showConfirmPassword}
             mode="underlined"
             right={
-              <TextInput.Icon 
-                icon={showConfirmPassword ? "eye-off" : "eye"} 
+              <TextInput.Icon
+                icon={showConfirmPassword ? "eye-off" : "eye"}
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                 color="#00ACE8"
               />
@@ -122,11 +115,11 @@ const PasswordResetScreen = () => {
             Las contraseñas no coinciden
           </HelperText>
 
-          <Button 
+          <Button
             mode="contained"
             buttonColor='#00ACE8'
 
-            onPress={handleResetPassword} 
+            onPress={handleResetPassword}
             loading={isSubmitting}
             disabled={isSubmitting || !passwordsMatch || !isPasswordValid}
             style={styles.button}
@@ -149,7 +142,6 @@ const PasswordResetScreen = () => {
     </KeyboardAvoidingView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
