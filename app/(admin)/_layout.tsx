@@ -1,4 +1,4 @@
-import React from 'react';
+/* import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -95,212 +95,278 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-});
+}); */
 
+  import React, { useState } from "react"
+import { View, StyleSheet, ScrollView, SafeAreaView, Platform, StatusBar, Dimensions } from "react-native"
+import { createDrawerNavigator } from "@react-navigation/drawer"
+import { Provider as PaperProvider, Avatar, Text, Button, useTheme, IconButton, Appbar } from "react-native-paper"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+  Extrapolate,
+} from "react-native-reanimated"
 
+import Dashboard from "./Dashboard"
+import Inventario from "./inventario"
+import Prueba from "./prueba"
+import { useProtectedRoute, useAuth } from "@/context/userContext"
 
-
-
-
-/* import React, { useState } from 'react';
-import { View, StyleSheet, Image, Dimensions, TouchableWithoutFeedback } from 'react-native';
-import { Drawer, Text, Appbar } from 'react-native-paper';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { Slot, useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { useProtectedRoute, useAuth } from "@/context/userContext";
-
-const { width } = Dimensions.get('window'); 
-
-const DrawerContent = ({ activeRoute, setActiveRoute }) => {
-  const { logout } = useAuth();
-  const router = useRouter();
-
-  const handleNavigation = (route) => {
-    setActiveRoute(route);
-    router.navigate(route);
-  };
-
+const Drawer = createDrawerNavigator()
+const { width: SCREEN_WIDTH } = Dimensions.get("window")
+const DRAWER_WIDTH = SCREEN_WIDTH * (Platform.OS == "web" ? 0.2 : 0.7);
+function AnimatedScreen({ children, style, staticButton }) {
   return (
-    <View style={styles.drawerContent}>
-      <View style={styles.userInfoSection}>
-        <Image
-         source={require('../../assets/images/icon.png')}
-          style={styles.profileImage}
-        />
-        <Text style={styles.username}>John Doe</Text>
-        <Text style={styles.userEmail}>john.doe@example.com</Text>
-      </View>
-      <Drawer.Section>
-        <Drawer.Item
-          label="Dashboard"
-          icon={({ color, size }) => (
-            <MaterialCommunityIcons name="home-outline" color={color} size={size} />
-          )}
-          active={activeRoute === '/'}
-          onPress={() => handleNavigation('/')}
-        />
-        <Drawer.Item
-          label="Inventario"
-          icon={({ color, size }) => (
-            <MaterialCommunityIcons name="clipboard-list-outline" color={color} size={size} />
-          )}
-          active={activeRoute === '/inventario'}
-          onPress={() => handleNavigation('/inventario')}
-        />
-        <Drawer.Item
-          label="Prueba"
-          icon={({ color, size }) => (
-            <MaterialCommunityIcons name="flask-outline" color={color} size={size} />
-          )}
-          active={activeRoute === '/prueba'}
-          onPress={() => handleNavigation('/prueba')}
-        />
-      </Drawer.Section>
-      <Drawer.Section style={styles.bottomDrawerSection}>
-        <Drawer.Item
-          label="Cerrar Sesión"
-          icon={({ color, size }) => (
-            <MaterialCommunityIcons name="logout" color={color} size={size} />
-          )}
-          onPress={logout}
-        />
-      </Drawer.Section>
-    </View>
-  );
-};
+    <Animated.View style={[styles.screen, style]}>
+      <ScrollView contentContainerStyle={styles.screenContent}>
+        {children}
+       {/*  <View style={styles.staticButtonContainer}>{staticButton}</View> */}
+      </ScrollView>
+    </Animated.View>
+  )
+}
 
-export default function AppLayout() {
-  const [activeRoute, setActiveRoute] = useState('/');
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const isAuthenticated = useProtectedRoute('/signIn');
+function CustomDrawerContent(props) {
+  const { logout, user } = useAuth()
+  const theme = useTheme()
 
-  const drawerAnimation = useSharedValue(-width * 0.8); 
-  const contentAnimation = useSharedValue(0); 
-
-  const drawerStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: withTiming(drawerAnimation.value, { duration: 300 }) }],
-  }));
-
-  const contentStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: withTiming(contentAnimation.value, { duration: 300 }) }],
-  }));
-
-  const toggleDrawer = () => {
-    if (isDrawerOpen) {
-      // Cerrar el menú
-      drawerAnimation.value = -width * 0.8;
-      contentAnimation.value = 0;
-    } else {
-      // Abrir el menú
-      drawerAnimation.value = 0;
-      contentAnimation.value = width * 0.8;
-    }
-    setIsDrawerOpen(!isDrawerOpen);
-  };
-
-  const handleOutsidePress = () => {
-    if (isDrawerOpen) {
-      drawerAnimation.value = -width * 0.8;
-      contentAnimation.value = 0;
-      setIsDrawerOpen(false);
-    }
-  };
-
-  if (!isAuthenticated) {
-    return null;
+  const handleSignOut = () => {
+    logout()
   }
 
   return (
-    <SafeAreaProvider>
-      <TouchableWithoutFeedback onPress={handleOutsidePress}>
-        <SafeAreaView style={styles.container}>
-          <Appbar.Header style={styles.header}>
-            <Appbar.Action icon="menu" onPress={toggleDrawer} />
-            <Appbar.Content title={activeRoute === '/' ? 'Dashboard' : activeRoute.slice(1)} />
-          </Appbar.Header>
-          <View style={styles.content}>
-           
-            <Animated.View style={[styles.drawer, drawerStyle]}>
-              <DrawerContent activeRoute={activeRoute} setActiveRoute={setActiveRoute} />
-            </Animated.View>
-           
-            <Animated.View style={[styles.pageContent, contentStyle]}>
-              <Slot />
-            </Animated.View>
-          </View>
-        </SafeAreaView>
-      </TouchableWithoutFeedback>
-    </SafeAreaProvider>
-  );
+    <SafeAreaView style={[styles.drawerContent, { backgroundColor: theme.colors.surface }]}>
+      <ScrollView>
+        <View style={styles.userInfoSection}>
+          <Avatar.Image source={require("../../assets/images/favicon.png")} size={80} style={{backgroundColor:"transparent"}} />
+          <Text style={[styles.title, { color: "#00ACE8" }]}>{user?.name || "Usuario"}</Text>
+          <Text style={[styles.caption, { color: theme.colors.secondary }]}>
+            {user?.email || "usuario@socotec.com"}
+          </Text>
+        </View>
+        <View style={styles.drawerSection}>
+          {props.state.routes.map((route, index) => {
+            const { title, drawerIcon } = props.descriptors[route.key].options
+            const isFocused = props.state.index === index
+
+            return (
+              <Button
+                key={route.key}
+                icon={({ size, color }) => drawerIcon({ color, size })}
+                mode={isFocused ? "contained" : "text"}
+                onPress={() => props.navigation.navigate(route.name)}
+                style={styles.drawerItem}
+                labelStyle={styles.drawerItemLabel}
+              >
+                {title}
+              </Button>
+            )
+          })}
+        </View>
+      </ScrollView>
+      <Button
+        icon={({ size, color }) => <MaterialCommunityIcons name="logout" size={size} color={color} />}
+        mode="outlined"
+        onPress={handleSignOut}
+        style={styles.logoutButton}
+      >
+        Cerrar Sesión
+      </Button>
+    </SafeAreaView>
+  )
+}
+
+function CustomAppBar({ title, navigation, drawerProgress }) {
+  const theme = useTheme()
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const rotate = interpolate(drawerProgress.value, [0, 1], [0, 180], Extrapolate.CLAMP)
+    return {
+      transform: [{ rotate: `${rotate}deg` }],
+    }
+  })
+
+  return (
+    <Appbar.Header style={{ backgroundColor:"#00ACE8" }}>
+      <Animated.View style={animatedStyle}>
+        <IconButton icon="menu" color={theme.colors.surface} size={24} onPress={navigation.toggleDrawer} />
+      </Animated.View>
+      <Appbar.Content title={title} color={theme.colors.surface} />
+    </Appbar.Header>
+  )
+}
+
+export default function App() {
+  const isAuthenticated = useProtectedRoute("/signIn")
+  const { user } = useAuth()
+  const theme = useTheme()
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+
+  const drawerProgress = useSharedValue(0)
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(drawerProgress.value, [0, 1], [0, DRAWER_WIDTH])
+    const borderRadius = interpolate(drawerProgress.value, [0, 1], [0, 20])
+    const scale = interpolate(drawerProgress.value, [0, 1], [1, 0.8])
+    return {
+      transform: [
+        { translateX: withTiming(translateX, { duration: 300 }) },
+        { scale: withTiming(scale, { duration: 300 }) },
+      ],
+      borderRadius: withTiming(borderRadius, { duration: 300 }),
+      overflow: "hidden",
+    }
+  })
+
+  if (!isAuthenticated) {
+    return null
+  }
+
+  return (
+    <PaperProvider theme={theme}>
+      <SafeAreaView style={styles.container}>
+        <Drawer.Navigator
+          initialRouteName="Dashboard"
+          drawerContent={(props) => <CustomDrawerContent {...props} user={user} />}
+          screenOptions={{
+            drawerStyle: {
+              backgroundColor: "transparent",
+              width: DRAWER_WIDTH,
+            },
+            drawerType: "slide",
+            overlayColor: "transparent",
+            sceneContainerStyle: { backgroundColor: "transparent" },
+            header: ({ navigation, route, options }) => (
+              <CustomAppBar title={options.title} navigation={navigation} drawerProgress={drawerProgress} />
+            ),
+          }}
+          drawerPosition="left"
+          onStateChange={(state) => {
+            const isOpen = state.history[state.history.length - 1].type === "drawer"
+            setIsDrawerOpen(isOpen)
+            drawerProgress.value = withTiming(isOpen ? 1 : 0, { duration: 300 })
+          }}
+        >
+          <Drawer.Screen
+            name="Dashboard"
+            options={{
+              title: "Dashboard",
+              drawerIcon: ({ color }) => (
+                <MaterialCommunityIcons name="view-dashboard-outline" size={24} color={color} />
+              ),
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen
+                style={animatedStyle}
+                staticButton={
+                  <Button
+                    mode="contained"
+                    onPress={() => {
+                      // Add your action here
+                    }}
+                    style={styles.floatingButton}
+                  >
+                    Action
+                  </Button>
+                }
+              >
+                <Dashboard {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+          <Drawer.Screen
+            name="Inventario"
+            options={{
+              title: "Inventario",
+              drawerIcon: ({ color }) => (
+                <MaterialCommunityIcons name="clipboard-list-outline" size={24} color={color} />
+              ),
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Inventario {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+          <Drawer.Screen
+            name="Prueba"
+            options={{
+              title: "Prueba",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="flask-outline" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Prueba {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+        </Drawer.Navigator>
+      </SafeAreaView>
+    </PaperProvider>
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f4f8',
-  },
-  header: {
-    backgroundColor: '#6200ea',
-  },
-  content: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  drawer: {
-    width: width * 0.8, 
-    backgroundColor: '#ffffff',
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    zIndex: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+    paddingTop: Platform.OS === "android" ?  StatusBar.currentHeight  : 0,
   },
   drawerContent: {
     flex: 1,
-    padding: 10,
   },
   userInfoSection: {
-    paddingLeft: 20,
-    paddingVertical: 20,
-    backgroundColor: '#6200ea',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    alignItems: "center",
+    marginVertical: 20,
   },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
-    marginBottom: 10,
-    alignSelf: 'center',
+  title: {
+    fontSize: 18,
+    marginTop: 10,
+    fontWeight: "bold",
   },
-  username: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    textAlign: 'center',
-  },
-  userEmail: {
+  caption: {
     fontSize: 14,
-    color: '#d1c4e9',
-    textAlign: 'center',
-    marginTop: 5,
   },
-  bottomDrawerSection: {
-    marginBottom: 15,
-    borderTopColor: '#f4f4f4',
-    borderTopWidth: 1,
+  drawerSection: {
+    marginTop: 15,
   },
-  pageContent: {
+  drawerItem: {
+    marginHorizontal: 10,
+    marginVertical: 5,
+    borderRadius: 10,
+  },
+  drawerItemLabel: {
+    marginLeft: -20,
+  },
+  logoutButton: {
+    margin: 16,
+    borderRadius: 10,
+  },
+  screen: {
     flex: 1,
-    backgroundColor: '#f0f4f8',
-    padding: 10,
   },
-});
- */
+  scrollView: {
+    flexGrow: 1,
+  },
+  screenContent: {
+    flex: 1,
+    position: "relative",
+  },
+  staticButtonContainer: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+  },
+  floatingButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    borderRadius: 30,
+  },
+})
+

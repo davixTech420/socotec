@@ -1,33 +1,82 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, useWindowDimensions, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, ScrollView, useWindowDimensions, Platform,Dimensions } from 'react-native';
 import { PaperProvider, Text, Card, Button, FAB, Portal, Modal, ProgressBar, useTheme } from 'react-native-paper';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import TablaComponente from "@/components/tablaComponent";
 import Breadcrumb from "@/components/BreadcrumbComponent";
 import{ router } from "expo-router";
+import AddComponent from '../../components/AddComponent';
+import { AlertaScroll } from '@/components/alerta';
+import InputComponent from "@/components/InputComponent";
+import { createInventory, getInventory } from "@/services/adminServices";
 
-const data = [
+
+ const data = [
   { id: 1, producto: 'Laptop', cantidad: 50, precio: 999.9, categoria: 'Electrónicos' },
   { id: 2, producto: 'Smartphone', cantidad: 100, precio: 599.9, categoria: 'Electrónicos' },
   { id: 3, producto: 'Auriculares', cantidad: 200, precio: 99.9, categoria: 'Accesorios' },
   { id: 4, producto: 'Monitor', cantidad: 30, precio: 299.9, categoria: 'Electrónicos' },
   { id: 5, producto: 'Teclado', cantidad: 80, precio: 49.9, categoria: 'Accesorios' },
-];
+]; 
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
-  { key: 'producto', title: 'Producto', sortable: true },
-  { key: 'cantidad', title: 'Cantidad', sortable: true, width: 80 },
-  { key: 'precio', title: 'Precio', sortable: true, width: 100 },
-  { key: 'categoria', title: 'Categoría', sortable: true },
+  { key: 'material', title: 'Material', sortable: true },
+  { key: 'descripcion', title: 'Descripcion', sortable: true, width: 80 },
+  { key: 'cantidad', title: 'Cantidad', sortable: true, width: 100 },
+  { key: 'medida', title: 'Medida', sortable: true },
+  { key: 'precio', title: 'Precio U/N', sortable: true },
+  { key: 'estado', title: 'Estado', sortable: true },
+  { key: 'createdAt', title: 'Creado', sortable: true },
+  { key: 'updatedAt', title: 'Modificado', sortable: true },
+
 ];
 
 const Inventario = () => {
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getInventory();
+     
+        console.log("respues api"+ response?.[0]);
+      } catch (error) {
+        console.error('Error al obtener los datos:', error);
+      }
+    };
+    fetchData();
+  
+  
+  },[]);
+
+
   const theme = useTheme();
   const { width } = useWindowDimensions();
+  
+//estado para abrir el formulario para el inventario
+  const [openForm, setOpenForm] = useState(false);
+//estos son los datos del fromulario
+const [formData, setFormData] = useState({
+  nombreMaterial: '',
+  descripcion: '',
+  cantidad: '',
+  unidadMedida: '',
+  precioUnidad: ''
+});
+
+//estado para los datos del endpoint
 
 
 
+  //esta funcion es la que envia el formulario para el back para crear
+  const handleSubmit = async () => {
+    try {
+      const response = await createInventory(formData);
+      console.log(response);
+    } catch (error) {
+      console.error('Error al enviar el formulario:', error);
+    }
+  };
   const handleSort = (key, order) => {
     console.log('Ordenando por:', key, order);
   };
@@ -41,7 +90,7 @@ const Inventario = () => {
   };
 
   // Calculamos los totales usando parseInt y toFixed para evitar problemas de precisión
-  const totalItems = data.reduce((sum, item) => sum + parseInt(String(item.cantidad), 10), 0);
+const totalItems = data.reduce((sum, item) => sum + parseInt(String(item.cantidad), 10), 0);
   const totalValue = data.reduce((sum, item) => {
     const itemTotal = parseInt(String(item.cantidad), 10) * parseFloat(item.precio.toFixed(2));
     return sum + itemTotal;
@@ -58,7 +107,10 @@ const Inventario = () => {
 
   const isSmallScreen = width < 600;
 
+  console.log(formData);
+  
   return (
+    <>
     <PaperProvider theme={theme}>
       <ScrollView style={styles.container}>
 
@@ -118,10 +170,66 @@ const Inventario = () => {
             />
           </Card.Content>
         </Card>
-
-        
       </ScrollView>
+      
+        <AlertaScroll  onOpen={openForm} onClose={() => setOpenForm(false)} title="Nuevo registro de inventario" content={
+<>
+          <View style={{ flexDirection: isSmallScreen?"column" :'row', 
+            justifyContent: 'space-between',
+            flexWrap: 'wrap', 
+            }}>
+
+          <InputComponent 
+          type="nombre"
+          value={formData.nombreMaterial}
+          onChangeText={(text) => setFormData({ ...formData, nombreMaterial: text })}
+          label="Nombre Material"
+          placeholder="Introduce el material"
+          validationRules={{ required: true }}
+          errorMessage="Por favor, introduce un nombre válido"
+        />
+        <InputComponent 
+          type="descripcion"
+          value={formData.descripcion}
+          onChangeText={(text) => setFormData({ ...formData, descripcion: text })}
+          label="Descripcion"
+          placeholder="Describe el material"
+          validationRules={{ required: true }}
+          errorMessage="Por favor, introduce una descripcion válida"
+        />
+         <InputComponent 
+          type="number"
+          value={formData.cantidad}
+          onChangeText={(text) => setFormData({ ...formData, cantidad: text })}
+          label="Cantidad"
+          placeholder="Introduce la cantidad"
+          validationRules={{ required: true }}
+          errorMessage="Por favor, introduce un numero válido"
+        />
+         <InputComponent 
+          type="nombre"
+          value={formData.unidadMedida}
+          onChangeText={(text) => setFormData({ ...formData, unidadMedida: text })}
+          label="Unidad de medida"
+          placeholder="Introduce tu unidad de medida"
+          validationRules={{ required: true }}
+          errorMessage="Por favor, introduce una unidad de medida válida"
+        />
+        <InputComponent 
+          type="precio"
+          value={formData.precioUnidad}
+          onChangeText={(text) => setFormData({ ...formData, precioUnidad: text })}
+          label="Precio Unitario"
+          placeholder="Introduce el precio"
+          validationRules={{ required: true }}
+          errorMessage="Por favor, introduce un precio válido"
+        />
+        </View>
+        </>
+      } actions={[<Button onPress={() => setOpenForm(false)}>Cancelar</Button>, <Button onPress={handleSubmit}>Crear</Button>]} />
     </PaperProvider>
+    <AddComponent onOpen={() => setOpenForm(true)} />
+    </>
   );
 };
 
@@ -206,7 +314,9 @@ const styles = StyleSheet.create({
         elevation: 4,
       },
     }),
-  },  
+  }, 
+  
+  
 });
 
 export default Inventario;
