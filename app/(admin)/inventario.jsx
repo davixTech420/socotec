@@ -8,24 +8,17 @@ import{ router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createInventory, getInventory } from "@/services/adminServices";
+import { createInventory, getInventory,deleteInventory,activeInventory, inactiveInventory } from "@/services/adminServices";
 
 
- const data = [
-  { id: 1, producto: 'Laptop', cantidad: 50, precio: 999.9, categoria: 'Electrónicos' },
-  { id: 2, producto: 'Smartphone', cantidad: 100, precio: 599.9, categoria: 'Electrónicos' },
-  { id: 3, producto: 'Auriculares', cantidad: 200, precio: 99.9, categoria: 'Accesorios' },
-  { id: 4, producto: 'Monitor', cantidad: 30, precio: 299.9, categoria: 'Electrónicos' },
-  { id: 5, producto: 'Teclado', cantidad: 80, precio: 49.9, categoria: 'Accesorios' },
-]; 
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
-  { key: 'material', title: 'Material', sortable: true },
+  { key: 'nombreMaterial', title: 'Material', sortable: true },
   { key: 'descripcion', title: 'Descripcion', sortable: true, width: 80 },
   { key: 'cantidad', title: 'Cantidad', sortable: true, width: 100 },
-  { key: 'medida', title: 'Medida', sortable: true },
-  { key: 'precio', title: 'Precio U/N', sortable: true },
+  { key: 'unidadMedida', title: 'Medida', sortable: true },
+  { key: 'precioUnidad', title: 'Precio U/N', sortable: true },
   { key: 'estado', title: 'Estado', sortable: true },
   { key: 'createdAt', title: 'Creado', sortable: true },
   { key: 'updatedAt', title: 'Modificado', sortable: true },
@@ -33,13 +26,12 @@ const columns = [
 ];
 
 const Inventario = () => {
-
+const [data,setData] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getInventory();
-     
-        console.log("respues api"+ response?.[0]);
+     setData(response);
       } catch (error) {
         console.error('Error al obtener los datos:', error);
       }
@@ -77,6 +69,53 @@ const [formData, setFormData] = useState({
       console.error('Error al enviar el formulario:', error);
     }
   };
+
+
+  const handleDelete = async (item) => {
+    try {
+      // Realizar la operación de eliminación (ej. llamada a API)
+      await deleteInventory(item.id);
+      
+      // Actualizar el estado local
+      setData(prevData => prevData.filter(dataItem => dataItem.id !== item.id));
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error al eliminar el item:', error);
+      return Promise.reject(error);
+    }
+  };
+
+  const handleToggleActive = async (item) => {
+    try {
+      // Realizar la operación de activación (ej. llamada a API)
+      await activeInventory(item.id);
+      
+      // Actualizar el estado local (activar el registro)
+      setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: true } : dataItem));
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error al activar el item:', error);
+      return Promise.reject(error);
+    }
+  };
+
+  const handleToggleInactive = async (item) => {
+  try {
+    await inactiveInventory(item.id);
+    
+    // Actualizar el estado local (desactivar el registro)
+    setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: false } : dataItem));
+    
+    return Promise.resolve();
+  } catch (error) {
+    console.error('Error al desactivar el item:', error); 
+    return Promise.reject(error);
+  }
+  };
+
+
   const handleSort = (key, order) => {
     console.log('Ordenando por:', key, order);
   };
@@ -90,9 +129,9 @@ const [formData, setFormData] = useState({
   };
 
   // Calculamos los totales usando parseInt y toFixed para evitar problemas de precisión
-const totalItems = data.reduce((sum, item) => sum + parseInt(String(item.cantidad), 10), 0);
+const totalItems = 5;
   const totalValue = data.reduce((sum, item) => {
-    const itemTotal = parseInt(String(item.cantidad), 10) * parseFloat(item.precio.toFixed(2));
+    const itemTotal = 10;
     return sum + itemTotal;
   }, 0);
 
@@ -107,7 +146,7 @@ const totalItems = data.reduce((sum, item) => sum + parseInt(String(item.cantida
 
   const isSmallScreen = width < 600;
 
-  console.log(formData);
+ 
   
   return (
     <>
@@ -167,6 +206,9 @@ const totalItems = data.reduce((sum, item) => sum + parseInt(String(item.cantida
               onSort={handleSort}
               onSearch={handleSearch}
               onFilter={handleFilter}
+              onDelete={handleDelete}
+              onToggleActive={handleToggleActive}
+              onToggleInactive={handleToggleInactive}
             />
           </Card.Content>
         </Card>
@@ -232,7 +274,6 @@ const totalItems = data.reduce((sum, item) => sum + parseInt(String(item.cantida
     </>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -314,10 +355,6 @@ const styles = StyleSheet.create({
         elevation: 4,
       },
     }),
-  }, 
-  
-  
+  },
 });
-
 export default Inventario;
-
