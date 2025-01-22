@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import {jwtDecode} from 'jwt-decode';
 
 const AuthContext = createContext(null);
 
@@ -44,8 +45,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+const user = async () => {
+  try {
+    const token = await AsyncStorage.getItem('userToken');
+    const decodedToken = jwtDecode(token);
+    return decodedToken;
+  } catch (error) {
+    console.error('Error getting user:', error);
+  }
+};
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout, checkAuthStatus }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout, checkAuthStatus,user }}>
       {children}
     </AuthContext.Provider>
   );

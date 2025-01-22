@@ -8,29 +8,28 @@ import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createInventory, getInventory, deleteInventory, activeInventory, inactiveInventory } from "@/services/adminServices";
+import { getUsers, deleteInventory, activateUser, inactivateUser } from "@/services/adminServices";
 
 
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
-  { key: 'nombreMaterial', title: 'Material', sortable: true },
-  { key: 'descripcion', title: 'Descripcion', sortable: true, width: 80 },
-  { key: 'cantidad', title: 'Cantidad', sortable: true, width: 100 },
-  { key: 'unidadMedida', title: 'Medida', sortable: true },
-  { key: 'precioUnidad', title: 'Precio U/N', sortable: true },
+  { key: 'nombre', title: 'Nombre', sortable: true },
+  { key: 'telefono', title: 'Telefono', sortable: true, width: 80 },
+  { key: 'email', title: 'Email', sortable: true, width: 100 },
   { key: 'estado', title: 'Estado', sortable: true },
+  { key: 'role', title: 'Rol', sortable: true },
   { key: 'createdAt', title: 'Creado', sortable: true },
   { key: 'updatedAt', title: 'Modificado', sortable: true },
 
 ];
 
-const Inventario = () => {
+const users = () => {
   const [data, setData] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getInventory();
+        const response = await getUsers();
         setData(response);
       } catch (error) {
         console.error('Error al obtener los datos:', error);
@@ -44,7 +43,6 @@ const Inventario = () => {
 
   const theme = useTheme();
   const { width } = useWindowDimensions();
-
   //estado para abrir el formulario para el inventario
   const [openForm, setOpenForm] = useState(false);
   //estos son los datos del fromulario
@@ -89,7 +87,7 @@ const Inventario = () => {
   const handleToggleActive = async (item) => {
     try {
       // Realizar la operación de activación (ej. llamada a API)
-      await activeInventory(item.id);
+      await activateUser(item.id);
 
       // Actualizar el estado local (activar el registro)
       setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: true } : dataItem));
@@ -103,7 +101,7 @@ const Inventario = () => {
 
   const handleToggleInactive = async (item) => {
     try {
-      await inactiveInventory(item.id);
+      await inactivateUser(item.id);
 
       // Actualizar el estado local (desactivar el registro)
       setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: false } : dataItem));
@@ -161,7 +159,7 @@ const Inventario = () => {
                   onPress: () => router.navigate('/(admin)/Dashboard'),
                 },
                 {
-                  label: 'Inventario'
+                  label: 'Usuarios'
                 }
               ]}
             />
@@ -170,7 +168,7 @@ const Inventario = () => {
               <MaterialCommunityIcons name="file-excel" size={24} color={theme.colors.primary} style={styles.icon} />
             </View>
           </View>
-          <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
+         {/*  <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
             <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
               <Card.Content>
                 <Text style={styles.cardTitle}>Total de Productos</Text>
@@ -193,7 +191,7 @@ const Inventario = () => {
                 />
               </Card.Content>
             </Card>
-          </View>
+          </View> */}
 
           <Card style={styles.tableCard}>
             <Card.Content>
@@ -213,7 +211,7 @@ const Inventario = () => {
           </Card>
         </ScrollView>
 
-        <AlertaScroll onOpen={openForm} onClose={() => setOpenForm(false)} title="Nuevo registro de inventario" content={
+        <AlertaScroll onOpen={openForm} onClose={() => setOpenForm(false)} title="Nuevo usuario" content={
           <>
             <View style={{
               flexDirection: isSmallScreen ? "column" : 'row',
@@ -357,4 +355,4 @@ const styles = StyleSheet.create({
     }),
   },
 });
-export default Inventario;
+export default users;

@@ -5,6 +5,82 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
 const baseUrl = `http://10.48.5.156:${port}/api/admin`;
+
+
+
+
+//activar usuario
+export const activateUser = async (id) => {
+  try {
+    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
+
+    if (!token) {
+      console.error('No se encontró el token');
+      return; // O maneja el error como desees
+    }
+
+    const response = await axios.put(`${baseUrl}/users/${id}/active`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data; // Retorna los datos de la respuesta
+  } catch (error) {
+    console.error('Error al activar usuario:', error);
+  }
+};
+
+
+
+
+
+
+
+//inactivar usuario
+export const inactivateUser = async (id) => {
+  try {
+    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
+
+    if (!token) {
+      console.error('No se encontró el token');
+      return; // O maneja el error como desees
+    }
+
+    const response = await axios.put(`${baseUrl}/users/${id}/inactive`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data; // Retorna los datos de la respuesta
+  } catch (error) {
+    console.error('Error al desactivar usuario:', error);
+  }
+};
+
+
+
+//eliminar usuario
+export const deleteUser = async (id) => {
+    try {
+      const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
+  
+      if (!token) {
+        console.error('No se encontró el token');
+        return; // O maneja el error como desees
+      }
+      const response = await axios.delete(`${baseUrl}/users/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
+          'Content-Type': 'application/json',
+        },
+      });
+      return response.data; // Retorna los datos de la respuesta
+    }catch(error){
+      console.error('Error al eliminar usuario:',error);
+    }
+  }
  
 //end point para enviar el email recien se registra un usuario
 export const getUsers = async () => {
