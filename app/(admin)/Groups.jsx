@@ -22,7 +22,7 @@ const columns = [
   { key: 'updatedAt', title: 'Modificado', sortable: true },
 ];
 
-const Inventario = () => {
+const Groups = () => {
   const [data, setData] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
@@ -346,4 +346,4 @@ const styles = StyleSheet.create({
     }),
   },
 });
-export default Inventario;
+export default Groups;

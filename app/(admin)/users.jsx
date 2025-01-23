@@ -1,268 +1,224 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, useWindowDimensions, Platform, Dimensions } from 'react-native';
-import { PaperProvider, Text, Card, Button, FAB, Portal, Modal, ProgressBar, useTheme } from 'react-native-paper';
-import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
-import TablaComponente from "@/components/tablaComponent";
-import Breadcrumb from "@/components/BreadcrumbComponent";
-import { router } from "expo-router";
-import AddComponent from '../../components/AddComponent';
-import { AlertaScroll } from '@/components/alerta';
-import InputComponent from "@/components/InputComponent";
-import { getUsers, deleteInventory, activateUser, inactivateUser } from "@/services/adminServices";
-
-
+import React, { useEffect, useState, useCallback } from "react"
+import { View, StyleSheet, ScrollView, Platform } from "react-native"
+import { Text, Card, Button, useTheme } from "react-native-paper"
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
+import TablaComponente from "@/components/tablaComponent"
+import Breadcrumb from "@/components/BreadcrumbComponent"
+import AddComponent from "@/components/AddComponent"
+import { AlertaScroll } from "@/components/alerta"
+import InputComponent from "@/components/InputComponent"
+import { getUsers, deleteUser, activateUser, inactivateUser } from "@/services/adminServices"
+import { useFocusEffect } from "@react-navigation/native"
 
 const columns = [
-  { key: 'id', title: 'ID', sortable: true, width: 50 },
-  { key: 'nombre', title: 'Nombre', sortable: true },
-  { key: 'telefono', title: 'Telefono', sortable: true, width: 80 },
-  { key: 'email', title: 'Email', sortable: true, width: 100 },
-  { key: 'estado', title: 'Estado', sortable: true },
-  { key: 'role', title: 'Rol', sortable: true },
-  { key: 'createdAt', title: 'Creado', sortable: true },
-  { key: 'updatedAt', title: 'Modificado', sortable: true },
+  { key: "id", title: "ID", sortable: true, width: 50 },
+  { key: "nombre", title: "Nombre", sortable: true },
+  { key: "telefono", title: "Teléfono", sortable: true, width: 80 },
+  { key: "email", title: "Email", sortable: true, width: 100 },
+  { key: "estado", title: "Estado", sortable: true },
+  { key: "role", title: "Rol", sortable: true },
+  { key: "createdAt", title: "Creado", sortable: true },
+  { key: "updatedAt", title: "Modificado", sortable: true },
+]
 
-];
-
-const users = () => {
-  const [data, setData] = useState([]);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getUsers();
-        setData(response);
-      } catch (error) {
-        console.error('Error al obtener los datos:', error);
-      }
-    };
-    fetchData();
-
-
-  }, []);
-
-
-  const theme = useTheme();
-  const { width } = useWindowDimensions();
-  //estado para abrir el formulario para el inventario
-  const [openForm, setOpenForm] = useState(false);
-  //estos son los datos del fromulario
+export default function Users() {
+  const [data, setData] = useState([])
+  const [openForm, setOpenForm] = useState(false)
   const [formData, setFormData] = useState({
-    nombreMaterial: '',
-    descripcion: '',
-    cantidad: '',
-    unidadMedida: '',
-    precioUnidad: ''
-  });
+    nombre: "",
+    email: "",
+    telefono: "",
+    role: "",
+  })
+  const [isMounted, setIsMounted] = useState(false)
 
-  
+  const theme = useTheme()
 
+  useEffect(() => {
+    setIsMounted(true)
+    return () => setIsMounted(false)
+  }, [])
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const response = await getUsers()
+          setData(response)
+        } catch (error) {
+          console.error("Error al obtener los datos:", error)
+        }
+      }
+      fetchData()
 
-  //esta funcion es la que envia el formulario para el back para crear
-  const handleSubmit = async () => {
+      return () => {
+        // Cleanup function if needed
+      }
+    }, []),
+  )
+
+  const handleSubmit = useCallback(async () => {
     try {
-      const response = await createInventory(formData);
-      console.log(response);
+      // Implement user creation logic here
+      console.log("Creating user:", formData)
+      setOpenForm(false)
     } catch (error) {
-      console.error('Error al enviar el formulario:', error);
+      console.error("Error al crear el usuario:", error)
     }
-  };
+  }, [formData])
 
-
-  const handleDelete = async (item) => {
+  const handleDelete = useCallback(async (item) => {
     try {
-      // Realizar la operación de eliminación (ej. llamada a API)
-      await deleteInventory(item.id);
-
-      // Actualizar el estado local
-      setData(prevData => prevData.filter(dataItem => dataItem.id !== item.id));
-
-      return Promise.resolve();
+      await deleteUser(item.id)
+      setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
+      return Promise.resolve()
     } catch (error) {
-      console.error('Error al eliminar el item:', error);
-      return Promise.reject(error);
+      console.error("Error al eliminar el usuario:", error)
+      return Promise.reject(error)
     }
-  };
+  }, [])
 
-  const handleToggleActive = async (item) => {
+  const handleToggleActive = useCallback(async (item) => {
     try {
-      // Realizar la operación de activación (ej. llamada a API)
-      await activateUser(item.id);
-
-      // Actualizar el estado local (activar el registro)
-      setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: true } : dataItem));
-
-      return Promise.resolve();
+      await activateUser(item.id)
+      setData((prevData) =>
+        prevData.map((dataItem) => (dataItem.id === item.id ? { ...dataItem, estado: true } : dataItem)),
+      )
+      return Promise.resolve()
     } catch (error) {
-      console.error('Error al activar el item:', error);
-      return Promise.reject(error);
+      console.error("Error al activar el usuario:", error)
+      return Promise.reject(error)
     }
-  };
+  }, [])
 
-  const handleToggleInactive = async (item) => {
+  const handleToggleInactive = useCallback(async (item) => {
     try {
-      await inactivateUser(item.id);
-
-      // Actualizar el estado local (desactivar el registro)
-      setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: false } : dataItem));
-
-      return Promise.resolve();
+      await inactivateUser(item.id)
+      setData((prevData) =>
+        prevData.map((dataItem) => (dataItem.id === item.id ? { ...dataItem, estado: false } : dataItem)),
+      )
+      return Promise.resolve()
     } catch (error) {
-      console.error('Error al desactivar el item:', error);
-      return Promise.reject(error);
+      console.error("Error al desactivar el usuario:", error)
+      return Promise.reject(error)
     }
-  };
+  }, [])
 
+  const handleSort = useCallback((key, order) => {
+    console.log("Ordenando por:", key, order)
+  }, [])
 
-  const handleDataUpdate = (updatedData) => {
-    setData(updatedData)
+  const handleSearch = useCallback((query) => {
+    console.log("Buscando:", query)
+  }, [])
+
+  const handleFilter = useCallback((filters) => {
+    console.log("Filtrando:", filters)
+  }, [])
+
+  if (!isMounted) {
+    return null // or a loading indicator
   }
 
-  const handleSort = (key, order) => {
-    console.log('Ordenando por:', key, order);
-  };
-
-  const handleSearch = (query) => {
-    console.log('Buscando:', query);
-  };
-
-  const handleFilter = (filters) => {
-    console.log('Filtrando:', filters);
-  };
-
-  // Calculamos los totales usando parseInt y toFixed para evitar problemas de precisión
-  const totalItems = data?.length;
-  const totalValue = data?.reduce((sum, item) => {
-    // Multiplicamos la cantidad por el precio por unidad
-    const itemTotal = item.cantidad * item.precioUnidad;
-    
-    return sum + itemTotal;
-  }, 0);
-
-  
-  const calculateProgress = (value, max) => {
-    const progress = Math.min(Math.max(value / max, 0), 1);
-    return parseFloat(progress.toFixed(2));
-  };
-  const itemsProgress = calculateProgress(totalItems, 1000);
-  const valueProgress = calculateProgress(totalValue, 100000);
-  const isSmallScreen = width < 600;
   return (
-    <>
-      <PaperProvider theme={theme}>
-        <ScrollView style={styles.container}>
-          <View style={styles.header}>
-            <Breadcrumb
-              items={[
-                {
-                  label: 'Dashboard',
-                  onPress: () => router.navigate('/(admin)/Dashboard'),
-                },
-                {
-                  label: 'Usuarios'
-                }
-              ]}
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Breadcrumb items={[{ label: "Dashboard", onPress: () => {} }, { label: "Usuarios" }]} />
+        <View style={styles.headerActions}>
+          <AntDesign name="pdffile1" size={24} color={theme.colors.primary} style={styles.icon} />
+          <MaterialCommunityIcons name="file-excel" size={24} color={theme.colors.primary} style={styles.icon} />
+        </View>
+      </View>
+
+      <Card style={styles.tableCard}>
+        <Card.Content>
+          <TablaComponente
+            data={data}
+            columns={columns}
+            keyExtractor={(item) => String(item.id)}
+            onSort={handleSort}
+            onSearch={handleSearch}
+            onFilter={handleFilter}
+            onDelete={handleDelete}
+            onToggleActive={handleToggleActive}
+            onToggleInactive={handleToggleInactive}
+            onDataUpdate={setData}
+          />
+        </Card.Content>
+      </Card>
+
+      <AlertaScroll
+        onOpen={openForm}
+        onClose={() => setOpenForm(false)}
+        title="Nuevo usuario"
+        content={
+          <View style={styles.formContainer}>
+            <InputComponent
+              type="text"
+              value={formData.nombre}
+              onChangeText={(text) => setFormData({ ...formData, nombre: text })}
+              label="Nombre"
+              placeholder="Introduce el nombre"
+              validationRules={{ required: true }}
+              errorMessage="Por favor, introduce un nombre válido"
             />
-            <View style={styles.headerActions}>
-              <AntDesign name="pdffile1" size={24} color={theme.colors.primary} style={styles.icon} />
-              <MaterialCommunityIcons name="file-excel" size={24} color={theme.colors.primary} style={styles.icon} />
-            </View>
+            <InputComponent
+              type="email"
+              value={formData.email}
+              onChangeText={(text) => setFormData({ ...formData, email: text })}
+              label="Email"
+              placeholder="Introduce el email"
+              validationRules={{ required: true, email: true }}
+              errorMessage="Por favor, introduce un email válido"
+            />
+            <InputComponent
+              type="tel"
+              value={formData.telefono}
+              onChangeText={(text) => setFormData({ ...formData, telefono: text })}
+              label="Teléfono"
+              placeholder="Introduce el teléfono"
+              validationRules={{ required: true }}
+              errorMessage="Por favor, introduce un teléfono válido"
+            />
+            <InputComponent
+              type="text"
+              value={formData.role}
+              onChangeText={(text) => setFormData({ ...formData, role: text })}
+              label="Rol"
+              placeholder="Introduce el rol"
+              validationRules={{ required: true }}
+              errorMessage="Por favor, introduce un rol válido"
+            />
           </View>
-        
-
-          <Card style={styles.tableCard}>
-            <Card.Content>
-              <TablaComponente
-                data={data}
-                columns={columns}
-                keyExtractor={(item) => String(item.id)}
-                onSort={handleSort}
-                onSearch={handleSearch}
-                onFilter={handleFilter}
-                onDelete={handleDelete}
-                onToggleActive={handleToggleActive}
-                onToggleInactive={handleToggleInactive}
-                onDataUpdate={handleDataUpdate}
-              />
-            </Card.Content>
-          </Card>
-        </ScrollView>
-
-        <AlertaScroll onOpen={openForm} onClose={() => setOpenForm(false)} title="Nuevo usuario" content={
-          <>
-            <View style={{
-              flexDirection: isSmallScreen ? "column" : 'row',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-            }}>
-
-              <InputComponent
-                type="nombre"
-                value={formData.nombreMaterial}
-                onChangeText={(text) => setFormData({ ...formData, nombreMaterial: text })}
-                label="Nombre Material"
-                placeholder="Introduce el material"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un nombre válido"
-              />
-              <InputComponent
-                type="descripcion"
-                value={formData.descripcion}
-                onChangeText={(text) => setFormData({ ...formData, descripcion: text })}
-                label="Descripcion"
-                placeholder="Describe el material"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce una descripcion válida"
-              />
-              <InputComponent
-                type="number"
-                value={formData.cantidad}
-                onChangeText={(text) => setFormData({ ...formData, cantidad: text })}
-                label="Cantidad"
-                placeholder="Introduce la cantidad"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un numero válido"
-              />
-              <InputComponent
-                type="nombre"
-                value={formData.unidadMedida}
-                onChangeText={(text) => setFormData({ ...formData, unidadMedida: text })}
-                label="Unidad de medida"
-                placeholder="Introduce tu unidad de medida"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce una unidad de medida válida"
-              />
-              <InputComponent
-                type="precio"
-                value={formData.precioUnidad}
-                onChangeText={(text) => setFormData({ ...formData, precioUnidad: text })}
-                label="Precio Unitario"
-                placeholder="Introduce el precio"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un precio válido"
-              />
-            </View>
-          </>
-        } actions={[<Button onPress={() => setOpenForm(false)}>Cancelar</Button>, <Button onPress={handleSubmit}>Crear</Button>]} />
-      </PaperProvider>
+        }
+        actions={[
+          <Button key="cancel" onPress={() => setOpenForm(false)}>
+            Cancelar
+          </Button>,
+          <Button key="create" onPress={handleSubmit}>
+            Crear
+          </Button>,
+        ]}
+      />
       <AddComponent onOpen={() => setOpenForm(true)} />
-    </>
-  );
-};
+    </ScrollView>
+  )
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -273,55 +229,16 @@ const styles = StyleSheet.create({
     }),
   },
   headerActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   icon: {
     marginLeft: 16,
-  },
-  cardContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-  },
-  cardContainerSmall: {
-    flexDirection: 'column',
-  },
-  card: {
-    width: '48%',
-    marginBottom: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.22,
-        shadowRadius: 2.22,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  cardSmall: {
-    width: '100%',
-  },
-  cardTitle: {
-    fontSize: 14,
-    color: '#666',
-  },
-  cardValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginVertical: 8,
-  },
-  progressBar: {
-    height: 8,
-    borderRadius: 4,
   },
   tableCard: {
     margin: 16,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -331,5 +248,9 @@ const styles = StyleSheet.create({
       },
     }),
   },
-});
-export default users;
+  formContainer: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+})
+

@@ -14,6 +14,8 @@ import Dashboard from "./Dashboard"
 import Inventario from "./inventario"
 import Proyects from "./Proyects"
 import Users from "./users";
+import Model3D from "./Model3D";
+import CalendarComponent from "./Calendar";
 import { useProtectedRoute, useAuth } from "@/context/userContext"
 
 
@@ -210,6 +212,21 @@ export default function App() {
             )}
           </Drawer.Screen>
 
+          <Drawer.Screen
+            name="Groups"
+            options={{
+              title: "Grupos de trabajo",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="account-group-outline" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Users {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
+
 
           <Drawer.Screen
             name="Inventario"
@@ -262,7 +279,7 @@ export default function App() {
           >
             {(props) => (
               <AnimatedScreen style={animatedStyle}>
-                <Proyects {...props} />
+                <CalendarComponent {...props} />
               </AnimatedScreen>
             )}
           </Drawer.Screen>
@@ -273,7 +290,7 @@ export default function App() {
             name="report"
             options={{
               title: "Reportes",
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="file-document" size={24} color={color} />,
             }}
           >
             {(props) => (
@@ -282,6 +299,37 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
+
+
+          <Drawer.Screen
+            name="models"
+            options={{
+              title: "Modelos 3D",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="printer-3d" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Model3D {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
+
+          <Drawer.Screen
+            name="account"
+            options={{
+              title: "Mi Cuenta",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="account-box" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Model3D {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
 
         </Drawer.Navigator>
       </SafeAreaView>
