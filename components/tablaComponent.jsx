@@ -31,7 +31,6 @@ const TablaComponente = ({
   onCreate,
   onDataUpdate,
   isLoading = false,
-  error,
   itemsPerPageOptions = [5, 10, 20, 50],
   defaultItemsPerPage = 10,
 }) => {
@@ -59,26 +58,30 @@ const TablaComponente = ({
   const [itemToToggle, setItemToToggle] = useState(null)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState({ text: "", type: "success" })
-  const [filteredData, setFilteredData] = useState([])
 
   const isSmallScreen = width < 768
   const isMediumScreen = width >= 768 && width < 1024
 
-  useEffect(() => {
-    const filtered = data.filter((item) =>
+  const filteredAndSortedData = useMemo(() => {
+    const result = data.filter((item) =>
       Object.entries(item).some(([key, value]) => String(value).toLowerCase().includes(searchQuery.toLowerCase())),
     )
 
     if (sortBy) {
-      filtered.sort((a, b) => {
+      result.sort((a, b) => {
         if (a[sortBy] < b[sortBy]) return sortOrder === "ascending" ? -1 : 1
         if (a[sortBy] > b[sortBy]) return sortOrder === "ascending" ? 1 : -1
         return 0
       })
     }
 
-    setFilteredData(filtered)
+    return result
   }, [data, searchQuery, sortBy, sortOrder])
+
+  const paginatedData = useMemo(() => {
+    const startIndex = page * itemsPerPage
+    return filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage)
+  }, [filteredAndSortedData, page, itemsPerPage])
 
   const handleSort = useCallback(
     (key) => {
@@ -207,11 +210,6 @@ const TablaComponente = ({
     }
   }, [onCreate])
 
-  const paginatedData = useMemo(() => {
-    const startIndex = page * itemsPerPage
-    return filteredData.slice(startIndex, startIndex + itemsPerPage)
-  }, [filteredData, page, itemsPerPage])
-
   const renderCell = useCallback(
     (column, item) => {
       if (column.key === "estado") {
@@ -239,21 +237,20 @@ const TablaComponente = ({
   const getColumnStyle = useCallback(
     (column) => {
       if (isSmallScreen) {
-        return { minWidth: column.width || 120 }
+        return { minWidth: column.width || 100, maxWidth: column.width || 150 }
       }
       if (isMediumScreen) {
-        return { minWidth: column.width || 150 }
+        return { minWidth: column.width || 120, maxWidth: column.width || 200 }
       }
-      return { flex: 1 }
+      return { flex: 1, minWidth: column.width || 150 }
     },
     [isSmallScreen, isMediumScreen],
   )
 
-  if (error) {
+  if (!data || data.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <MaterialCommunityIcons name="alert-circle-outline" size={48} color={extendedTheme.colors.error} />
-        <Text style={[styles.errorText, { color: extendedTheme.colors.error }]}>{error}</Text>
+        <Text style={styles.noDataText}>No hay datos disponibles</Text>
       </View>
     )
   }
@@ -394,9 +391,9 @@ const TablaComponente = ({
 
         <DataTable.Pagination
           page={page}
-          numberOfPages={Math.ceil(filteredData.length / itemsPerPage)}
+          numberOfPages={Math.ceil(filteredAndSortedData.length / itemsPerPage)}
           onPageChange={setPage}
-          label={`${page + 1} de ${Math.ceil(filteredData.length / itemsPerPage)}`}
+          label={`${page + 1} de ${Math.ceil(filteredAndSortedData.length / itemsPerPage)}`}
           showFastPaginationControls
           numberOfItemsPerPageList={itemsPerPageOptions}
           numberOfItemsPerPage={itemsPerPage}
@@ -540,6 +537,10 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: "center",
   },
+  noDataText: {
+    fontSize: 16,
+    color: "rgba(0, 0, 0, 0.6)",
+  },
   row: {
     minHeight: 60,
     width: "100%",
@@ -557,6 +558,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 })
-
 export default TablaComponente
-

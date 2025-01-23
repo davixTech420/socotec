@@ -52,7 +52,7 @@ Tableros de control: Un módulo para crear tableros de control personalizados qu
 
 
 
-
+hacer modelado 3d
 
 
 . Tabla: Empleado

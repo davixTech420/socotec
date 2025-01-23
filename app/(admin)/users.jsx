@@ -54,7 +54,7 @@ const users = () => {
     precioUnidad: ''
   });
 
-  //estado para los datos del endpoint
+  
 
 
 
@@ -131,15 +131,15 @@ const users = () => {
   };
 
   // Calculamos los totales usando parseInt y toFixed para evitar problemas de precisión
-  const totalItems = data.length;
-  const totalValue = data.reduce((sum, item) => {
+  const totalItems = data?.length;
+  const totalValue = data?.reduce((sum, item) => {
     // Multiplicamos la cantidad por el precio por unidad
     const itemTotal = item.cantidad * item.precioUnidad;
-    // Sumamos el total de cada producto al acumulador
+    
     return sum + itemTotal;
   }, 0);
 
-  // Calculamos los progress con valores seguros
+  
   const calculateProgress = (value, max) => {
     const progress = Math.min(Math.max(value / max, 0), 1);
     return parseFloat(progress.toFixed(2));
@@ -168,30 +168,7 @@ const users = () => {
               <MaterialCommunityIcons name="file-excel" size={24} color={theme.colors.primary} style={styles.icon} />
             </View>
           </View>
-         {/*  <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
-            <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
-              <Card.Content>
-                <Text style={styles.cardTitle}>Total de Productos</Text>
-                <Text style={styles.cardValue}>{totalItems}</Text>
-                <ProgressBar
-                  progress={itemsProgress}
-                  color="#00ACE8"
-                  style={styles.progressBar}
-                />
-              </Card.Content>
-            </Card>
-            <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
-              <Card.Content>
-                <Text style={styles.cardTitle}>Valor del Inventario</Text>
-                <Text style={styles.cardValue}>${totalValue.toFixed(2)}</Text>
-                <ProgressBar
-                  progress={valueProgress}
-                  color="#00ACE8"
-                  style={styles.progressBar}
-                />
-              </Card.Content>
-            </Card>
-          </View> */}
+        
 
           <Card style={styles.tableCard}>
             <Card.Content>

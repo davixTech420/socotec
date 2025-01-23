@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { View, StyleSheet, ScrollView, SafeAreaView, Platform, StatusBar, Dimensions } from "react-native"
 import { createDrawerNavigator } from "@react-navigation/drawer"
 import { Provider as PaperProvider, Avatar, Text, Button, useTheme, IconButton, Appbar } from "react-native-paper"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -41,7 +41,7 @@ function CustomDrawerContent(props) {
   }, []);
   /** */
 
-//cerrar la sesion en el contexto general
+  //cerrar la sesion en el contexto general
   const handleSignOut = () => {
     logout()
   }
@@ -230,7 +230,34 @@ export default function App() {
             name="Proyects"
             options={{
               title: "Proyectos",
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="flask-outline" size={24} color={color} />,
+              drawerIcon: ({ color }) => <MaterialIcons name="construction" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Proyects {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+          <Drawer.Screen
+            name="Finance"
+            options={{
+              title: "Finanzas",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="finance" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Proyects {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
+          <Drawer.Screen
+            name="Calendar"
+            options={{
+              title: "Calendario",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
             }}
           >
             {(props) => (
@@ -241,7 +268,20 @@ export default function App() {
           </Drawer.Screen>
 
 
-          
+
+          <Drawer.Screen
+            name="report"
+            options={{
+              title: "Reportes",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Proyects {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
 
         </Drawer.Navigator>
       </SafeAreaView>
