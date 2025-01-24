@@ -8,26 +8,24 @@ import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createInventory, getInventory, deleteInventory, activeInventory, inactiveInventory } from "@/services/adminServices";
+import { createGroup, getGroups, deleteGroup, activateGroup, inactivateGroup } from "@/services/adminServices";
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
-  { key: 'nombreMaterial', title: 'Material', sortable: true },
+  { key: 'nombre', title: 'Nombre', sortable: true },
   { key: 'descripcion', title: 'Descripcion', sortable: true, width: 80 },
-  { key: 'cantidad', title: 'Cantidad', sortable: true, width: 100 },
-  { key: 'unidadMedida', title: 'Medida', sortable: true },
-  { key: 'precioUnidad', title: 'Precio U/N', sortable: true },
   { key: 'estado', title: 'Estado', sortable: true },
   { key: 'createdAt', title: 'Creado', sortable: true },
   { key: 'updatedAt', title: 'Modificado', sortable: true },
 ];
+
 
 const Groups = () => {
   const [data, setData] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getInventory();
+        const response = await getGroups();
         setData(response);
       } catch (error) {
         console.error('Error al obtener los datos:', error);
@@ -44,16 +42,13 @@ const Groups = () => {
   const [openForm, setOpenForm] = useState(false);
   //estos son los datos del fromulario
   const [formData, setFormData] = useState({
-    nombreMaterial: '',
+    nombre: '',
     descripcion: '',
-    cantidad: '',
-    unidadMedida: '',
-    precioUnidad: ''
   });
   //esta funcion es la que envia el formulario para el back para crear
   const handleSubmit = async () => {
     try {
-      const response = await createInventory(formData);
+      const response = await createGroup(formData);
       console.log(response);
     } catch (error) {
       console.error('Error al enviar el formulario:', error);
@@ -64,7 +59,7 @@ const Groups = () => {
   const handleDelete = async (item) => {
     try {
       // Realizar la operación de eliminación (ej. llamada a API)
-      await deleteInventory(item.id);
+      await deleteGroup(item.id);
 
       // Actualizar el estado local
       setData(prevData => prevData.filter(dataItem => dataItem.id !== item.id));
@@ -79,7 +74,7 @@ const Groups = () => {
   const handleToggleActive = async (item) => {
     try {
       // Realizar la operación de activación (ej. llamada a API)
-      await activeInventory(item.id);
+      await activateGroup(item.id);
 
       // Actualizar el estado local (activar el registro)
       setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: true } : dataItem));
@@ -93,7 +88,7 @@ const Groups = () => {
 
   const handleToggleInactive = async (item) => {
     try {
-      await inactiveInventory(item.id);
+      await inactivateGroup(item.id);
 
       // Actualizar el estado local (desactivar el registro)
       setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: false } : dataItem));
@@ -143,6 +138,7 @@ const Groups = () => {
     <>
       <PaperProvider theme={theme}>
         <ScrollView style={styles.container}>
+
           <View style={styles.header}>
             <Breadcrumb
               items={[
@@ -151,7 +147,7 @@ const Groups = () => {
                   onPress: () => router.navigate('/(admin)/Dashboard'),
                 },
                 {
-                  label: 'Inventario'
+                  label: 'Grupos'
                 }
               ]}
             />
@@ -160,10 +156,13 @@ const Groups = () => {
               <MaterialCommunityIcons name="file-excel" size={24} color={theme.colors.primary} style={styles.icon} />
             </View>
           </View>
+
+
+          
           <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
             <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
               <Card.Content>
-                <Text style={styles.cardTitle}>Total de Productos</Text>
+                <Text style={styles.cardTitle}>Total de grupos</Text>
                 <Text style={styles.cardValue}>{totalItems}</Text>
                 <ProgressBar
                   progress={itemsProgress}
@@ -172,7 +171,7 @@ const Groups = () => {
                 />
               </Card.Content>
             </Card>
-            <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
+            {/* <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
               <Card.Content>
                 <Text style={styles.cardTitle}>Valor del Inventario</Text>
                 <Text style={styles.cardValue}>${totalValue.toFixed(2)}</Text>
@@ -182,7 +181,7 @@ const Groups = () => {
                   style={styles.progressBar}
                 />
               </Card.Content>
-            </Card>
+            </Card> */}
           </View>
 
           <Card style={styles.tableCard}>
@@ -212,10 +211,10 @@ const Groups = () => {
             }}>
               <InputComponent
                 type="nombre"
-                value={formData.nombreMaterial}
-                onChangeText={(text) => setFormData({ ...formData, nombreMaterial: text })}
-                label="Nombre Material"
-                placeholder="Introduce el material"
+                value={formData.nombre}
+                onChangeText={(text) => setFormData({ ...formData, nombre: text })}
+                label="Nombre del grupo"
+                placeholder="Introduce el nombre"
                 validationRules={{ required: true }}
                 errorMessage="Por favor, introduce un nombre válido"
               />
@@ -223,38 +222,13 @@ const Groups = () => {
                 type="descripcion"
                 value={formData.descripcion}
                 onChangeText={(text) => setFormData({ ...formData, descripcion: text })}
-                label="Descripcion"
-                placeholder="Describe el material"
+                label="Descripcion del grupo"
+                placeholder="Describe el grupo"
                 validationRules={{ required: true }}
                 errorMessage="Por favor, introduce una descripcion válida"
               />
-              <InputComponent
-                type="number"
-                value={formData.cantidad}
-                onChangeText={(text) => setFormData({ ...formData, cantidad: text })}
-                label="Cantidad"
-                placeholder="Introduce la cantidad"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un numero válido"
-              />
-              <InputComponent
-                type="nombre"
-                value={formData.unidadMedida}
-                onChangeText={(text) => setFormData({ ...formData, unidadMedida: text })}
-                label="Unidad de medida"
-                placeholder="Introduce tu unidad de medida"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce una unidad de medida válida"
-              />
-              <InputComponent
-                type="precio"
-                value={formData.precioUnidad}
-                onChangeText={(text) => setFormData({ ...formData, precioUnidad: text })}
-                label="Precio Unitario"
-                placeholder="Introduce el precio"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un precio válido"
-              />
+              
+              
             </View>
           </>
         } actions={[<Button onPress={() => setOpenForm(false)}>Cancelar</Button>, <Button onPress={handleSubmit}>Crear</Button>]} />

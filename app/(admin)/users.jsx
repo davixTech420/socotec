@@ -9,6 +9,7 @@ import { AlertaScroll } from "@/components/alerta"
 import InputComponent from "@/components/InputComponent"
 import { getUsers, deleteUser, activateUser, inactivateUser } from "@/services/adminServices"
 import { useFocusEffect } from "@react-navigation/native"
+import { router } from "expo-router";
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -123,7 +124,9 @@ export default function Users() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Breadcrumb items={[{ label: "Dashboard", onPress: () => {} }, { label: "Usuarios" }]} />
+        <Breadcrumb items={[{ label: "Dashboard", onPress: () => {
+          router.navigate("/(admin)/Dashboard")
+        } }, { label: "Usuarios" }]} />
         <View style={styles.headerActions}>
           <AntDesign name="pdffile1" size={24} color={theme.colors.primary} style={styles.icon} />
           <MaterialCommunityIcons name="file-excel" size={24} color={theme.colors.primary} style={styles.icon} />

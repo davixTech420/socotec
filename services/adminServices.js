@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.4.188:${port}/api/admin`;
+const baseUrl = `http://10.48.4.195:${port}/api/admin`;
 
 
 
@@ -248,4 +248,303 @@ export const getUsers = async () => {
 
 
 
+ export const createGroup = async (group) => {
+    try {
+
+       const token = AsyncStorage.getItem("userToken");
+      const response = await axios.post(`${baseUrl}/groups`, group,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data; // Retorna los datos de la respuesta
+    } catch (error) {
+      console.error('Error al crear el grupo:', error);
+    }
+  };
+
+
+
+  export const updateGroup = async (group) => {
+    try {
+      const token = AsyncStorage.getItem("userToken");
+      const response = await axios.put(`${baseUrl}/groups/${group.id}`, group,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data; // Retorna los datos de la respuesta
+    } catch (error) {
+      console.error('Error al actualizar el grupo:', error);
+    }
+  };
+
+
+  export const deleteGroup = async (id) => {
+    try {
+      const token = AsyncStorage.getItem("userToken");
+      const response = await axios.delete(`${baseUrl}/groups/${id}`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data; // Retorna los datos de la respuesta
+    } catch (error) {
+      console.error('Error al eliminar el grupo:', error);
+    }
+  };
+
+  export const activateGroup = async (id) => {
+    try {
+      const token = AsyncStorage.getItem("userToken");
+      const response = await axios.put(`${baseUrl}/groups/${id}/active`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data; // Retorna los datos de la respuesta
+    } catch (error) {
+      console.error('Error al activar el grupo:', error);
+    }
+  };
+
+
+  export const inactivateGroup = async (id) => {
+    try {
+      const token = AsyncStorage.getItem("userToken");
+      const response = await axios.put(`${baseUrl}/groups/${id}/inactive`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data; // Retorna los datos de la respuesta
+    } catch (error) {
+      console.error('Error al desactivar el grupo:', error);
+    }
+  };
+
+
+
   /**aca termina las funciones de los grupos de trabajo */
+
+
+
+
+  /**
+   * 
+   * 
+   * 
+   * funcionalidades  para proyectos
+   * 
+   * 
+   */
+
+
+
+
+  export const createProyect = async (req,res) => {
+    try{
+const token = AsyncStorage.getItem("userToken");
+const response = await axios.post(`${baseUrl}/proyects`,req,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+
+        },
+      });
+      return response.data; 
+
+
+    }catch(error){
+      console.error('Error al crear el proyecto:',error);
+    }
+  };
+
+
+
+  export const getProyect = async (req,res) => {
+    try{
+const token = AsyncStorage.getItem("userToken");
+const response = await axios.get(`${baseUrl}/proyects`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data; 
+    }catch(error){
+      console.error('Error al obtener los proyectos:',error);
+    }
+  };
+
+  export const deleteProyect = async (req,res) => {
+    try{
+      const token = AsyncStorage.getItem("userToken");
+      const response = await axios.delete(`${baseUrl}/proyects/${req.id}`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    }catch(error){
+      console.error("error al eliminar el proyecto: ",error);
+    }
+  }
+
+
+
+  export const updateProyect = async (req,res) => {
+    try{
+      const token = AsyncStorage.getItem("userToken");
+      const response = await axios.put(`${baseUrl}/proyects/${req.id}`,req,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    }catch(error){
+      console.error("error al actualizar el proyecto: ",error);
+    }
+  }
+
+export const activeProyect = async (req,res) => {
+  try{
+  const token = AsyncStorage.getItem("userToken");
+const response = await axios.put(`${baseUrl}/proyects/${req.id}/active`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+  }catch(error){
+console.error("Error al activar el proyecto : ", error);
+  }
+}
+
+
+
+export const inactiveProyect = async (req,res) => {
+  try{
+    const {id } = req.params; 
+    const token = AsyncStorage.getItem("userToken");
+const response = await axios.put(`${baseUrl}/proyects/${id}/inactive`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+
+        },
+      });
+      return response.data;
+
+  }catch(error){
+    console.error("Error al inactivar el proyecto ",error);
+  }
+}
+
+  /**
+   * 
+   * 
+   * 
+   */
+
+
+
+  /**
+   * 
+   * 
+   * 
+   * funcionalidades para los permisos y el calendario
+   * 
+   * 
+   */
+export const getPermissions = async () => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    const response = await axios.get(`${baseUrl}/permissions`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener los permisos", error);
+  }
+};
+
+
+export const createPermission = async (req) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    const response = await axios.post(`${baseUrl}/permissions`, req, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear el permiso", error.response);
+  }
+};
+  
+
+
+export const updatePermission = async (req) => {
+  try {
+    const token = AsycnStorage.getItem("userToken");
+    const response = await axios.put(`${baseUrl}/permissions`, req, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar el permiso", error);
+  }
+};
+
+export const deletePermission = async (id) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    const response = await axios.delete(`${baseUrl}/permissions/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al eliminar el permiso", error);
+  }
+};
+
+
+export const activePermission = async (id) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    const response = await axios.put(`${baseUrl}/permissions/${id}/active`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al activar el permiso", error);
+  }
+};
+
+
+export const inactivePermission = async (id) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    const response = await axios.put(`${baseUrl}/permissions/${id}/inactive`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al desactivar el permiso", error);
+  }
+};
+  /**
+  * 
+   * aca termina la funcionalidad para los permisos y calendario
+   * 
+   */

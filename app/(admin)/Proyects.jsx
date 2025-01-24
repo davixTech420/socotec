@@ -8,15 +8,16 @@ import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createInventory, getInventory, deleteInventory, activeInventory, inactiveInventory } from "@/services/adminServices";
+import { createProyect, getProyect, deleteProyect, activeProyect, inactiveProyect } from "@/services/adminServices";
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
-  { key: 'nombreMaterial', title: 'Material', sortable: true },
+  { key: 'nombre', title: 'Nombre', sortable: true },
   { key: 'descripcion', title: 'Descripcion', sortable: true, width: 80 },
-  { key: 'cantidad', title: 'Cantidad', sortable: true, width: 100 },
-  { key: 'unidadMedida', title: 'Medida', sortable: true },
-  { key: 'precioUnidad', title: 'Precio U/N', sortable: true },
+  { key: 'presupuesto', title: 'Presupuesto', sortable: true, width: 100 },
+  { key: 'cliente', title: 'Cliente', sortable: true },
+  { key: 'fechaInicio', title: 'Fecha Inicio', sortable: true },
+  { key: 'fechaEntrega', title: 'Fecha Entrega', sortable: true },
   { key: 'estado', title: 'Estado', sortable: true },
   { key: 'createdAt', title: 'Creado', sortable: true },
   { key: 'updatedAt', title: 'Modificado', sortable: true },
@@ -27,7 +28,7 @@ const Proyects = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getInventory();
+        const response = await getProyect();
         setData(response);
       } catch (error) {
         console.error('Error al obtener los datos:', error);
@@ -44,16 +45,17 @@ const Proyects = () => {
   const [openForm, setOpenForm] = useState(false);
   //estos son los datos del fromulario
   const [formData, setFormData] = useState({
-    nombreMaterial: '',
+    nombre: '',
     descripcion: '',
-    cantidad: '',
-    unidadMedida: '',
-    precioUnidad: ''
+    presupuesto: '',
+    cliente: '',
+    fechaInicio: '',
+    fechaEntrega: ''
   });
   //esta funcion es la que envia el formulario para el back para crear
   const handleSubmit = async () => {
     try {
-      const response = await createInventory(formData);
+      const response = await createProyect(formData);
       console.log(response);
     } catch (error) {
       console.error('Error al enviar el formulario:', error);
@@ -64,7 +66,7 @@ const Proyects = () => {
   const handleDelete = async (item) => {
     try {
       // Realizar la operación de eliminación (ej. llamada a API)
-      await deleteInventory(item.id);
+      await deleteProyect(item.id);
 
       // Actualizar el estado local
       setData(prevData => prevData.filter(dataItem => dataItem.id !== item.id));
@@ -79,7 +81,7 @@ const Proyects = () => {
   const handleToggleActive = async (item) => {
     try {
       // Realizar la operación de activación (ej. llamada a API)
-      await activeInventory(item.id);
+      await activeProyect(item.id);
 
       // Actualizar el estado local (activar el registro)
       setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: true } : dataItem));
@@ -93,7 +95,7 @@ const Proyects = () => {
 
   const handleToggleInactive = async (item) => {
     try {
-      await inactiveInventory(item.id);
+      await inactiveProyect(item.id);
 
       // Actualizar el estado local (desactivar el registro)
       setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: false } : dataItem));
@@ -117,6 +119,7 @@ const Proyects = () => {
   const handleSearch = (query) => {
     console.log('Buscando:', query);
   };
+
 
   const handleFilter = (filters) => {
     console.log('Filtrando:', filters);
@@ -151,7 +154,7 @@ const Proyects = () => {
                   onPress: () => router.navigate('/(admin)/Dashboard'),
                 },
                 {
-                  label: 'Inventario'
+                  label: 'Proyectos'
                 }
               ]}
             />
@@ -163,7 +166,7 @@ const Proyects = () => {
           <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
             <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
               <Card.Content>
-                <Text style={styles.cardTitle}>Total de Productos</Text>
+                <Text style={styles.cardTitle}>Total de Proyectos</Text>
                 <Text style={styles.cardValue}>{totalItems}</Text>
                 <ProgressBar
                   progress={itemsProgress}
@@ -172,7 +175,7 @@ const Proyects = () => {
                 />
               </Card.Content>
             </Card>
-            <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
+           {/*  <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
               <Card.Content>
                 <Text style={styles.cardTitle}>Valor del Inventario</Text>
                 <Text style={styles.cardValue}>${totalValue.toFixed(2)}</Text>
@@ -182,7 +185,7 @@ const Proyects = () => {
                   style={styles.progressBar}
                 />
               </Card.Content>
-            </Card>
+            </Card> */}
           </View>
 
           <Card style={styles.tableCard}>
@@ -212,10 +215,10 @@ const Proyects = () => {
             }}>
               <InputComponent
                 type="nombre"
-                value={formData.nombreMaterial}
-                onChangeText={(text) => setFormData({ ...formData, nombreMaterial: text })}
-                label="Nombre Material"
-                placeholder="Introduce el material"
+                value={formData.nombre}
+                onChangeText={(text) => setFormData({ ...formData, nombre: text })}
+                label="Nombre Proyecto"
+                placeholder="Introduce el nombre del proyecto"
                 validationRules={{ required: true }}
                 errorMessage="Por favor, introduce un nombre válido"
               />
@@ -224,34 +227,43 @@ const Proyects = () => {
                 value={formData.descripcion}
                 onChangeText={(text) => setFormData({ ...formData, descripcion: text })}
                 label="Descripcion"
-                placeholder="Describe el material"
+                placeholder="Describe el proyecto"
                 validationRules={{ required: true }}
                 errorMessage="Por favor, introduce una descripcion válida"
               />
               <InputComponent
-                type="number"
-                value={formData.cantidad}
-                onChangeText={(text) => setFormData({ ...formData, cantidad: text })}
-                label="Cantidad"
-                placeholder="Introduce la cantidad"
+                type="precio"
+                value={formData.presupuesto}
+                onChangeText={(text) => setFormData({ ...formData, presupuesto: text })}
+                label="Presupuesto"
+                placeholder="Introduce el presupuesto"
                 validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un numero válido"
+                errorMessage="Por favor, introduce un presupuesto válido"
               />
               <InputComponent
                 type="nombre"
-                value={formData.unidadMedida}
-                onChangeText={(text) => setFormData({ ...formData, unidadMedida: text })}
-                label="Unidad de medida"
-                placeholder="Introduce tu unidad de medida"
+                value={formData.cliente}
+                onChangeText={(text) => setFormData({ ...formData, cliente: text })}
+                label="Cliente"
+                placeholder="Introduce el cliente"
                 validationRules={{ required: true }}
                 errorMessage="Por favor, introduce una unidad de medida válida"
               />
               <InputComponent
-                type="precio"
-                value={formData.precioUnidad}
-                onChangeText={(text) => setFormData({ ...formData, precioUnidad: text })}
-                label="Precio Unitario"
-                placeholder="Introduce el precio"
+                type="date"
+                value={formData.fechaInicio}
+                onChangeText={(text) => setFormData({ ...formData, fechaInicio: text })}
+                label="Fecha Inicio"
+                placeholder="Introduce la fecha de inicio"
+                validationRules={{ required: true }}
+                errorMessage="Por favor, introduce un precio válido"
+              />
+              <InputComponent
+                type="date"
+                value={formData.fechaEntrega}
+                onChangeText={(text) => setFormData({ ...formData, fechaEntrega: text })}
+                label="Fecha Entrega"
+                placeholder="Introduce la fecha de entrega"
                 validationRules={{ required: true }}
                 errorMessage="Por favor, introduce un precio válido"
               />

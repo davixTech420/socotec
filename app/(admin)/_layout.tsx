@@ -16,6 +16,7 @@ import Proyects from "./Proyects"
 import Users from "./users";
 import Model3D from "./Model3D";
 import CalendarComponent from "./Calendar";
+import Group from "./Groups";
 import { useProtectedRoute, useAuth } from "@/context/userContext"
 
 
@@ -221,7 +222,7 @@ export default function App() {
           >
             {(props) => (
               <AnimatedScreen style={animatedStyle}>
-                <Users {...props} />
+                <Group {...props} />
               </AnimatedScreen>
             )}
           </Drawer.Screen>
