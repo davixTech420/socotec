@@ -8,14 +8,15 @@ import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createGroup, getGroups, deleteGroup, activateGroup, inactivateGroup } from "@/services/adminServices";
+import { createGroup, getGroups, deleteGroup, activateGroup, inactivateGroup, getUsersGroup } from "@/services/adminServices";
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
   { key: 'nombre', title: 'Nombre', sortable: true },
   { key: 'descripcion', title: 'Descripcion', sortable: true, width: 80 },
   { key: 'estado', title: 'Estado', sortable: true },
-  { key: 'createdAt', title: 'Creado', sortable: true },
+  { key: 'usuariosGrupo', title: 'Usuarios', sortable: true },
+  { key: 'createdAt', title: 'Creado', sortable: true },  
   { key: 'updatedAt', title: 'Modificado', sortable: true },
 ];
 
@@ -40,6 +41,8 @@ const Groups = () => {
 
   //estado para abrir el formulario para el inventario
   const [openForm, setOpenForm] = useState(false);
+
+ 
   //estos son los datos del fromulario
   const [formData, setFormData] = useState({
     nombre: '',
@@ -58,10 +61,10 @@ const Groups = () => {
 
   const handleDelete = async (item) => {
     try {
-      // Realizar la operación de eliminación (ej. llamada a API)
+      
       await deleteGroup(item.id);
 
-      // Actualizar el estado local
+     
       setData(prevData => prevData.filter(dataItem => dataItem.id !== item.id));
 
       return Promise.resolve();
@@ -86,6 +89,8 @@ const Groups = () => {
     }
   };
 
+ 
+
   const handleToggleInactive = async (item) => {
     try {
       await inactivateGroup(item.id);
@@ -99,6 +104,7 @@ const Groups = () => {
       return Promise.reject(error);
     }
   };
+
 
 
   const handleDataUpdate = (updatedData) => {
@@ -119,12 +125,7 @@ const Groups = () => {
 
   // Calculamos los totales usando parseInt y toFixed para evitar problemas de precisión
   const totalItems = data.length;
-  const totalValue = data.reduce((sum, item) => {
-    // Multiplicamos la cantidad por el precio por unidad
-    const itemTotal = item.cantidad * item.precioUnidad;
-    // Sumamos el total de cada producto al acumulador
-    return sum + itemTotal;
-  }, 0);
+ 
 
   // Calculamos los progress con valores seguros
   const calculateProgress = (value, max) => {
@@ -132,7 +133,7 @@ const Groups = () => {
     return parseFloat(progress.toFixed(2));
   };
   const itemsProgress = calculateProgress(totalItems, 1000);
-  const valueProgress = calculateProgress(totalValue, 100000);
+ 
   const isSmallScreen = width < 600;
   return (
     <>
@@ -152,13 +153,10 @@ const Groups = () => {
               ]}
             />
             <View style={styles.headerActions}>
-              <AntDesign name="pdffile1" size={24} color={theme.colors.primary} style={styles.icon} />
-              <MaterialCommunityIcons name="file-excel" size={24} color={theme.colors.primary} style={styles.icon} />
+              <AntDesign name="pdffile1" size={24} color="red" style={styles.icon} />
+              <MaterialCommunityIcons name="file-excel" size={24} color="green" style={styles.icon} />
             </View>
           </View>
-
-
-          
           <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
             <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
               <Card.Content>
@@ -171,17 +169,7 @@ const Groups = () => {
                 />
               </Card.Content>
             </Card>
-            {/* <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
-              <Card.Content>
-                <Text style={styles.cardTitle}>Valor del Inventario</Text>
-                <Text style={styles.cardValue}>${totalValue.toFixed(2)}</Text>
-                <ProgressBar
-                  progress={valueProgress}
-                  color="#00ACE8"
-                  style={styles.progressBar}
-                />
-              </Card.Content>
-            </Card> */}
+           
           </View>
 
           <Card style={styles.tableCard}>
@@ -197,10 +185,18 @@ const Groups = () => {
                 onToggleActive={handleToggleActive}
                 onToggleInactive={handleToggleInactive}
                 onDataUpdate={handleDataUpdate}
+               
               />
             </Card.Content>
           </Card>
         </ScrollView>
+
+
+
+
+
+
+
 
         <AlertaScroll onOpen={openForm} onClose={() => setOpenForm(false)} title="Nuevo registro de inventario" content={
           <>

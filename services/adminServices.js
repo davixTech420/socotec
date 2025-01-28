@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.4.195:${port}/api/admin`;
+const baseUrl = `http://10.48.12.161:${port}/api/admin`;
 
 
 
@@ -13,7 +13,6 @@ const baseUrl = `http://10.48.4.195:${port}/api/admin`;
 export const activateUser = async (id) => {
   try {
     const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-
     if (!token) {
       console.error('No se encontró el token');
       return; // O maneja el error como desees
@@ -81,6 +80,27 @@ export const deleteUser = async (id) => {
       console.error('Error al eliminar usuario:',error);
     }
   }
+
+
+
+
+export const updateUser = async (id,user) => {
+  try{
+    const token = await AsyncStorage.getItem("userToken");
+    const response = await axios.put(`${baseUrl}/users/${id}`,user,{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  }catch(error){
+    console.error('Error al actualizar usuario:',error);
+  }
+}
+
+
+
+
  
 //end point para enviar el email recien se registra un usuario
 export const getUsers = async () => {
@@ -104,6 +124,14 @@ export const getUsers = async () => {
       console.error('Error al obtener usuarios:', error);
     }
   };
+
+
+
+
+
+
+
+
 
 
 //end point para la funcionalidades de la tabla inventarios
@@ -168,6 +196,7 @@ export const getUsers = async () => {
       console.error('Error al eliminar inventario:', error);
     }
   };
+
 
 
   export const activeInventory = async (id) => {
@@ -327,6 +356,37 @@ export const getUsers = async () => {
 
   /**aca termina las funciones de los grupos de trabajo */
 
+
+
+  /**
+   * 
+   * 
+   * estas son las funcionalidades para los usuarios del grupo
+   * 
+   * 
+   */
+export const getUsersGroup = async (id) => {
+    try {
+      const token = AsyncStorage.getItem("userToken");
+      const response = await axios.get(`${baseUrl}/userGroup/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    }catch(error){
+      console.error('Error al obtener los usuarios del grupo:',error);
+    }
+  }
+
+
+
+
+
+  /**
+   * 
+   * aca termina las funcionalidades para los usuarios del grupo
+   */
 
 
 
