@@ -215,13 +215,32 @@ function InputComponent({
       inputProps.left = (
         <TextInput.Icon icon={() => <MaterialCommunityIcons name="account-outline" size={24} color="black" />} />
       )
+      inputProps.maxLength = 15
+      inputProps.onChangeText = (text) => {
+        const validText = text.replace(/[^A-Za-z]/g, "");
+        if (validText !== inputValue) {
+            setInputValue(validText);
+            onChangeText?.(validText); 
+        }
+    };
+    inputProps.value = inputValue;
       break
     case "descripcion":
       inputProps.left = <TextInput.Icon icon={() => <MaterialIcons name="description" size={24} color="black" />} />
       break
-    case "number":
-      inputProps.keyboardType = "numeric"
+        case "number":
+      inputProps.keyboardType = Platform.OS === "web" ? "numeric" : "number-pad"
       inputProps.left = <TextInput.Icon icon={() => <MaterialIcons name="numbers" size={24} color="black" />} />
+      inputProps.maxLength = 10
+      inputProps.onChangeText = (text) => {
+        const validText = text.replace(/[^0-9]/g, "").slice(0, 10);
+        const processedText = validText.length > 0 && validText[0] !== "3" ? "3" + validText.slice(1) : validText;
+        if (processedText !== inputValue) {
+            setInputValue(processedText);
+            onChangeText?.(processedText); 
+        }
+    };
+    inputProps.value = inputValue;
       break
     case "precio":
       inputProps.keyboardType = "numeric"
@@ -231,10 +250,12 @@ function InputComponent({
       inputProps.keyboardType = "email-address"
       inputProps.autoCapitalize = "none"
       inputProps.left = <TextInput.Icon icon={() => <Ionicons name="mail" size={24} />} />
-      validationRules.pattern = validationRules.pattern || /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      validationRules.pattern = validationRules.pattern || /^[a-zA-Z0-9._%+-]+@socotec\.com$/
       break
     case "password":
       inputProps.secureTextEntry = true
+      inputProps.left = <TextInput.Icon icon={() => <Ionicons name="lock-closed" size={24} />} />
+      inputProps.right = <TextInput.Icon icon={() => <Ionicons name="eye" size={24} />} />
       break
     case "textarea":
       inputProps.multiline = true

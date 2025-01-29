@@ -4,9 +4,29 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.12.161:${port}/api/admin`;
+const baseUrl = `http://10.48.12.211:${port}/api/admin`;
 
 
+
+//crear usuario api
+export const createUser = async (user) => {
+  try {
+    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
+    if (!token) {
+      console.error('No se encontró el token');
+      return; // O maneja el error como desees
+    }
+    const response = await axios.post(`${baseUrl}/users`, user, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data; // Retorna los datos de la respuesta
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
+  }
+}
 
 
 //activar usuario
@@ -29,11 +49,6 @@ export const activateUser = async (id) => {
     console.error('Error al activar usuario:', error);
   }
 };
-
-
-
-
-
 
 
 //inactivar usuario
@@ -59,7 +74,6 @@ export const inactivateUser = async (id) => {
 };
 
 
-
 //eliminar usuario
 export const deleteUser = async (id) => {
     try {
@@ -82,8 +96,6 @@ export const deleteUser = async (id) => {
   }
 
 
-
-
 export const updateUser = async (id,user) => {
   try{
     const token = await AsyncStorage.getItem("userToken");
@@ -99,9 +111,6 @@ export const updateUser = async (id,user) => {
 }
 
 
-
-
- 
 //end point para enviar el email recien se registra un usuario
 export const getUsers = async () => {
     try {
@@ -124,6 +133,9 @@ export const getUsers = async () => {
       console.error('Error al obtener usuarios:', error);
     }
   };
+
+
+
 
 
 
@@ -276,7 +288,6 @@ export const getUsers = async () => {
   };
 
 
-
  export const createGroup = async (group) => {
     try {
 
@@ -291,7 +302,6 @@ export const getUsers = async () => {
       console.error('Error al crear el grupo:', error);
     }
   };
-
 
 
   export const updateGroup = async (group) => {
@@ -322,6 +332,7 @@ export const getUsers = async () => {
       console.error('Error al eliminar el grupo:', error);
     }
   };
+
 
   export const activateGroup = async (id) => {
     try {
@@ -420,7 +431,6 @@ const response = await axios.post(`${baseUrl}/proyects`,req,{
   };
 
 
-
   export const getProyect = async (req,res) => {
     try{
 const token = AsyncStorage.getItem("userToken");
@@ -450,7 +460,6 @@ const response = await axios.get(`${baseUrl}/proyects`,{
   }
 
 
-
   export const updateProyect = async (req,res) => {
     try{
       const token = AsyncStorage.getItem("userToken");
@@ -465,6 +474,7 @@ const response = await axios.get(`${baseUrl}/proyects`,{
     }
   }
 
+
 export const activeProyect = async (req,res) => {
   try{
   const token = AsyncStorage.getItem("userToken");
@@ -478,7 +488,6 @@ const response = await axios.put(`${baseUrl}/proyects/${req.id}/active`,{
 console.error("Error al activar el proyecto : ", error);
   }
 }
-
 
 
 export const inactiveProyect = async (req,res) => {
@@ -545,7 +554,6 @@ export const createPermission = async (req) => {
 };
   
 
-
 export const updatePermission = async (req) => {
   try {
     const token = AsycnStorage.getItem("userToken");
@@ -559,6 +567,7 @@ export const updatePermission = async (req) => {
     console.error("Error al actualizar el permiso", error);
   }
 };
+
 
 export const deletePermission = async (id) => {
   try {

@@ -14,14 +14,13 @@ const SignUp = () => {
   const isMobile = width < 768;
   const inputScale = useSharedValue(1);
   const loginUser = useLogin();
-  const [email, setEmail] = useState('');
 
+  const [visiblePass, setVisiblePass] = useState(false);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   //estos son los errores errors son los helpertext
   //message es el mensaje que devuel
   const [errors, setErrors] = useState({});
-  const [messageApi, setMessageApi] = useState('');
-
   //estas son los estados para abrir las alertas o dialogos de la vista de  inicio de sesion o login
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenError, setIsOpenError] = useState(false);
@@ -132,7 +131,7 @@ const SignUp = () => {
                     <Image style={styles.logo} source={require("@/assets/images/favicon.png")} />
                   </View>
                   {renderInput("Email", email, setEmail, "mail-outline", errors.email, "email-address")}
-                  {renderInput("Contraseña", password, setPassword, "lock-closed-outline", errors.password, "default", true, <TextInput.Icon icon="eye" />)}
+                  {renderInput("Contraseña", password, setPassword, "lock-closed-outline", errors.password, "default", !visiblePass, <TextInput.Icon icon={visiblePass ?"eye-off":"eye"} onPress={() => setVisiblePass(!visiblePass)} />)}
                 </View>
                 <View>
                   <Button buttonColor='#00ACE8' mode="contained" onPress={handleSubmit} style={styles.loginButton}>

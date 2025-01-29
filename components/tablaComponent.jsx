@@ -688,7 +688,7 @@ const TablaComponente = ({
   const isMediumScreen = width >= 768 && width < 1024
 
   const filteredAndSortedData = useMemo(() => {
-    const result = data.filter((item) =>
+    const result = data?.filter((item) =>
       Object.entries(item).some(([key, value]) => String(value).toLowerCase().includes(searchQuery.toLowerCase())),
     )
 
@@ -705,7 +705,7 @@ const TablaComponente = ({
 
   const paginatedData = useMemo(() => {
     const startIndex = page * itemsPerPage
-    return filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage)
+    return filteredAndSortedData?.slice(startIndex, startIndex + itemsPerPage)
   }, [filteredAndSortedData, page, itemsPerPage])
 
   const handleSort = useCallback(
@@ -1227,4 +1227,3 @@ const styles = StyleSheet.create({
 })
 
 export default TablaComponente
-

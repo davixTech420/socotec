@@ -12,7 +12,7 @@ const SignUp = () => {
   const theme = useTheme();
   const isMobile = width < 768;
   const inputScale = useSharedValue(1);
-
+const [visiblePass,setVisiblePass] = useState(false);
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [telefono, setTelefono] = useState('');
@@ -151,7 +151,9 @@ const SignUp = () => {
                   {renderInput("Nombre", nombre, handleNameChange, "person-outline", errors.nombre)}
                   {renderInput("Email", email, setEmail, "mail-outline", errors.email, "email-address")}
                   {renderInput("Teléfono", telefono, handlePhoneChange, "call-outline", errors.telefono, "phone-pad")}
-                  {renderInput("Contraseña", password, setPassword, "lock-closed-outline", errors.password, "default", true, <TextInput.Icon icon="eye" />)}
+                  {renderInput("Contraseña", password, setPassword, "lock-closed-outline", errors.password, "default", !visiblePass , <TextInput.Icon icon={visiblePass ? "eye-off": "eye"} onPress={() => {
+                    setVisiblePass(!visiblePass);
+                  }} />)}
                 </View>
 
                 <View>

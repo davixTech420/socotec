@@ -224,9 +224,10 @@ const styles = StyleSheet.create({
   hero: {
     flexDirection: Platform.OS === 'web' ? 'row' : 'column',
     padding: 20,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 60,
     backgroundColor: 'rgba(0, 97, 242, 0.8)',
+    
   },
   heroMobile: {
     flexDirection: 'column',
@@ -235,12 +236,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingRight: Platform.OS === 'web' ? 40 : 0,
+    padding:20,
+    
   },
   heroTitle: {
     fontSize: 42,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: 20,
     color: '#ffffff',
+    position:'relative',
+    top:2,
+    
   },
   heroSubtitle: {
     fontSize: 18,
@@ -398,6 +404,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
+
 
 export default UIKitLanding;
 

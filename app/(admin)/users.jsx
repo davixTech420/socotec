@@ -262,16 +262,17 @@ const styles = StyleSheet.create({
 
 import React, { useEffect, useState, useCallback } from "react"
 import { View, StyleSheet, ScrollView, Platform } from "react-native"
-import { Text, Card, Button, useTheme, Snackbar,Portal } from "react-native-paper"
+import { Text, Card, Button, useTheme, Snackbar, Portal } from "react-native-paper"
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import TablaComponente from "@/components/tablaComponent"
 import Breadcrumb from "@/components/BreadcrumbComponent"
 import AddComponent from "@/components/AddComponent"
 import { AlertaScroll } from "@/components/alerta"
 import InputComponent from "@/components/InputComponent"
-import { getUsers, deleteUser, activateUser, inactivateUser, updateUser } from "@/services/adminServices"
+import { getUsers, deleteUser, activateUser, inactivateUser, updateUser,createUser } from "@/services/adminServices"
 import { useFocusEffect } from "@react-navigation/native"
 import { router } from "expo-router"
+
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -291,7 +292,6 @@ export default function Users() {
     nombre: "",
     email: "",
     telefono: "",
-    role: "",
   })
   const [isMounted, setIsMounted] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -336,8 +336,7 @@ export default function Users() {
         })
       } else {
         // Implement user creation logic here
-        // For now, we'll just simulate adding a new user
-        const newUser = { id: Date.now(), ...formData }
+        const newUser =  await createUser(formData);
         setData((prevData) => [...prevData, newUser])
         setSnackbarMessage({
           text: "Usuario creado exitosamente",
@@ -426,46 +425,51 @@ export default function Users() {
 
   return (
     <>
-
-
-
-
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Breadcrumb
-          items={[
-            {
-              label: "Dashboard",
-              onPress: () => {
-                router.navigate("/(admin)/Dashboard")
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <Breadcrumb
+            items={[
+              {
+                label: "Dashboard",
+                onPress: () => {
+                  router.navigate("/(admin)/Dashboard")
+                },
               },
-            },
-            { label: "Usuarios" },
-          ]}
-        />
-        <View style={styles.headerActions}>
-          <AntDesign name="pdffile1" size={24} color="red" style={styles.icon} />
-          <MaterialCommunityIcons name="file-excel" size={24} color="green" style={styles.icon} />
-        </View>
-      </View>
-
-      <Card style={styles.tableCard}>
-        <Card.Content>
-          <TablaComponente
-            data={data}
-            columns={columns}
-            keyExtractor={(item) => String(item.id)}
-            onSort={handleSort}
-            onSearch={handleSearch}
-            onFilter={handleFilter}
-            onDelete={handleDelete}
-            onToggleActive={handleToggleActive}
-            onToggleInactive={handleToggleInactive}
-            onDataUpdate={setData}
-            onEdit={handleEdit}
+              { label: "Usuarios" },
+            ]}
           />
-        </Card.Content>
-       {/*  <Snackbar
+          <View style={styles.headerActions}>
+            <AntDesign name="pdffile1" size={24} color="red" style={styles.icon} />
+            <MaterialCommunityIcons name="file-excel" size={24} color="green" style={styles.icon} />
+          </View>
+        </View>
+        <Card style={styles.tableCard}>
+          <Card.Content>
+            <TablaComponente
+              data={data}
+              columns={columns}
+              keyExtractor={(item) => String(item.id)}
+              onSort={handleSort}
+              onSearch={handleSearch}
+              onFilter={handleFilter}
+              onDelete={handleDelete}
+              onToggleActive={handleToggleActive}
+              onToggleInactive={handleToggleInactive}
+              onDataUpdate={setData}
+              onEdit={handleEdit}
+            />
+          </Card.Content>
+          
+        </Card>
+       
+        
+      </ScrollView>
+
+
+
+
+
+      <Snackbar
       visible={snackbarVisible}
       onDismiss={() => setSnackbarVisible(false)}
       duration={3000}
@@ -478,88 +482,81 @@ export default function Users() {
       }}
     >
       <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
-    </Snackbar> */}
-      </Card>
-
-      
-
+    </Snackbar>
 
 
       <AlertaScroll
-        onOpen={openForm}
-        onClose={() => {
-          setOpenForm(false)
-          setIsEditing(false)
-          setEditingUserId(null)
-          setFormData({ nombre: "", email: "", telefono: "", role: "" })
-        }}
-        title={isEditing ? "Editar usuario" : "Nuevo usuario"}
-        content={
-          <View style={styles.formContainer}>
-            <InputComponent
-              type="text"
-              value={formData.nombre}
-              onChangeText={(text) => setFormData({ ...formData, nombre: text })}
-              label="Nombre"
-              placeholder="Introduce el nombre"
-              validationRules={{ required: true }}
-              errorMessage="Por favor, introduce un nombre válido"
-            />
-            <InputComponent
-              type="email"
-              value={formData.email}
-              onChangeText={(text) => setFormData({ ...formData, email: text })}
-              label="Email"
-              placeholder="Introduce el email"
-              validationRules={{ required: true, email: true }}
-              errorMessage="Por favor, introduce un email válido"
-            />
-            <InputComponent
-              type="tel"
-              value={formData.telefono}
-              onChangeText={(text) => setFormData({ ...formData, telefono: text })}
-              label="Teléfono"
-              placeholder="Introduce el teléfono"
-              validationRules={{ required: true }}
-              errorMessage="Por favor, introduce un teléfono válido"
-            />
-            <InputComponent
-              type="text"
-              value={formData.role}
-              onChangeText={(text) => setFormData({ ...formData, role: text })}
-              label="Rol"
-              placeholder="Introduce el rol"
-              validationRules={{ required: true }}
-              errorMessage="Por favor, introduce un rol válido"
-            />
-          </View>
-        }
-        actions={[
-          <Button
-            key="cancel"
-            onPress={() => {
-              setOpenForm(false)
-              setIsEditing(false)
-              setEditingUserId(null)
-              setFormData({ nombre: "", email: "", telefono: "", role: "" })
-            }}
-          >
-            Cancelar
-          </Button>,
-          <Button key="submit" onPress={handleSubmit}>
-            {isEditing ? "Actualizar" : "Crear"}
-          </Button>,
-        ]}
-      />
+          onOpen={openForm}
+          onClose={() => {
+            setOpenForm(false)
+            setIsEditing(false)
+            setEditingUserId(null)
+            setFormData({ nombre: "", email: "", telefono: "" })
+          }}
+          title={isEditing ? "Editar usuario" : "Nuevo usuario"}
+          content={
+            <View style={styles.formContainer}>
+              <InputComponent
+                type="nombre"
+                value={formData.nombre}
+                onChangeText={(text) => setFormData({ ...formData, nombre: text })}
+                label="Nombre"
+                placeholder="Introduce el nombre"
+                validationRules={{ required: true }}
+                errorMessage="Por favor, introduce un nombre válido"
+              />
+              <InputComponent
+                type="email"
+                value={formData.email}
+                onChangeText={(text) => setFormData({ ...formData, email: text })}
+                label="Email"
+                placeholder="Introduce el email"
+                validationRules={{ required: true, email: true }}
+                errorMessage="Por favor, introduce un email válido"
+              />
+              <InputComponent
+                type="number"
+                value={formData.telefono}
+                onChangeText={(text) => {
+                  setFormData({ ...formData, telefono: text });
+                }}
+                label="Teléfono"
+                placeholder="Introduce el teléfono"
+                validationRules={{ required: true }}
+                errorMessage="Por favor, introduce un teléfono válido"
+              />
+              {!isEditing && (
+                <InputComponent
+                  type="password"
+                  value={formData.role}
+                  onChangeText={(text) => setFormData({ ...formData, password: text })}
+                  label="Contraseña"
+                  placeholder="Introduce la contraseña"
+                  validationRules={{ required: true }}
+                  errorMessage="Por favor, introduce una contraseña de minimo 8 caracteres"
+                />
+              )}
+              
+            </View>
+          }
+          actions={[
+            <Button
+              key="cancel"
+              onPress={() => {
+                setOpenForm(false)
+                setIsEditing(false)
+                setEditingUserId(null)
+                setFormData({ nombre: "", email: "", telefono: "" })
+              }}
+            >
+              Cancelar
+            </Button>,
+            <Button key="submit" onPress={handleSubmit}>
+              {isEditing ? "Actualizar" : "Crear"}
+            </Button>,
+          ]}
+        />
       <AddComponent onOpen={() => setOpenForm(true)} />
-
-
-
-
-    </ScrollView>
-    
-    
-    
     </>
   )
 }
@@ -568,6 +565,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
+    
   },
   header: {
     flexDirection: "row",
