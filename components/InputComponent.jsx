@@ -153,6 +153,7 @@ function InputComponent({
   const { width } = useWindowDimensions()
   const isSmallScreen = width < 600
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
+  const [visiblePass,setVisiblePass] = useState(false);
 
   const handleChange = (text) => {
     setInputValue(text)
@@ -255,7 +256,8 @@ function InputComponent({
     case "password":
       inputProps.secureTextEntry = true
       inputProps.left = <TextInput.Icon icon={() => <Ionicons name="lock-closed" size={24} />} />
-      inputProps.right = <TextInput.Icon icon={() => <Ionicons name="eye" size={24} />} />
+      inputProps.right = <TextInput.Icon onPress={() => setVisiblePass(!visiblePass)} icon={() => <Ionicons name={visiblePass ? "eye-off" : "eye"} size={24} />} />
+      inputProps.secureTextEntry = !visiblePass
       break
     case "textarea":
       inputProps.multiline = true

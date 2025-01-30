@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await AsyncStorage.removeItem('userToken');
       setIsAuthenticated(false);
-      router.replace('/');
+      router.navigate('/');
     } catch (error) {
       console.error('Error during logout:', error);
     }
@@ -51,7 +51,7 @@ const user = async () => {
     const decodedToken = jwtDecode(token);
     return decodedToken;
   } catch (error) {
-    console.error('Error getting user:', error);
+    console.log('Error getting user:', error);
   }
 };
 

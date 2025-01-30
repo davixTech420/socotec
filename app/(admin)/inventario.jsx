@@ -8,7 +8,7 @@ import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createInventory, getInventory, deleteInventory, activeInventory, inactiveInventory } from "@/services/adminServices";
+import { createInventory, getInventory, deleteInventory, activeInventory, inactiveInventory,updateInventory } from "@/services/adminServices";
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
@@ -210,6 +210,11 @@ const Inventario = () => {
               justifyContent: 'space-between',
               flexWrap: 'wrap',
             }}>
+
+             
+
+
+
               <InputComponent
                 type="nombre"
                 value={formData.nombreMaterial}

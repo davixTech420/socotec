@@ -40,7 +40,7 @@ function CustomDrawerContent(props) {
   //obtener el usuario logueado
   const [userData, setUserData] = useState(null);
   useEffect(() => {
-    user().then(setUserData).catch(error => console.error('Error user data:', error));
+    user().then(setUserData).catch(error => console.log('Error user data:', error));
   }, []);
   /** */
 
@@ -116,7 +116,7 @@ function CustomAppBar({ title, navigation, drawerProgress }) {
 }
 
 export default function App() {
-  const isAuthenticated = useProtectedRoute("/signIn")
+  const isAuthenticated = useProtectedRoute("/singIn")
   const { user } = useAuth()
   const theme = useTheme()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)

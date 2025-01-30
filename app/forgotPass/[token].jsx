@@ -35,14 +35,13 @@ const PasswordResetScreen = () => {
   const handleResetPassword = async () => {
     setIsSubmitting(true);
     await changePassword({ password, token }).then((response) => {
-      console.log(response);
-      response.success == true ? router.navigate("/singIn") : setIsSubmitting(false);
+      response == true ? router.navigate("/singIn") : setIsSubmitting(false);
     }).catch((error) => { console.log(error); setIsSubmitting(false); });
     // Aquí iría la lógica para cambiar la contraseña
     setTimeout(() => {
       setIsSubmitting(false);
       // Mostrar mensaje de éxito o error
-    }, 2000);
+    }, 1000);
   };
 
   const passwordsMatch = password === confirmPassword;

@@ -5,7 +5,7 @@ import { useAuth } from "@/context/userContext";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.12.211:${port}/api/public`;
+const baseUrl = `http://10.48.5.113:${port}/api/public`;
 //end point para enviar el email recien se registra un usuario
 export const emailRegistro = async (user) => {
   try {
@@ -33,10 +33,8 @@ export const useLogin = () => {
       return { success: false, message: error.message || 'Error desconocido' };
     }
   };
-
   return loginUser;
 };
-
 
 
 //end point para enviar el email de recuperacion
@@ -56,7 +54,7 @@ export const forgotPassword = async (user) => {
 export const changePassword = async (user) => {
   try {
     await axios.post(`${baseUrl}/forgotPassword`, user).then((response) => {
-      console.log(response);
+      router.replace("/singIn"); 
     }).catch((error) => {
       console.log(error);
     });

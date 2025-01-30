@@ -639,8 +639,8 @@ const TablaComponente = ({
   onDataUpdate,
   onEdit,
   isLoading = false,
-  itemsPerPageOptions = [5, 10, 20, 50],
-  defaultItemsPerPage = 10,
+  itemsPerPageOptions = [5, 10, 20],
+  defaultItemsPerPage = 5,
 }) => {
   const theme = useTheme()
   const extendedTheme = {
@@ -857,7 +857,7 @@ const TablaComponente = ({
     },
     [onEdit],
   )
-    
+
 
   const renderCell = useCallback(
     (column, item) => {
@@ -919,7 +919,7 @@ const TablaComponente = ({
               iconColor="#5bfff3"
               inputStyle={{ color: "black" }}
             />
-            <IconButton icon="plus" onPress={handleCreate} color={extendedTheme.colors.primary} />
+            {/* <IconButton icon="plus" onPress={handleCreate} color={extendedTheme.colors.primary} /> */}
             <Menu
               visible={filterMenuVisible}
               onDismiss={() => setFilterMenuVisible(false)}
