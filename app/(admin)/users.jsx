@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react"
-import { View, StyleSheet, ScrollView, Platform, useWindowDimensions, TouchableOpacity } from "react-native"
+import { View, StyleSheet, ScrollView, Platform, useWindowDimensions } from "react-native"
 import { Text, Card, Button, useTheme, Snackbar, ProgressBar } from "react-native-paper"
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import TablaComponente from "@/components/tablaComponent"
@@ -10,6 +10,9 @@ import InputComponent from "@/components/InputComponent"
 import { getUsers, deleteUser, activateUser, inactivateUser, updateUser, createUser } from "@/services/adminServices"
 import { useFocusEffect } from "@react-navigation/native"
 import { router } from "expo-router"
+import DropdownComponent from "@/components/DropdownComponent"
+import ExcelPreviewButton from "@/components/ExcelViewComponent";
+
 
 
 const columns = [
@@ -33,7 +36,10 @@ export default function Users() {
   const [snackbarMessage, setSnackbarMessage] = useState({ text: "", type: "success" })
   const theme = useTheme()
   const { width } = useWindowDimensions()
-
+  const options = [
+    { label: "Administrador", value: "admin" },
+    { label: "Empleado", value: "employee" },
+  ]
   useFocusEffect(
     useCallback(() => {
       getUsers().then(setData).catch(console.error)
@@ -42,7 +48,7 @@ export default function Users() {
 
   const handleSubmit = useCallback(async () => {
     try {
-      const requiredFields = isEditing ? ["nombre", "email", "telefono"] : ["nombre", "email", "telefono", "password"]
+      const requiredFields = isEditing ? ["nombre", "email", "telefono", "role"] : ["nombre", "email", "telefono", "password"]
       const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "")
 
       if (emptyFields.length > 0) {
@@ -119,7 +125,9 @@ export default function Users() {
             ]}
           />
           <View style={styles.headerActions}>
-            <AntDesign onPress={() => console.log("pleno")} name="pdffile1" size={24} color="red" style={styles.icon} />
+            <ExcelPreviewButton columns={columns} data={data} iconStyle={styles.icon} />
+            <AntDesign onPress={() => console.log("pdf")
+             } name="pdffile1" size={24} color="red" style={styles.icon} />
             <MaterialCommunityIcons name="file-excel" size={24} color="green" style={styles.icon} />
           </View>
         </View>
@@ -191,6 +199,14 @@ export default function Users() {
                 errorMessage={`Por favor, introduce un ${field} válido`}
               />
             ))}
+            {isEditing ? (<DropdownComponent
+              options={options}
+              onSelect={(value) => {
+                setFormData({ ...formData, role: value })
+              }}
+              placeholder="ROl"
+              value={formData.role}
+            />) : null}
           </View>
         }
         actions={[

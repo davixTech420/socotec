@@ -18,6 +18,7 @@ import Model3D from "./Model3D";
 import CalendarComponent from "./Calendar";
 import Group from "./Groups";
 import { useProtectedRoute, useAuth } from "@/context/userContext"
+import ProfileScreen from "./MyAccount";
 
 
 const Drawer = createDrawerNavigator()
@@ -28,7 +29,7 @@ function AnimatedScreen({ children, style, staticButton }) {
     <Animated.View style={[styles.screen, style]}>
       <ScrollView contentContainerStyle={styles.screenContent}>
         {children}
-        {/*  <View style={styles.staticButtonContainer}>{staticButton}</View> */}
+        
       </ScrollView>
     </Animated.View>
   )
@@ -200,7 +201,7 @@ export default function App() {
 
 
           <Drawer.Screen
-            name="Users"
+            name="users"
             options={{
               title: "Usuarios",
               drawerIcon: ({ color }) => <MaterialCommunityIcons name="account-multiple-outline" size={24} color={color} />,
@@ -230,7 +231,7 @@ export default function App() {
 
 
           <Drawer.Screen
-            name="Inventario"
+            name="inventario"
             options={{
               title: "Inventario",
               drawerIcon: ({ color }) => (
@@ -318,7 +319,7 @@ export default function App() {
 
 
           <Drawer.Screen
-            name="account"
+            name="MyAccount"
             options={{
               title: "Mi Cuenta",
               drawerIcon: ({ color }) => <MaterialCommunityIcons name="account-box" size={24} color={color} />,
@@ -326,7 +327,7 @@ export default function App() {
           >
             {(props) => (
               <AnimatedScreen style={animatedStyle}>
-                <Model3D {...props} />
+                <ProfileScreen {...props} />
               </AnimatedScreen>
             )}
           </Drawer.Screen>

@@ -11,7 +11,6 @@ Reportes de tendencias: Análisis de costos laborales y otros indicadores para m
 
 
 
-
 . Cumplimiento Legal
 	Actualización automática de leyes fiscales y laborales: Un sistema que esté actualizado con las leyes laborales y fiscales locales. Esto es crucial para cumplir con las normativas sin tener que revisar constantemente.
 Generación de recibos de pago electrónicos: Los recibos de pago deben ser generados y entregados electrónicamente, permitiendo a los empleados acceder a ellos fácilmente a través de un portal.
@@ -50,49 +49,17 @@ Informes personalizados: Un módulo para crear informes personalizados basados e
 Análisis de datos: Un sistema para analizar los datos del sistema y proporcionar insights y recomendaciones.
 Tableros de control: Un módulo para crear tableros de control personalizados que muestran los indicadores clave de rendimiento (KPI) de la empresa.
 
-
-
 hacer modelado 3d
 
 
-. Tabla: Empleado
-Información básica de los empleados.
 
-Campo	Tipo	Descripción
-id	INT (PK)	Identificador único del empleado.
-nombre	VARCHAR(100)	Nombre del empleado.
-email	VARCHAR(150)	Correo del empleado (único).
-telefono	VARCHAR(15)	Teléfono del empleado.
-cargo_id	INT (FK)	Relación con el cargo del empleado.
-2. Tabla: Cargo
-Lista de cargos disponibles para empleados.
+dependencias posibles a borrar 
 
-Campo	Tipo	Descripción
-id	INT (PK)	Identificador único del cargo.
-nombre	VARCHAR(100)	Nombre del cargo (ej. Desarrollador).
-3. Tabla: Proyecto
-Información sobre los proyectos.
 
-Campo	Tipo	Descripción
-id	INT (PK)	Identificador único del proyecto.
-nombre	VARCHAR(200)	Nombre del proyecto.
-descripcion	TEXT	Descripción detallada del proyecto.
-fecha_inicio	DATE	Fecha de inicio del proyecto..
-fecha_fin	DATE	Fecha estimada de finalización.
-lider_id	INT (FK)	Empleado que lidera el proyecto.
-4. Tabla: EmpleadoProyecto
-Relación entre empleados y proyectos. Permite asignar varios empleados a un proyecto.
 
-Campo	Tipo	Descripción
-id	INT (PK)	Identificador único de la relación.
-empleado_id	INT (FK)	Relación con la tabla Empleado.
-proyecto_id	INT (FK)	Relación con la tabla Proyecto.
-5. Tabla: Anotacion
-Anotaciones o comentarios realizados por los participantes en los proyectos.
 
-Campo	Tipo	Descripción
-id	INT (PK)	Identificador único de la anotación.
-proyecto_id	INT (FK)	Relación con el proyecto.
-empleado_id	INT (FK)	Empleado que hizo la anotación.
-contenido	TEXT	Texto de la anotación.
-fecha_creacion	DATETIME	Fecha y hora de creación de la anotación.
+expo-sharing
+import * as FileSystem from "expo-file-system"
+import * as Print from "expo-print"
+
+

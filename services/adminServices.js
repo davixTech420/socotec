@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.5.113:${port}/api/admin`;
+const baseUrl = `http://10.48.5.155:${port}/api/admin`;
 
 
 
