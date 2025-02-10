@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, useWindowDimensions, Platform, Dimensions } from 'react-native';
-import { PaperProvider, Text, Card, Button, FAB, Portal, Modal, ProgressBar, useTheme } from 'react-native-paper';
+import React, { useCallback, useState } from 'react';
+import { View, StyleSheet, ScrollView, useWindowDimensions, Platform } from 'react-native';
+import { PaperProvider, Text, Card, Button, ProgressBar, useTheme, Snackbar } from 'react-native-paper';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from "@react-navigation/native"
 import TablaComponente from "@/components/tablaComponent";
 import Breadcrumb from "@/components/BreadcrumbComponent";
 import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createInventory, getInventory, deleteInventory, activeInventory, inactiveInventory,updateInventory } from "@/services/adminServices";
+import { createInventory, getInventory, deleteInventory, activeInventory, inactiveInventory, updateInventory } from "@/services/adminServices";
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
@@ -24,25 +25,10 @@ const columns = [
 
 const Inventario = () => {
   const [data, setData] = useState([]);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getInventory();
-        setData(response);
-      } catch (error) {
-        console.error('Error al obtener los datos:', error);
-      }
-    };
-    fetchData();
-  }, []);
-
-
-  const theme = useTheme();
-  const { width } = useWindowDimensions();
-
-  //estado para abrir el formulario para el inventario
-  const [openForm, setOpenForm] = useState(false);
-  //estos son los datos del fromulario
+  const [editingInventoryId, setEditingInventoryId] = useState(null)
+  const [isEditing, setIsEditing] = useState(false)
+  const [snackbarVisible, setSnackbarVisible] = useState(false)
+  const [snackbarMessage, setSnackbarMessage] = useState({ text: "", type: "success" });
   const [formData, setFormData] = useState({
     nombreMaterial: '',
     descripcion: '',
@@ -50,79 +36,84 @@ const Inventario = () => {
     unidadMedida: '',
     precioUnidad: ''
   });
-  //esta funcion es la que envia el formulario para el back para crear
-  const handleSubmit = async () => {
+  const [openForm, setOpenForm] = useState(false);
+  //estados de los estilos
+  const theme = useTheme();
+  const { width } = useWindowDimensions();
+
+  useFocusEffect(
+    useCallback(() => {
+      getInventory().then(setData).catch(console.error)
+    }, []),
+  );
+
+  const handleSubmit = useCallback(async () => {
     try {
-      const response = await createInventory(formData);
-      console.log(response);
+      const requiredFields = isEditing ? ["nombreMaterial", "descripcion", "cantidad", "unidadMedida", "precioUnidad"] : ["nombreMaterial", "descripcion", "cantidad", "unidadMedida", "precioUnidad"];
+      const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "")
+
+      if (emptyFields.length > 0) {
+        setOpenForm(false);
+        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
+      }
+
+      let newData
+      if (isEditing) {
+        await updateInventory(editingInventoryId, formData)
+        newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item))
+      } else {
+        const newUser = await createInventory(formData)
+        if (!newUser) throw new Error("Error al crear el usuario")
+        newData = [...data, newUser.inventory]
+      }
+      setData(newData)
+      setSnackbarMessage({
+        text: `Usuario ${isEditing ? "actualizado" : "creado"} exitosamente`,
+        type: "success",
+      })
+      resetForm()
     } catch (error) {
-      console.error('Error al enviar el formulario:', error);
+      setSnackbarMessage({ text: error.message, type: "error" })
+    } finally {
+      setSnackbarVisible(true)
     }
-  };
+  }, [formData, isEditing, editingInventoryId, data])
 
 
-  const handleDelete = async (item) => {
-    try {
-      // Realizar la operación de eliminación (ej. llamada a API)
-      await deleteInventory(item.id);
-
-      // Actualizar el estado local
-      setData(prevData => prevData.filter(dataItem => dataItem.id !== item.id));
-
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error al eliminar el item:', error);
-      return Promise.reject(error);
-    }
-  };
-
-  const handleToggleActive = async (item) => {
-    try {
-      // Realizar la operación de activación (ej. llamada a API)
-      await activeInventory(item.id);
-
-      // Actualizar el estado local (activar el registro)
-      setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: true } : dataItem));
-
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error al activar el item:', error);
-      return Promise.reject(error);
-    }
-  };
-
-  const handleToggleInactive = async (item) => {
-    try {
-      await inactiveInventory(item.id);
-
-      // Actualizar el estado local (desactivar el registro)
-      setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: false } : dataItem));
-
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error al desactivar el item:', error);
-      return Promise.reject(error);
-    }
-  };
-
-
-  const handleDataUpdate = (updatedData) => {
-    setData(updatedData)
+  const resetForm = () => {
+    setOpenForm(false)
+    setIsEditing(false)
+    setEditingInventoryId(null)
+    setFormData({ nombreMaterial: "", descripcion: "", cantidad: "", unidadMedida: "", precioUnidad: "" })
   }
 
-  const handleSort = (key, order) => {
-    console.log('Ordenando por:', key, order);
-  };
+  const handleAction = useCallback(async (action, item) => {
+    try {
+      await action(item.id)
+      setData((prevData) =>
+        prevData.map((dataItem) =>
+          dataItem.id === item.id ? { ...dataItem, estado: action === activeInventory } : dataItem,
+        ),
+      )
+    } catch (error) {
+      console.error(`Error al ${action === activeInventory ? "activar" : "desactivar"} el usuario:`, error)
+    }
+  }, [])
 
-  const handleSearch = (query) => {
-    console.log('Buscando:', query);
-  };
+  const handleEdit = useCallback((item) => {
+    setFormData({
+      nombreMaterial: item.nombreMaterial,
+      descripcion: item.descripcion,
+      cantidad: item.cantidad,
+      unidadMedida: item.unidadMedida,
+      precioUnidad: item.precioUnidad,
+    })
+    setEditingInventoryId(item.id)
+    setIsEditing(true)
+    setOpenForm(true)
+  }, [])
 
-  const handleFilter = (filters) => {
-    console.log('Filtrando:', filters);
-  };
-
-  // Calculamos los totales usando parseInt y toFixed para evitar problemas de precisión
+  // para evitar problemas de precisión
   const totalItems = data.length;
   const totalValue = data.reduce((sum, item) => {
     // Multiplicamos la cantidad por el precio por unidad
@@ -184,85 +175,72 @@ const Inventario = () => {
               </Card.Content>
             </Card>
           </View>
-
           <Card style={styles.tableCard}>
             <Card.Content>
               <TablaComponente
                 data={data}
                 columns={columns}
                 keyExtractor={(item) => String(item.id)}
-                onSort={handleSort}
-                onSearch={handleSearch}
-                onFilter={handleFilter}
-                onDelete={handleDelete}
-                onToggleActive={handleToggleActive}
-                onToggleInactive={handleToggleInactive}
-                onDataUpdate={handleDataUpdate}
+                onSort={console.log}
+                onSearch={console.log}
+                onFilter={console.log}
+                onDelete={async (item) => {
+                  await deleteInventory(item.id)
+                  setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
+                }}
+                onToggleActive={(item) => handleAction(activeInventory, item)}
+                onToggleInactive={(item) => handleAction(inactiveInventory, item)}
+                onDataUpdate={setData}
+                onCreate={handleSubmit}
+                onEdit={handleEdit}
               />
             </Card.Content>
           </Card>
         </ScrollView>
+        <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={3000}
+          style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
+          action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
+        >
+          <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
+        </Snackbar>
 
-        <AlertaScroll onOpen={openForm} onClose={() => setOpenForm(false)} title="Nuevo registro de inventario" content={
-          <>
-            <View style={{
-              flexDirection: isSmallScreen ? "column" : 'row',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-            }}>
+        <AlertaScroll onOpen={openForm} onClose={resetForm} title={isEditing ? "Editar inventario" : "Nuevo inventario"} content={
 
-             
+          <View style={{
+            flexDirection: isSmallScreen ? "column" : 'row',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+          }}>
+            {["nombreMaterial", "descripcion", "cantidad", "unidadMedida", "precioUnidad"].map((field) => (
+              <InputComponent
+                key={field}
+                type={
+                  field === "nombreMaterial"
+                    ? "nombre"
+                    : field === "descripcion"
+                      ? "descripcion"
+                      : field === "cantidad"
+                        ? "number"
+                        : field === "unidadMedida"
+                          ? "nombre"
+                          : field === "precioUnidad"
+                            ? "precio"
+                            : "text"
 
-
-
-              <InputComponent
-                type="nombre"
-                value={formData.nombreMaterial}
-                onChangeText={(text) => setFormData({ ...formData, nombreMaterial: text })}
-                label="Nombre Material"
-                placeholder="Introduce el material"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un nombre válido"
+                }
+                value={formData[field]}
+                onChangeText={(text) => setFormData((prev) => ({ ...prev, [field]: text }))}
+                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                placeholder={`Introduce el ${field}`}
+                validationRules={{ required: field !== "descripcion", ...(field === "descripcion") }}
+                errorMessage={`Por favor, introduce un ${field} válido`}
               />
-              <InputComponent
-                type="descripcion"
-                value={formData.descripcion}
-                onChangeText={(text) => setFormData({ ...formData, descripcion: text })}
-                label="Descripcion"
-                placeholder="Describe el material"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce una descripcion válida"
-              />
-              <InputComponent
-                type="number"
-                value={formData.cantidad}
-                onChangeText={(text) => setFormData({ ...formData, cantidad: text })}
-                label="Cantidad"
-                placeholder="Introduce la cantidad"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un numero válido"
-              />
-              <InputComponent
-                type="nombre"
-                value={formData.unidadMedida}
-                onChangeText={(text) => setFormData({ ...formData, unidadMedida: text })}
-                label="Unidad de medida"
-                placeholder="Introduce tu unidad de medida"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce una unidad de medida válida"
-              />
-              <InputComponent
-                type="precio"
-                value={formData.precioUnidad}
-                onChangeText={(text) => setFormData({ ...formData, precioUnidad: text })}
-                label="Precio Unitario"
-                placeholder="Introduce el precio"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un precio válido"
-              />
-            </View>
-          </>
-        } actions={[<Button onPress={() => setOpenForm(false)}>Cancelar</Button>, <Button onPress={handleSubmit}>Crear</Button>]} />
+            ))}
+          </View>
+        } actions={[<Button onPress={resetForm}>Cancelar</Button>, <Button onPress={handleSubmit}>{isEditing ? "Actualizar" : "Crear"}</Button>]} />
       </PaperProvider>
       <AddComponent onOpen={() => setOpenForm(true)} />
     </>

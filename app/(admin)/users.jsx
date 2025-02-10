@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react"
 import { View, StyleSheet, ScrollView, Platform, useWindowDimensions } from "react-native"
 import { Text, Card, Button, useTheme, Snackbar, ProgressBar } from "react-native-paper"
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
+import { AntDesign } from "@expo/vector-icons"
 import TablaComponente from "@/components/tablaComponent"
 import Breadcrumb from "@/components/BreadcrumbComponent"
 import AddComponent from "@/components/AddComponent"
@@ -12,8 +12,6 @@ import { useFocusEffect } from "@react-navigation/native"
 import { router } from "expo-router"
 import DropdownComponent from "@/components/DropdownComponent"
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
-
-
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -113,7 +111,6 @@ export default function Users() {
   }, [])
 
   const isSmallScreen = width < 600
-
   return (
     <>
       <ScrollView style={styles.container}>
@@ -127,8 +124,7 @@ export default function Users() {
           <View style={styles.headerActions}>
             <ExcelPreviewButton columns={columns} data={data} iconStyle={styles.icon} />
             <AntDesign onPress={() => console.log("pdf")
-             } name="pdffile1" size={24} color="red" style={styles.icon} />
-            <MaterialCommunityIcons name="file-excel" size={24} color="green" style={styles.icon} />
+            } name="pdffile1" size={24} color="red" style={styles.icon} />
           </View>
         </View>
         <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>

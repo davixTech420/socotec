@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect,useCallback, useState } from 'react';
 import { View, StyleSheet, ScrollView, useWindowDimensions, Platform, Dimensions } from 'react-native';
 import { PaperProvider, Text, Card, Button, FAB, Portal, Modal, ProgressBar, useTheme } from 'react-native-paper';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
 import { createProyect, getProyect, deleteProyect, activeProyect, inactiveProyect } from "@/services/adminServices";
+import { useFocusEffect } from '@react-navigation/native';
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
@@ -25,17 +26,13 @@ const columns = [
 
 const Proyects = () => {
   const [data, setData] = useState([]);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getProyect();
-        setData(response);
-      } catch (error) {
-        console.error('Error al obtener los datos:', error);
-      }
-    };
-    fetchData();
-  }, []);
+ 
+
+
+  useFocusEffect(
+    useCallback(() => {
+      getProyect().then(setData).catch(console.error)
+    }))
 
 
   const theme = useTheme();
@@ -187,7 +184,6 @@ const Proyects = () => {
               </Card.Content>
             </Card> */}
           </View>
-
           <Card style={styles.tableCard}>
             <Card.Content>
               <TablaComponente

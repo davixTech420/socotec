@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, useWindowDimensions, Platform, Dimensions } from 'react-native';
-import { PaperProvider, Text, Card, Button, FAB, Portal, Modal, ProgressBar, useTheme } from 'react-native-paper';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, useWindowDimensions, Platform } from 'react-native';
+import { PaperProvider, Text, Card, Button, Snackbar, ProgressBar, useTheme } from 'react-native-paper';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from "@react-navigation/native"
 import TablaComponente from "@/components/tablaComponent";
 import Breadcrumb from "@/components/BreadcrumbComponent";
 import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createGroup, getGroups, deleteGroup, activateGroup, inactivateGroup, getUsersGroup } from "@/services/adminServices";
+import { createGroup, updateGroup, getGroups, deleteGroup, activateGroup, inactivateGroup } from "@/services/adminServices";
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
@@ -16,57 +17,101 @@ const columns = [
   { key: 'descripcion', title: 'Descripcion', sortable: true, width: 80 },
   { key: 'estado', title: 'Estado', sortable: true },
   { key: 'usuariosGrupo', title: 'Usuarios', sortable: true },
-  { key: 'createdAt', title: 'Creado', sortable: true },  
+  { key: 'createdAt', title: 'Creado', sortable: true },
   { key: 'updatedAt', title: 'Modificado', sortable: true },
 ];
 
 
 const Groups = () => {
-  const [data, setData] = useState([]);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getGroups();
-        setData(response);
-      } catch (error) {
-        console.error('Error al obtener los datos:', error);
-      }
-    };
-    fetchData();
-  }, []);
 
-
+  //estilos
   const theme = useTheme();
   const { width } = useWindowDimensions();
 
-  //estado para abrir el formulario para el inventario
+  //funcionalidad del componente 
+  const [data, setData] = useState([]);
+  const [editingGroupId, setEditingGroupId] = useState(null)
+  const [isEditing, setIsEditing] = useState(false)
+  const [snackbarVisible, setSnackbarVisible] = useState(false)
+  const [snackbarMessage, setSnackbarMessage] = useState({ text: "", type: "success" })
   const [openForm, setOpenForm] = useState(false);
-
- 
   //estos son los datos del fromulario
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
   });
-  //esta funcion es la que envia el formulario para el back para crear
-  const handleSubmit = async () => {
-    try {
-      const response = await createGroup(formData);
-      console.log(response);
-    } catch (error) {
-      console.error('Error al enviar el formulario:', error);
-    }
-  };
 
+  useFocusEffect(
+    useCallback(() => {
+      getGroups().then(setData).catch(console.error)
+    }, []),
+  );
+
+  const handleSubmit = useCallback(async () => {
+    try {
+      const requiredFields = isEditing ? ["nombre", "descripcion"] : ["nombre", "descripcion"]
+      const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "")
+
+      if (emptyFields.length > 0) {
+        setOpenForm(false);
+        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
+      }
+      let newData
+      if (isEditing) {
+        await updateGroup(editingGroupId, formData)
+        newData = data.map((item) => (item.id === editingGroupId ? { ...item, ...formData } : item))
+      } else {
+        const newUser = await createGroup(formData)
+        if (!newUser) throw new Error("Error al crear el grupo")
+        newData = [...data, newUser.group]
+      }
+      setData(newData)
+      setSnackbarMessage({
+        text: `Grupo ${isEditing ? "actualizado" : "creado"} exitosamente`,
+        type: "success",
+      })
+      resetForm()
+    } catch (error) {
+      setSnackbarMessage({ text: error.message, type: "error" })
+    } finally {
+      setSnackbarVisible(true)
+    }
+  }, [formData, isEditing, editingGroupId, data]);
+
+  const resetForm = () => {
+    setOpenForm(false)
+    setIsEditing(false)
+    setEditingGroupId(null)
+    setFormData({ nombre: "", descripcion: "" })
+  }
+
+  const handleAction = useCallback(async (action, item) => {
+    try {
+      await action(item.id)
+      setData((prevData) =>
+        prevData.map((dataItem) =>
+          dataItem.id === item.id ? { ...dataItem, estado: action === activateGroup } : dataItem,
+        ),
+      )
+    } catch (error) {
+      console.error(`Error al ${action === activateGroup ? "activar" : "desactivar"} el grupo:`, error)
+    }
+  }, []);
+
+  const handleEdit = useCallback((item) => {
+    setFormData({
+      nombre: item.nombre,
+      descripcion: item.descripcion,
+    })
+    setEditingGroupId(item.id)
+    setIsEditing(true)
+    setOpenForm(true)
+  }, [])
 
   const handleDelete = async (item) => {
     try {
-      
       await deleteGroup(item.id);
-
-     
       setData(prevData => prevData.filter(dataItem => dataItem.id !== item.id));
-
       return Promise.resolve();
     } catch (error) {
       console.error('Error al eliminar el item:', error);
@@ -74,58 +119,8 @@ const Groups = () => {
     }
   };
 
-  const handleToggleActive = async (item) => {
-    try {
-      // Realizar la operación de activación (ej. llamada a API)
-      await activateGroup(item.id);
-
-      // Actualizar el estado local (activar el registro)
-      setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: true } : dataItem));
-
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error al activar el item:', error);
-      return Promise.reject(error);
-    }
-  };
-
- 
-
-  const handleToggleInactive = async (item) => {
-    try {
-      await inactivateGroup(item.id);
-
-      // Actualizar el estado local (desactivar el registro)
-      setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: false } : dataItem));
-
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error al desactivar el item:', error);
-      return Promise.reject(error);
-    }
-  };
-
-
-
-  const handleDataUpdate = (updatedData) => {
-    setData(updatedData)
-  }
-
-  const handleSort = (key, order) => {
-    console.log('Ordenando por:', key, order);
-  };
-
-  const handleSearch = (query) => {
-    console.log('Buscando:', query);
-  };
-
-  const handleFilter = (filters) => {
-    console.log('Filtrando:', filters);
-  };
-
   // Calculamos los totales usando parseInt y toFixed para evitar problemas de precisión
   const totalItems = data.length;
- 
 
   // Calculamos los progress con valores seguros
   const calculateProgress = (value, max) => {
@@ -133,7 +128,7 @@ const Groups = () => {
     return parseFloat(progress.toFixed(2));
   };
   const itemsProgress = calculateProgress(totalItems, 1000);
- 
+
   const isSmallScreen = width < 600;
   return (
     <>
@@ -169,7 +164,7 @@ const Groups = () => {
                 />
               </Card.Content>
             </Card>
-           
+
           </View>
 
           <Card style={styles.tableCard}>
@@ -178,57 +173,53 @@ const Groups = () => {
                 data={data}
                 columns={columns}
                 keyExtractor={(item) => String(item.id)}
-                onSort={handleSort}
-                onSearch={handleSearch}
-                onFilter={handleFilter}
-                onDelete={handleDelete}
-                onToggleActive={handleToggleActive}
-                onToggleInactive={handleToggleInactive}
-                onDataUpdate={handleDataUpdate}
-               
+                onSort={console.log}
+                onSearch={console.log}
+                onFilter={console.log}
+                onDelete={async (item) => {
+                  await deleteGroup(item.id)
+                  setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
+                }}
+                onToggleActive={(item) => handleAction(activateGroup, item)}
+                onToggleInactive={(item) => handleAction(inactivateGroup, item)}
+                onDataUpdate={setData}
+                onCreate={handleSubmit}
+                onEdit={handleEdit}
+
               />
             </Card.Content>
           </Card>
         </ScrollView>
-
-
-
-
-
-
-
-
-        <AlertaScroll onOpen={openForm} onClose={() => setOpenForm(false)} title="Nuevo registro de inventario" content={
-          <>
-            <View style={{
-              flexDirection: isSmallScreen ? "column" : 'row',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-            }}>
+        <AlertaScroll onOpen={openForm} onClose={resetForm} title={isEditing ? "Editar grupo" : "Nuevo grupo"} content={
+          <View style={{
+            flexDirection: isSmallScreen ? "column" : 'row',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+          }}>
+            {["nombre", "descripcion"].map((field) => (
               <InputComponent
-                type="nombre"
-                value={formData.nombre}
-                onChangeText={(text) => setFormData({ ...formData, nombre: text })}
-                label="Nombre del grupo"
-                placeholder="Introduce el nombre"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un nombre válido"
+                key={field}
+                type={field}
+                value={formData[field]}
+                onChangeText={(text) => setFormData((prev) => ({ ...prev, [field]: text }))}
+                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                placeholder={`Introduce el ${field}`}
+                validationRules={{ required: field !== "descripcion", ...(field === "descripcion") }}
+                errorMessage={`Por favor, introduce un ${field} válido`}
               />
-              <InputComponent
-                type="descripcion"
-                value={formData.descripcion}
-                onChangeText={(text) => setFormData({ ...formData, descripcion: text })}
-                label="Descripcion del grupo"
-                placeholder="Describe el grupo"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce una descripcion válida"
-              />
-              
-              
-            </View>
-          </>
-        } actions={[<Button onPress={() => setOpenForm(false)}>Cancelar</Button>, <Button onPress={handleSubmit}>Crear</Button>]} />
+            ))}
+          </View>
+        } actions={[<Button onPress={() => setOpenForm(false)}>Cancelar</Button>, <Button onPress={handleSubmit}>{isEditing ? "Actualizar" : "Crear"}</Button>]} />
       </PaperProvider>
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={3000}
+        style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
+        action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
+      >
+        <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
+      </Snackbar>
       <AddComponent onOpen={() => setOpenForm(true)} />
     </>
   );

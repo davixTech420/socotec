@@ -337,7 +337,6 @@ const TablaComponente = ({
               ))}
             </Menu>
           </View>
-
           <ScrollView style={styles.tableWrapper}>
             <ScrollView horizontal={isSmallScreen || isMediumScreen}>
               <View style={styles.tableContainer}>
@@ -511,7 +510,7 @@ const TablaComponente = ({
         onClose={() => setOpenUserGroup(false)}
         title="Usuarios del grupo"
         content={<Text>asdasd</Text>}
-        actions={[<Button key="cancelar">Cancelar</Button>, <Button key="crear">Crear</Button>]}
+        actions={[<Button onPress={()=>setOpenUserGroup(false)} key="cancelar">Cancelar</Button>, <Button key="crear">Crear</Button>]}
       />
     </>
   )

@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.5.155:${port}/api/admin`;
+const baseUrl = `http://10.48.5.122:${port}/api/admin`;
 
 
 
@@ -314,9 +314,14 @@ export const createGroup = async (group) => {
   try {
 
     const token = AsyncStorage.getItem("userToken");
+    if (!token) {
+      console.error('No se encontró el token');
+      return; // O maneja el error como desees
+    }
     const response = await axios.post(`${baseUrl}/groups`, group, {
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
     });
     return response.data; // Retorna los datos de la respuesta
@@ -326,12 +331,17 @@ export const createGroup = async (group) => {
 };
 
 
-export const updateGroup = async (group) => {
+export const updateGroup = async (id,group) => {
   try {
     const token = AsyncStorage.getItem("userToken");
-    const response = await axios.put(`${baseUrl}/groups/${group.id}`, group, {
+    if (!token) {
+      console.error('No se encontró el token');
+      return; // O maneja el error como desees
+    }
+    const response = await axios.put(`${baseUrl}/groups/${id}`, group, {
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
     });
     return response.data; // Retorna los datos de la respuesta
