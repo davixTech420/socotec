@@ -1,71 +1,105 @@
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, useWindowDimensions, Platform } from 'react-native';
-import { PaperProvider, Text, Card, Button, Snackbar, ProgressBar, useTheme } from 'react-native-paper';
-import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useState, useCallback } from "react"
+import { View, StyleSheet, ScrollView, useWindowDimensions, Platform } from "react-native"
+import {
+  PaperProvider,
+  Text,
+  Card,
+  Button,
+  Snackbar,
+  ProgressBar,
+  useTheme,
+  Searchbar,
+  Chip,
+  Avatar,
+} from "react-native-paper"
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import { useFocusEffect } from "@react-navigation/native"
-import TablaComponente from "@/components/tablaComponent";
-import Breadcrumb from "@/components/BreadcrumbComponent";
-import { router } from "expo-router";
-import AddComponent from '../../components/AddComponent';
-import { AlertaScroll } from '@/components/alerta';
-import InputComponent from "@/components/InputComponent";
-import { createGroup, updateGroup, getGroups, deleteGroup, activateGroup, inactivateGroup } from "@/services/adminServices";
+import TablaComponente from "@/components/tablaComponent"
+import Breadcrumb from "@/components/BreadcrumbComponent"
+import { router } from "expo-router"
+import AddComponent from "../../components/AddComponent"
+import { AlertaScroll } from "@/components/alerta"
+import InputComponent from "@/components/InputComponent"
+import {
+  createGroup,
+  updateGroup,
+  getGroups,
+  deleteGroup,
+  activateGroup,
+  inactivateGroup,
+  getUsersNotGroup,
+  getUsersGroup,
+  deleteUsersGroup,
+} from "@/services/adminServices"
 
 const columns = [
-  { key: 'id', title: 'ID', sortable: true, width: 50 },
-  { key: 'nombre', title: 'Nombre', sortable: true },
-  { key: 'descripcion', title: 'Descripcion', sortable: true, width: 80 },
-  { key: 'estado', title: 'Estado', sortable: true },
-  { key: 'usuariosGrupo', title: 'Usuarios', sortable: true },
-  { key: 'createdAt', title: 'Creado', sortable: true },
-  { key: 'updatedAt', title: 'Modificado', sortable: true },
-];
-
+  { key: "id", title: "ID", sortable: true, width: 50 },
+  { key: "nombre", title: "Nombre", sortable: true },
+  { key: "descripcion", title: "Descripcion", sortable: true, width: 80 },
+  { key: "estado", title: "Estado", sortable: true },
+  { key: "createdAt", title: "Creado", sortable: true },
+  { key: "updatedAt", title: "Modificado", sortable: true },
+]
 
 const Groups = () => {
+  const theme = useTheme()
+  const { width } = useWindowDimensions()
+  const isSmallScreen = width < 600
 
-  //estilos
-  const theme = useTheme();
-  const { width } = useWindowDimensions();
-
-  //funcionalidad del componente 
-  const [data, setData] = useState([]);
+  const [data, setData] = useState([])
   const [editingGroupId, setEditingGroupId] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState({ text: "", type: "success" })
-  const [openForm, setOpenForm] = useState(false);
-  //estos son los datos del fromulario
-  const [formData, setFormData] = useState({
-    nombre: '',
-    descripcion: '',
-  });
+  const [openForm, setOpenForm] = useState(false)
+  const [formData, setFormData] = useState({ nombre: "", descripcion: "" })
+  const [users, setUsers] = useState([])
+  const [selectedUsers, setSelectedUsers] = useState([])
+  const [searchQuery, setSearchQuery] = useState("")
 
+ 
   useFocusEffect(
     useCallback(() => {
-      getGroups().then(setData).catch(console.error)
-    }, []),
+      const fetchData = async () => {
+        try {
+          const [groupsData, usersData] = await Promise.all([getGroups(), getUsersNotGroup()]);
+          setData(groupsData);
+          setUsers(usersData);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          setSnackbarMessage({ text: "Error al cargar los datos", type: "error" });
+          setSnackbarVisible(true);
+        }
+      };
+  
+      fetchData();
+    }, [])
   );
-
   const handleSubmit = useCallback(async () => {
     try {
-      const requiredFields = isEditing ? ["nombre", "descripcion"] : ["nombre", "descripcion"]
-      const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "")
+      const requiredFields = ["nombre", "descripcion"]
+      const emptyFields = requiredFields.filter((field) => !formData[field]?.trim())
 
       if (emptyFields.length > 0) {
-        setOpenForm(false);
-        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
+        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`)
       }
-      let newData
+
+      const dataToSubmit = {
+        ...formData,
+        usuarios: selectedUsers.map((user) => user.id),
+      }
+
       if (isEditing) {
-        await updateGroup(editingGroupId, formData)
-        newData = data.map((item) => (item.id === editingGroupId ? { ...item, ...formData } : item))
+        await updateGroup(editingGroupId, dataToSubmit)
+        setData((prevData) =>
+          prevData.map((item) => (item.id === editingGroupId ? { ...item, ...dataToSubmit } : item)),
+        )
       } else {
-        const newUser = await createGroup(formData)
-        if (!newUser) throw new Error("Error al crear el grupo")
-        newData = [...data, newUser.group]
+        const newGroup = await createGroup(dataToSubmit)
+        if (!newGroup) throw new Error("Error al crear el grupo")
+        setData((prevData) => [...prevData, newGroup.group])
       }
-      setData(newData)
+
       setSnackbarMessage({
         text: `Grupo ${isEditing ? "actualizado" : "creado"} exitosamente`,
         type: "success",
@@ -76,14 +110,17 @@ const Groups = () => {
     } finally {
       setSnackbarVisible(true)
     }
-  }, [formData, isEditing, editingGroupId, data]);
+  }, [formData, isEditing, editingGroupId, selectedUsers])
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setOpenForm(false)
     setIsEditing(false)
     setEditingGroupId(null)
+    setSnackbarVisible(false)
     setFormData({ nombre: "", descripcion: "" })
-  }
+    setSelectedUsers([])
+    setSearchQuery("")
+  }, [])
 
   const handleAction = useCallback(async (action, item) => {
     try {
@@ -95,122 +132,175 @@ const Groups = () => {
       )
     } catch (error) {
       console.error(`Error al ${action === activateGroup ? "activar" : "desactivar"} el grupo:`, error)
+      setSnackbarMessage({
+        text: `Error al ${action === activateGroup ? "activar" : "desactivar"} el grupo`,
+        type: "error",
+      })
+      setSnackbarVisible(true)
     }
-  }, []);
-
-  const handleEdit = useCallback((item) => {
-    setFormData({
-      nombre: item.nombre,
-      descripcion: item.descripcion,
-    })
-    setEditingGroupId(item.id)
-    setIsEditing(true)
-    setOpenForm(true)
   }, [])
 
-  const handleDelete = async (item) => {
+  const handleEdit = useCallback(async (item) => {
     try {
-      await deleteGroup(item.id);
-      setData(prevData => prevData.filter(dataItem => dataItem.id !== item.id));
-      return Promise.resolve();
+      setSnackbarVisible(false)
+      setFormData({
+        nombre: item.nombre,
+        descripcion: item.descripcion,
+      })
+      setEditingGroupId(item.id)
+      const usersGroup = await getUsersGroup(item.id)
+      setSelectedUsers(usersGroup.map((item) => item.User))
+      setIsEditing(true)
+      setOpenForm(true)
+      
     } catch (error) {
-      console.error('Error al eliminar el item:', error);
-      return Promise.reject(error);
+      console.error("Error al cargar los usuarios del grupo:", error)
+      setSnackbarMessage({ text: "Error al cargar los usuarios del grupo", type: "error" })
+      setSnackbarVisible(true)
     }
-  };
+  }, [])
 
-  // Calculamos los totales usando parseInt y toFixed para evitar problemas de precisión
-  const totalItems = data.length;
+  const handleDelete = useCallback(async (item) => {
+    try {
+      await deleteGroup(item.id)
+      setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
+    } catch (error) {
+      console.error("Error al eliminar el grupo:", error)
+      setSnackbarMessage({ text: "Error al eliminar el grupo", type: "error" })
+      setSnackbarVisible(true)
+    }
+  }, [])
 
-  // Calculamos los progress con valores seguros
-  const calculateProgress = (value, max) => {
-    const progress = Math.min(Math.max(value / max, 0), 1);
-    return parseFloat(progress.toFixed(2));
-  };
-  const itemsProgress = calculateProgress(totalItems, 1000);
+  const toggleUserSelection = useCallback( async (user) => {
+    if (!user?.id) {
+      console.error('User ID is undefined');
+      return;
+    }
+await deleteUsersGroup(user.id);
+   
+    setSelectedUsers((prevUsers) =>
+      prevUsers.some((u) => u.id === user.id) ? prevUsers.filter((u) => u.id !== user.id) : [...prevUsers, user],
+    )
+  }, [])
 
-  const isSmallScreen = width < 600;
+  const filteredUsers = users.filter(
+    (user) =>
+      user.nombre.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !selectedUsers.some((selectedUser) => selectedUser.id === user.id),
+  )
+
+  const totalItems = data.length
+  const itemsProgress = Math.min(totalItems / 1000, 1).toFixed(2)
+
   return (
-    <>
-      <PaperProvider theme={theme}>
-        <ScrollView style={styles.container}>
-
-          <View style={styles.header}>
-            <Breadcrumb
-              items={[
-                {
-                  label: 'Dashboard',
-                  onPress: () => router.navigate('/(admin)/Dashboard'),
-                },
-                {
-                  label: 'Grupos'
-                }
-              ]}
-            />
-            <View style={styles.headerActions}>
-              <AntDesign name="pdffile1" size={24} color="red" style={styles.icon} />
-              <MaterialCommunityIcons name="file-excel" size={24} color="green" style={styles.icon} />
-            </View>
+    <PaperProvider theme={theme}>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <Breadcrumb
+            items={[{ label: "Dashboard", onPress: () => router.navigate("/(admin)/Dashboard") }, { label: "Grupos" }]}
+          />
+          <View style={styles.headerActions}>
+            <AntDesign name="pdffile1" size={24} color="red" style={styles.icon} />
+            <MaterialCommunityIcons name="file-excel" size={24} color="green" style={styles.icon} />
           </View>
-          <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
-            <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
-              <Card.Content>
-                <Text style={styles.cardTitle}>Total de grupos</Text>
-                <Text style={styles.cardValue}>{totalItems}</Text>
-                <ProgressBar
-                  progress={itemsProgress}
-                  color="#00ACE8"
-                  style={styles.progressBar}
-                />
-              </Card.Content>
-            </Card>
-
-          </View>
-
-          <Card style={styles.tableCard}>
+        </View>
+        <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
+          <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
             <Card.Content>
-              <TablaComponente
-                data={data}
-                columns={columns}
-                keyExtractor={(item) => String(item.id)}
-                onSort={console.log}
-                onSearch={console.log}
-                onFilter={console.log}
-                onDelete={async (item) => {
-                  await deleteGroup(item.id)
-                  setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-                }}
-                onToggleActive={(item) => handleAction(activateGroup, item)}
-                onToggleInactive={(item) => handleAction(inactivateGroup, item)}
-                onDataUpdate={setData}
-                onCreate={handleSubmit}
-                onEdit={handleEdit}
-
-              />
+              <Text style={styles.cardTitle}>Total de grupos</Text>
+              <Text style={styles.cardValue}>{totalItems}</Text>
+              <ProgressBar progress={Number.parseFloat(itemsProgress)} color="#00ACE8" style={styles.progressBar} />
             </Card.Content>
           </Card>
-        </ScrollView>
-        <AlertaScroll onOpen={openForm} onClose={resetForm} title={isEditing ? "Editar grupo" : "Nuevo grupo"} content={
-          <View style={{
-            flexDirection: isSmallScreen ? "column" : 'row',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-          }}>
-            {["nombre", "descripcion"].map((field) => (
-              <InputComponent
-                key={field}
-                type={field}
-                value={formData[field]}
-                onChangeText={(text) => setFormData((prev) => ({ ...prev, [field]: text }))}
-                label={field.charAt(0).toUpperCase() + field.slice(1)}
-                placeholder={`Introduce el ${field}`}
-                validationRules={{ required: field !== "descripcion", ...(field === "descripcion") }}
-                errorMessage={`Por favor, introduce un ${field} válido`}
-              />
-            ))}
+        </View>
+
+        <Card style={styles.tableCard}>
+          <Card.Content>
+            <TablaComponente
+              data={data}
+              columns={columns}
+              keyExtractor={(item) => String(item.id)}
+              onDelete={handleDelete}
+              onToggleActive={(item) => handleAction(activateGroup, item)}
+              onToggleInactive={(item) => handleAction(inactivateGroup, item)}
+              onDataUpdate={setData}
+              onCreate={() => setOpenForm(true)}
+              onEdit={handleEdit}
+            />
+          </Card.Content>
+        </Card>
+      </ScrollView>
+      <AlertaScroll
+        onOpen={openForm}
+        onClose={resetForm}
+        title={isEditing ? "Editar grupo" : "Nuevo grupo"}
+        content={
+          <View style={styles.formContainer}>
+            <InputComponent
+              type="text"
+              value={formData.nombre}
+              onChangeText={(text) => setFormData((prev) => ({ ...prev, nombre: text }))}
+              label="Nombre"
+              placeholder="Introduce el nombre del grupo"
+              validationRules={{ required: true }}
+              errorMessage="Por favor, introduce un nombre válido"
+            />
+            <InputComponent
+              type="text"
+              value={formData.descripcion}
+              onChangeText={(text) => setFormData((prev) => ({ ...prev, descripcion: text }))}
+              label="Descripción"
+              placeholder="Introduce la descripción del grupo"
+              validationRules={{ required: true }}
+              errorMessage="Por favor, introduce una descripción válida"
+            />
+
+            <View style={styles.selectedUsersContainer}>
+              <Text style={styles.label}>Usuarios del grupo seleccionados:</Text>
+              <ScrollView horizontal style={styles.selectedUsers}>
+                {selectedUsers.map((user) => (
+                  <Chip
+                    key={user.id}
+                    onClose={() => toggleUserSelection(user)}
+                    style={styles.selectedChip}
+                    avatar={<Avatar.Text size={24} label={user.nombre[0]} />}
+                  >
+                    {user.nombre}
+                  </Chip>
+                ))}
+              </ScrollView>
+            </View>
+
+            <Text style={styles.label}>Usuarios disponibles</Text>
+            <Searchbar
+              placeholder="Buscar usuarios"
+              onChangeText={setSearchQuery}
+              value={searchQuery}
+              style={styles.searchBar}
+            />
+            <ScrollView style={styles.userList}>
+              {filteredUsers.map((user) => (
+                <Chip
+                  key={user.id}
+                  onPress={() => toggleUserSelection(user)}
+                  style={styles.chip}
+                  avatar={<Avatar.Text size={24} label={user.nombre[0]} />}
+                >
+                  {user.nombre}
+                </Chip>
+              ))}
+            </ScrollView>
           </View>
-        } actions={[<Button onPress={() => setOpenForm(false)}>Cancelar</Button>, <Button onPress={handleSubmit}>{isEditing ? "Actualizar" : "Crear"}</Button>]} />
-      </PaperProvider>
+        }
+        actions={[
+          <Button key="cancel" onPress={resetForm}>
+            Cancelar
+          </Button>,
+          <Button key="submit" onPress={handleSubmit}>
+            {isEditing ? "Actualizar" : "Crear"}
+          </Button>,
+        ]}
+      />
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
@@ -221,23 +311,24 @@ const Groups = () => {
         <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
       </Snackbar>
       <AddComponent onOpen={() => setOpenForm(true)} />
-    </>
-  );
-};
+    </PaperProvider>
+  )
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -248,25 +339,25 @@ const styles = StyleSheet.create({
     }),
   },
   headerActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   icon: {
     marginLeft: 16,
   },
   cardContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     padding: 16,
   },
   cardContainerSmall: {
-    flexDirection: 'column',
+    flexDirection: "column",
   },
   card: {
-    width: '48%',
+    width: "48%",
     marginBottom: 16,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.22,
         shadowRadius: 2.22,
@@ -277,15 +368,15 @@ const styles = StyleSheet.create({
     }),
   },
   cardSmall: {
-    width: '100%',
+    width: "100%",
   },
   cardTitle: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   cardValue: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginVertical: 8,
   },
   progressBar: {
@@ -296,7 +387,7 @@ const styles = StyleSheet.create({
     margin: 16,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -306,5 +397,36 @@ const styles = StyleSheet.create({
       },
     }),
   },
-});
-export default Groups;
+  formContainer: {
+    gap: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  searchBar: {
+    marginBottom: 10,
+  },
+  userList: {
+    maxHeight: 200,
+    marginBottom: 10,
+  },
+  chip: {
+    margin: 4,
+  },
+  selectedUsersContainer: {
+    marginTop: 10,
+  },
+  selectedUsers: {
+    flexDirection: "row",
+  },
+  selectedChip: {
+    margin: 4,
+    backgroundColor: "#e0e0e0",
+  },
+})
+
+export default Groups
+

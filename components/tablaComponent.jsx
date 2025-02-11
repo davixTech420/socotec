@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react"
+import React, { useState, useCallback, useMemo } from "react"
 import { StyleSheet, View, Platform, ScrollView, useWindowDimensions, TouchableOpacity } from "react-native"
 import {
   DataTable,
@@ -13,13 +13,10 @@ import {
   Dialog,
   Button,
   Snackbar,
-  Badge,
   Chip,
 } from "react-native-paper"
 import Animated, { FadeInUp, Layout } from "react-native-reanimated"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
-import { AlertaScroll } from "./alerta"
-import { getUsersGroup } from "@/services/adminServices"
 
 const TablaComponente = ({
   data,
@@ -63,22 +60,6 @@ const TablaComponente = ({
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState({ text: "", type: "success" })
 
-  const [openUserGroup, setOpenUserGroup] = useState(false)
-  const [usersInGroup, setUsersInGroup] = useState([])
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getUsersGroup(itemToDelete?.id)
-        setUsersInGroup(response)
-      } catch (error) {
-        console.error("Error al obtener los usuarios del grupo:", error)
-      }
-    }
-    if (itemToDelete?.id) {
-      fetchData()
-    }
-  }, [itemToDelete])
 
   const isSmallScreen = width < 768
   const isMediumScreen = width >= 768 && width < 1024
@@ -231,12 +212,12 @@ const TablaComponente = ({
     }
   }, [onCreate])
 
- 
-    const handleEdit = useCallback(
-      async (item) => {
-        if (onEdit) {
-          try {
-            await onEdit(item).then(() => {
+
+  const handleEdit = useCallback(
+    async (item) => {
+      if (onEdit) {
+        try {
+          await onEdit(item).then(() => {
             setSnackbarMessage({
               text: "Registro actualizado exitosamente",
               type: "success",
@@ -244,14 +225,14 @@ const TablaComponente = ({
           }).catch((error) => {
             return;
           });
-          } catch (error) {
-            return;
-          } 
-          setSnackbarVisible(true);
+        } catch (error) {
+          return;
         }
-      },
-      [onEdit]
-    );
+        setSnackbarVisible(true);
+      }
+    },
+    [onEdit]
+  );
 
 
   const renderCell = useCallback(
@@ -384,17 +365,9 @@ const TablaComponente = ({
                         <DataTable.Row style={styles.row}>
                           {columns.map((column) => (
                             <DataTable.Cell key={String(column.key)} style={[styles.cell, getColumnStyle(column)]}>
-                              {column.key === "usuariosGrupo" ? (
-                                <TouchableOpacity
-                                  style={{ justifyContent: "center", alignItems: "center" }}
-                                  onPress={() => setOpenUserGroup(true)}
-                                >
-                                  <MaterialCommunityIcons name="eye" size={24} color="black" />
-                                  <Text style={styles.cellText}>Ver Detalles</Text>
-                                </TouchableOpacity>
-                              ) : (
+                              
                                 <Text style={styles.cellText}>{renderCell(column, item)}</Text>
-                              )}
+                              
                             </DataTable.Cell>
                           ))}
 
@@ -505,13 +478,7 @@ const TablaComponente = ({
         </Snackbar>
       </View>
 
-      <AlertaScroll
-        onOpen={openUserGroup}
-        onClose={() => setOpenUserGroup(false)}
-        title="Usuarios del grupo"
-        content={<Text>asdasd</Text>}
-        actions={[<Button onPress={()=>setOpenUserGroup(false)} key="cancelar">Cancelar</Button>, <Button key="crear">Crear</Button>]}
-      />
+
     </>
   )
 }

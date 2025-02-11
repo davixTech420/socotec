@@ -1,6 +1,6 @@
-import React, { useEffect,useCallback, useState } from 'react';
-import { View, StyleSheet, ScrollView, useWindowDimensions, Platform, Dimensions } from 'react-native';
-import { PaperProvider, Text, Card, Button, FAB, Portal, Modal, ProgressBar, useTheme } from 'react-native-paper';
+import React, { useCallback, useState } from 'react';
+import { View, StyleSheet, ScrollView, useWindowDimensions, Platform } from 'react-native';
+import { PaperProvider, Text, Card, Button, ProgressBar, useTheme, Snackbar } from 'react-native-paper';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import TablaComponente from "@/components/tablaComponent";
 import Breadcrumb from "@/components/BreadcrumbComponent";
@@ -8,7 +8,7 @@ import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createProyect, getProyect, deleteProyect, activeProyect, inactiveProyect } from "@/services/adminServices";
+import { createProyect, getProyect, deleteProyect, activeProyect, inactiveProyect, updateProyect } from "@/services/adminServices";
 import { useFocusEffect } from '@react-navigation/native';
 
 const columns = [
@@ -26,13 +26,18 @@ const columns = [
 
 const Proyects = () => {
   const [data, setData] = useState([]);
- 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingProyectId, setEditingProyectId] = useState(null);
+  const [snackbarMessage, setSnackbarMessage] = useState(null);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+
 
 
   useFocusEffect(
     useCallback(() => {
       getProyect().then(setData).catch(console.error)
-    }))
+    }, []),
+  );
 
 
   const theme = useTheme();
@@ -50,77 +55,85 @@ const Proyects = () => {
     fechaEntrega: ''
   });
   //esta funcion es la que envia el formulario para el back para crear
-  const handleSubmit = async () => {
+
+
+  const handleSubmit = useCallback(async () => {
     try {
-      const response = await createProyect(formData);
-      console.log(response);
+      const requiredFields = isEditing ? ["nombre", "descripcion", "presupuesto", "cliente", "fechaInicio", "fechaEntrega"] : ["nombre", "descripcion", "presupuesto", "cliente", "fechaInicio", "fechaEntrega"];
+      const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field] === "")
+
+      if (emptyFields.length > 0) {
+        setOpenForm(false);
+        throw new Error(`Por favor, rellena los campos: ${emptyFields.join(", ")}`);
+      }
+
+      let newData;
+
+      if (isEditing) {
+        await updateProyect(editingProyectId, formData);
+        newData = data.map((item) => (item.id === editingProyectId ? { ...item, ...formData } : item));
+      } else {
+        const newProyect = await createProyect(formData);
+        if (!newProyect) throw new Error("No se ha podido crear el proyecto");
+        newData = [...data, newProyect]
+      }
+      setData(newData);
+      setSnackbarMessage({
+        text: `Usuario ${isEditing ? "actualizado" : "creado"} exitosamente`,
+        type: "success",
+      })
+      resetForm();
     } catch (error) {
-      console.error('Error al enviar el formulario:', error);
+      setSnackbarMessage({
+        text: error.message,
+        type: "error",
+      })
+    } finally {
+      setSnackbarVisible(true);
     }
-  };
+
+  }, [formData, data, isEditing, editingProyectId]);
 
 
-  const handleDelete = async (item) => {
-    try {
-      // Realizar la operación de eliminación (ej. llamada a API)
-      await deleteProyect(item.id);
-
-      // Actualizar el estado local
-      setData(prevData => prevData.filter(dataItem => dataItem.id !== item.id));
-
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error al eliminar el item:', error);
-      return Promise.reject(error);
-    }
-  };
-
-  const handleToggleActive = async (item) => {
-    try {
-      // Realizar la operación de activación (ej. llamada a API)
-      await activeProyect(item.id);
-
-      // Actualizar el estado local (activar el registro)
-      setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: true } : dataItem));
-
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error al activar el item:', error);
-      return Promise.reject(error);
-    }
-  };
-
-  const handleToggleInactive = async (item) => {
-    try {
-      await inactiveProyect(item.id);
-
-      // Actualizar el estado local (desactivar el registro)
-      setData(prevData => prevData.map(dataItem => dataItem.id === item.id ? { ...dataItem, active: false } : dataItem));
-
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error al desactivar el item:', error);
-      return Promise.reject(error);
-    }
-  };
-
-
-  const handleDataUpdate = (updatedData) => {
-    setData(updatedData)
+  const resetForm = () => {
+    setOpenForm(false);
+    setIsEditing(false);
+    setEditingProyectId(null);
+    setFormData({
+      nombre: '',
+      descripcion: '',
+      presupuesto: '',
+      cliente: '',
+      fechaInicio: '',
+      fechaEntrega: ''
+    });
+    setSnackbarVisible(false);
   }
+  const handleAction = useCallback(async (action, item) => {
+    try {
+      await action(item.id);
+      setData((prevData) => prevData.map((dataItem) => dataItem.id === item.id ? {
+        ...dataItem, estado: action === activeProyect
+      } : dataItem,),
+      )
+    } catch (error) {
+      console.error(`Error al ${action === activeProyect ? "activar" : "desactivar"} el usuario:`, error)
+    }
+  }, []);
 
-  const handleSort = (key, order) => {
-    console.log('Ordenando por:', key, order);
-  };
-
-  const handleSearch = (query) => {
-    console.log('Buscando:', query);
-  };
-
-
-  const handleFilter = (filters) => {
-    console.log('Filtrando:', filters);
-  };
+  const handleEdit = useCallback((item) => {
+    setFormData({
+      nombre: item.nombre,
+      descripcion: item.descripcion,
+      presupuesto: item.presupuesto,
+      cliente: item.cliente,
+      fechaInicio: item.fechaInicio,
+      fechaEntrega: item.fechaEntrega,
+    })
+    setEditingProyectId(item.id)
+    setIsEditing(true)
+    setOpenForm(true)
+  }, []);
 
   // Calculamos los totales usando parseInt y toFixed para evitar problemas de precisión
   const totalItems = data.length;
@@ -172,17 +185,6 @@ const Proyects = () => {
                 />
               </Card.Content>
             </Card>
-           {/*  <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
-              <Card.Content>
-                <Text style={styles.cardTitle}>Valor del Inventario</Text>
-                <Text style={styles.cardValue}>${totalValue.toFixed(2)}</Text>
-                <ProgressBar
-                  progress={valueProgress}
-                  color="#00ACE8"
-                  style={styles.progressBar}
-                />
-              </Card.Content>
-            </Card> */}
           </View>
           <Card style={styles.tableCard}>
             <Card.Content>
@@ -190,82 +192,59 @@ const Proyects = () => {
                 data={data}
                 columns={columns}
                 keyExtractor={(item) => String(item.id)}
-                onSort={handleSort}
-                onSearch={handleSearch}
-                onFilter={handleFilter}
-                onDelete={handleDelete}
-                onToggleActive={handleToggleActive}
-                onToggleInactive={handleToggleInactive}
-                onDataUpdate={handleDataUpdate}
+                onSort={console.log}
+                onSearch={console.log}
+                onFilter={console.log}
+                onDelete={async (item) => {
+                  await deleteProyect(item.id)
+                  setData((prevData) => prevData.filter((dataItem) => dataItemd.id !== item.id))
+                }}
+                onToggleActive={(item) => handleAction(activeProyect, item)}
+                onToggleInactive={(item) => handleAction(inactiveProyect, item)}
+                onDataUpdate={setData}
+                onCreate={handleSubmit}
+                onEdit={handleEdit}
               />
             </Card.Content>
           </Card>
         </ScrollView>
+        <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={3000}
+          style={{ }}
+          action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
+        >
+          <Text style={{ color: theme.colors.surface }}>{snackbarMessage?.text}</Text>
+        </Snackbar>
+        <AlertaScroll onOpen={openForm} onClose={resetForm} title={isEditing ? "Editar proyecto" : "Nuevo proyecto"} content={
 
-        <AlertaScroll onOpen={openForm} onClose={() => setOpenForm(false)} title="Nuevo registro de inventario" content={
-          <>
-            <View style={{
-              flexDirection: isSmallScreen ? "column" : 'row',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-            }}>
+          <View style={{
+            flexDirection: isSmallScreen ? "column" : 'row',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+          }}>
+
+
+            {["nombre", "descripcion", "precio", "cliente", "fechaInicio", "fechaEntrega"].map((field) => (
               <InputComponent
-                type="nombre"
-                value={formData.nombre}
-                onChangeText={(text) => setFormData({ ...formData, nombre: text })}
-                label="Nombre Proyecto"
-                placeholder="Introduce el nombre del proyecto"
+                key={field}
+                type={field == "nombre" ? "nombre" : field == "descripcion" ?
+                  "descripcion" : field == "precio" ? "precio" : field == "cliente" ? "nombre" : field == "fechaInicio" ? "date" : field == "fechaEntrega" ? "date" : "text"}
+                value={formData[field]}
+                onChangeText={(text) => setFormData((prev) => ({
+                  ...prev, [field]: text
+                }))}
+                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                placeholder={`Introduce el ${field}`}
                 validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un nombre válido"
+                errorMessage={`Por favor, introduce un ${field}`}
+
               />
-              <InputComponent
-                type="descripcion"
-                value={formData.descripcion}
-                onChangeText={(text) => setFormData({ ...formData, descripcion: text })}
-                label="Descripcion"
-                placeholder="Describe el proyecto"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce una descripcion válida"
-              />
-              <InputComponent
-                type="precio"
-                value={formData.presupuesto}
-                onChangeText={(text) => setFormData({ ...formData, presupuesto: text })}
-                label="Presupuesto"
-                placeholder="Introduce el presupuesto"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un presupuesto válido"
-              />
-              <InputComponent
-                type="nombre"
-                value={formData.cliente}
-                onChangeText={(text) => setFormData({ ...formData, cliente: text })}
-                label="Cliente"
-                placeholder="Introduce el cliente"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce una unidad de medida válida"
-              />
-              <InputComponent
-                type="date"
-                value={formData.fechaInicio}
-                onChangeText={(text) => setFormData({ ...formData, fechaInicio: text })}
-                label="Fecha Inicio"
-                placeholder="Introduce la fecha de inicio"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un precio válido"
-              />
-              <InputComponent
-                type="date"
-                value={formData.fechaEntrega}
-                onChangeText={(text) => setFormData({ ...formData, fechaEntrega: text })}
-                label="Fecha Entrega"
-                placeholder="Introduce la fecha de entrega"
-                validationRules={{ required: true }}
-                errorMessage="Por favor, introduce un precio válido"
-              />
-            </View>
-          </>
-        } actions={[<Button onPress={() => setOpenForm(false)}>Cancelar</Button>, <Button onPress={handleSubmit}>Crear</Button>]} />
+            ))}
+
+          </View>
+        } actions={[<Button onPress={resetForm}>Cancelar</Button>, <Button onPress={handleSubmit}>{isEditing ? "Actualizar" : "Crear"}</Button>]} />
       </PaperProvider>
       <AddComponent onOpen={() => setOpenForm(true)} />
     </>

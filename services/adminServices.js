@@ -422,6 +422,49 @@ export const getUsersGroup = async (id) => {
   }
 }
 
+export const createUsersGroup = async (req, res) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    const response = await axios.post(`${baseUrl}/userGroup`, req, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+    } });
+ return response.data;
+} catch(error){
+  console.error('Error al crear el usuario del grupo:', error);
+}
+}
+
+
+export const deleteUsersGroup = async (id) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    const response = await axios.delete(`${baseUrl}/userGroup/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+    } });
+ return response.data;
+} catch(error){
+  console.log('Error al eliminar el usuario del grupo:', error);
+}
+}
+
+
+export const getUsersNotGroup = async () => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    const response = await axios.get(`${baseUrl}/userNotGroup`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener los usuarios no en grupo", error);
+  }
+};
 
 
 
