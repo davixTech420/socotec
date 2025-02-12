@@ -4,6 +4,7 @@ import { TextInput, Avatar, Text, useTheme, Surface, Chip, IconButton } from "re
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { useAuth } from "@/context/userContext";
+import { Profiler } from "react-native-calendars"
 
 
 const AnimatedSurface = Animated.createAnimatedComponent(Surface)
@@ -15,8 +16,8 @@ const ProfileScreen = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [profileData, setProfileData] = useState({
     nombre: "",
-    email: "alex.johnson@company.com",
-    phone: "+1 234 567 890",
+    email: "",
+    phone: "",
     role: "Senior Developer",
     department: "Engineering",
     employeeId: "EMP-2024-001",
@@ -25,7 +26,7 @@ const ProfileScreen = () => {
     skills: ["React Native", "Node.js", "AWS", "Python", "Docker"],
     languages: ["English", "Spanish", "French"],
   })
-  const [editedData, setEditedData] = useState(profileData)
+  const [editedData, setEditedData] = useState(profileData);
 
    useEffect(() => {
       user().then(setProfileData).catch(error => console.log('Error user data:', error));
@@ -76,7 +77,7 @@ const ProfileScreen = () => {
           </View>
           <View style={styles.headerInfo}>
             <Text style={[styles.name, isSmallScreen && styles.nameSmall]}>{profileData?.nombre}</Text>
-            <Text style={styles.role}>{profileData  .role}</Text>
+            <Text style={styles.role}>{profileData.role}</Text>
             <Chip icon="badge-account" style={styles.idChip}>
               ID: {profileData?.id}
             </Chip>
@@ -129,30 +130,6 @@ const ProfileScreen = () => {
           </View>
         </AnimatedSurface>
       </Animated.View>
-
-      {/* Skills Section */}
-      {/* <AnimatedSurface elevation={1} style={styles.section}>
-        <Text style={styles.sectionTitle}>Habilidades</Text>
-        <View style={styles.skillsContainer}>
-          {profileData.skills.map((skill) => (
-            <Chip key={skill} style={styles.skillChip} textStyle={styles.skillChipText}>
-              {skill}
-            </Chip>
-          ))}
-        </View>
-      </AnimatedSurface> */}
-
-      {/* Languages Section */}
-      {/* <AnimatedSurface elevation={1} style={styles.section}>
-        <Text style={styles.sectionTitle}>Idiomas</Text>
-        <View style={styles.languagesContainer}>
-          {profileData.languages.map((language) => (
-            <Chip key={language} icon="translate" style={styles.languageChip}>
-              {language}
-            </Chip>
-          ))}
-        </View>
-      </AnimatedSurface> */}
     </ScrollView>
   )
 }

@@ -10,6 +10,7 @@ import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
 import { createProyect, getProyect, deleteProyect, activeProyect, inactiveProyect, updateProyect } from "@/services/adminServices";
 import { useFocusEffect } from '@react-navigation/native';
+import ExcelPreviewButton from "@/components/ExcelViewComponent"
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
@@ -61,7 +62,6 @@ const Proyects = () => {
     try {
       const requiredFields = isEditing ? ["nombre", "descripcion", "presupuesto", "cliente", "fechaInicio", "fechaEntrega"] : ["nombre", "descripcion", "presupuesto", "cliente", "fechaInicio", "fechaEntrega"];
       const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field] === "")
-
       if (emptyFields.length > 0) {
         setOpenForm(false);
         throw new Error(`Por favor, rellena los campos: ${emptyFields.join(", ")}`);
@@ -70,6 +70,8 @@ const Proyects = () => {
       let newData;
 
       if (isEditing) {
+        console.log(editingProyectId,formData);
+        
         await updateProyect(editingProyectId, formData);
         newData = data.map((item) => (item.id === editingProyectId ? { ...item, ...formData } : item));
       } else {
@@ -169,8 +171,8 @@ const Proyects = () => {
               ]}
             />
             <View style={styles.headerActions}>
-              <AntDesign name="pdffile1" size={24} color={theme.colors.primary} style={styles.icon} />
-              <MaterialCommunityIcons name="file-excel" size={24} color={theme.colors.primary} style={styles.icon} />
+            <ExcelPreviewButton data={data} columns={columns}/>
+              <AntDesign name="pdffile1" size={24} color="red" style={styles.icon} />
             </View>
           </View>
           <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
@@ -197,7 +199,7 @@ const Proyects = () => {
                 onFilter={console.log}
                 onDelete={async (item) => {
                   await deleteProyect(item.id)
-                  setData((prevData) => prevData.filter((dataItem) => dataItemd.id !== item.id))
+                  setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
                 }}
                 onToggleActive={(item) => handleAction(activeProyect, item)}
                 onToggleInactive={(item) => handleAction(inactiveProyect, item)}
@@ -226,11 +228,11 @@ const Proyects = () => {
           }}>
 
 
-            {["nombre", "descripcion", "precio", "cliente", "fechaInicio", "fechaEntrega"].map((field) => (
+            {["nombre", "descripcion", "presupuesto", "cliente", "fechaInicio", "fechaEntrega"].map((field) => (
               <InputComponent
                 key={field}
                 type={field == "nombre" ? "nombre" : field == "descripcion" ?
-                  "descripcion" : field == "precio" ? "precio" : field == "cliente" ? "nombre" : field == "fechaInicio" ? "date" : field == "fechaEntrega" ? "date" : "text"}
+                  "descripcion" : field == "presupuesto" ? "precio" : field == "cliente" ? "nombre" : field == "fechaInicio" ? "date" : field == "fechaEntrega" ? "date" : "text"}
                 value={formData[field]}
                 onChangeText={(text) => setFormData((prev) => ({
                   ...prev, [field]: text

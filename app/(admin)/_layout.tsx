@@ -49,9 +49,6 @@ function CustomDrawerContent(props) {
   const handleSignOut = () => {
     logout()
   }
-
-
-
   return (
     <SafeAreaView style={[styles.drawerContent, { backgroundColor: theme.colors.surface }]}>
       <ScrollView>
@@ -66,7 +63,6 @@ function CustomDrawerContent(props) {
           {props.state.routes.map((route, index) => {
             const { title, drawerIcon } = props.descriptors[route.key].options
             const isFocused = props.state.index === index
-
             return (
               <Button
                 key={route.key}
@@ -94,7 +90,6 @@ function CustomDrawerContent(props) {
     </SafeAreaView>
   )
 }
-
 function CustomAppBar({ title, navigation, drawerProgress }) {
   const theme = useTheme()
 

@@ -520,10 +520,10 @@ export const getProyect = async (req, res) => {
   }
 };
 
-export const deleteProyect = async (req, res) => {
+export const deleteProyect = async (id) => {
   try {
     const token = AsyncStorage.getItem("userToken");
-    const response = await axios.delete(`${baseUrl}/proyects/${req.id}`, {
+    const response = await axios.delete(`${baseUrl}/proyects/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -535,10 +535,10 @@ export const deleteProyect = async (req, res) => {
 }
 
 
-export const updateProyect = async (req, res) => {
+export const updateProyect = async (id,data) => {
   try {
     const token = AsyncStorage.getItem("userToken");
-    const response = await axios.put(`${baseUrl}/proyects/${req.id}`, req, {
+    const response = await axios.put(`${baseUrl}/proyects/${id}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
