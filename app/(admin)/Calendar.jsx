@@ -18,6 +18,7 @@ import {
 } from "@/services/adminServices"
 import { useFocusEffect } from "@react-navigation/native"
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
+import PDFViewComponent from "@/components/PdfViewComponent"
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -216,8 +217,8 @@ useFocusEffect(
             ]}
           />
           <View style={styles.headerActions}>
-          <ExcelPreviewButton data={data} columns={columns} />
-            <AntDesign name="pdffile1" size={24} color={theme.colors.primary} style={styles.icon} />
+          <PDFViewComponent data={data} columns={columns} iconStyle={styles.icon}/>
+          <ExcelPreviewButton data={data} columns={columns} iconStyle={styles.icon}/>
           </View>
         </View>
         <Card style={styles.tableCard}>
@@ -486,4 +487,3 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
 })
-

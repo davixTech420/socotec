@@ -66,11 +66,11 @@ function CustomDrawerContent(props) {
             return (
               <Button
                 key={route.key}
-                icon={({ size, color }) => drawerIcon({ color, size })}
+                icon={({ size, color }) => drawerIcon({  color:isFocused ? color:"black" , size })}
                 mode={isFocused ? "contained" : "text"}
                 onPress={() => props.navigation.navigate(route.name)}
-                style={styles.drawerItem}
-                labelStyle={styles.drawerItemLabel}
+                style={[styles.drawerItem,{backgroundColor:isFocused ? "#00ACE8" : "#fff"}]}
+                labelStyle={[styles.drawerItemLabel,{color:isFocused ? "white" : "black"}]}
               >
                 {title}
               </Button>
@@ -154,13 +154,14 @@ export default function App() {
             header: ({ navigation, route, options }) => (
               <CustomAppBar title={options.title} navigation={navigation} drawerProgress={drawerProgress} />
             ),
+           
           }}
+          
+
           drawerPosition="left"
           onStateChange={(state) => {
             const isOpen = state.history[state.history.length - 1].type === "drawer"
             setIsDrawerOpen(isOpen)
-            console.log("nuevao" + isDrawerOpen);
-
             drawerProgress.value = withTiming(isOpen ? 1 : 0, { duration: 300 })
           }}
         >
@@ -271,7 +272,7 @@ export default function App() {
             name="Calendar"
             options={{
               title: "Calendario",
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color}/>,
             }}
           >
             {(props) => (

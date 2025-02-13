@@ -113,7 +113,6 @@ const SignUp = () => {
       {error && <Text style={styles.errorText}>{error}</Text>}
     </Animated.View>
   );
-
   return (
     <>
       <ScrollView contentContainerStyle={styles.container}>
@@ -153,7 +152,7 @@ const SignUp = () => {
           </Animated.View>
         </Animated.View>
       </ScrollView>
-      <AlertaIcono onOpen={isOpenError} onClose={() => setIsOpenError(false)} icon="alert" title="Error" text="Credenciales incorrectas" actions={<>
+      <AlertaIcono onOpen={isOpenError} onClose={() => setIsOpenError(false)} icon="alert" title="Error" text="Credenciales incorrectas o usuario inactivo" actions={<>
         <Button onPress={() => setIsOpenError(false)}>Cerrar</Button>
       </>
       } />
@@ -171,7 +170,6 @@ const SignUp = () => {
     </>
   );
 };
-
 const styles = {
   container: {
     flexGrow: 1,

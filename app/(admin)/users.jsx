@@ -12,6 +12,7 @@ import { useFocusEffect } from "@react-navigation/native"
 import { router } from "expo-router"
 import DropdownComponent from "@/components/DropdownComponent"
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
+import PDFPreviewButton from "@/components/PdfViewComponent";
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -22,7 +23,7 @@ const columns = [
   { key: "role", title: "Rol", sortable: true },
   { key: "createdAt", title: "Creado", sortable: true },
   { key: "updatedAt", title: "Modificado", sortable: true },
-]
+];
 
 export default function Users() {
   const [data, setData] = useState([])
@@ -122,9 +123,8 @@ export default function Users() {
             ]}
           />
           <View style={styles.headerActions}>
-            <ExcelPreviewButton columns={columns} data={data} iconStyle={styles.icon} />
-            <AntDesign onPress={() => console.log("pdf")
-            } name="pdffile1" size={24} color="red" style={styles.icon} />
+          <PDFPreviewButton data={data} columns={columns} iconStyle={styles.icon}/>
+            <ExcelPreviewButton columns={columns} data={data} iconStyle={styles.icon}/>
           </View>
         </View>
         <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>

@@ -31,7 +31,8 @@ import {
   getUsersGroup,
   deleteUsersGroup,
 } from "@/services/adminServices"
-import ExcelPreviewButton from "@/components/ExcelViewComponent"
+import ExcelPreviewButton from "@/components/ExcelViewComponent";
+import PDFPreviewButton from "@/components/PdfViewComponent";
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -201,9 +202,8 @@ await deleteUsersGroup(user.id);
             items={[{ label: "Dashboard", onPress: () => router.navigate("/(admin)/Dashboard") }, { label: "Grupos" }]}
           />
           <View style={styles.headerActions}>
-            <ExcelPreviewButton  data={data} columns={columns} />
-            <AntDesign name="pdffile1" size={24} color="red" style={styles.icon} />
-            
+           <PDFPreviewButton data={data} columns={columns} iconStyle={styles.icon}/>
+            <ExcelPreviewButton  data={data} columns={columns} iconStyle={styles.icon}/>
           </View>
         </View>
         <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>

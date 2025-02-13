@@ -11,6 +11,7 @@ import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
 import { createInventory, getInventory, deleteInventory, activeInventory, inactiveInventory, updateInventory } from "@/services/adminServices";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
+import PDFViewComponent from '@/components/PdfViewComponent';
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
@@ -148,8 +149,8 @@ const Inventario = () => {
               ]}
             />
             <View style={styles.headerActions}>
+            <PDFViewComponent data={data} columns={columns} iconStyle={styles.icon} />
             <ExcelPreviewButton columns={columns} data={data} iconStyle={styles.icon} />
-              <AntDesign name="pdffile1" size={24} color={theme.colors.primary} style={styles.icon} />
             </View>
           </View>
           <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
