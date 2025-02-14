@@ -12,7 +12,6 @@ import {
   Chip,
   Avatar,
 } from "react-native-paper"
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import { useFocusEffect } from "@react-navigation/native"
 import TablaComponente from "@/components/tablaComponent"
 import Breadcrumb from "@/components/BreadcrumbComponent"
@@ -59,7 +58,7 @@ const Groups = () => {
   const [selectedUsers, setSelectedUsers] = useState([])
   const [searchQuery, setSearchQuery] = useState("")
 
- 
+
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
@@ -73,7 +72,7 @@ const Groups = () => {
           setSnackbarVisible(true);
         }
       };
-  
+
       fetchData();
     }, [])
   );
@@ -154,7 +153,7 @@ const Groups = () => {
       setSelectedUsers(usersGroup.map((item) => item.User))
       setIsEditing(true)
       setOpenForm(true)
-      
+
     } catch (error) {
       console.error("Error al cargar los usuarios del grupo:", error)
       setSnackbarMessage({ text: "Error al cargar los usuarios del grupo", type: "error" })
@@ -173,13 +172,13 @@ const Groups = () => {
     }
   }, [])
 
-  const toggleUserSelection = useCallback( async (user) => {
+  const toggleUserSelection = useCallback(async (user) => {
     if (!user?.id) {
       console.error('User ID is undefined');
       return;
     }
-await deleteUsersGroup(user.id);
-   
+    await deleteUsersGroup(user.id);
+
     setSelectedUsers((prevUsers) =>
       prevUsers.some((u) => u.id === user.id) ? prevUsers.filter((u) => u.id !== user.id) : [...prevUsers, user],
     )
@@ -202,8 +201,8 @@ await deleteUsersGroup(user.id);
             items={[{ label: "Dashboard", onPress: () => router.navigate("/(admin)/Dashboard") }, { label: "Grupos" }]}
           />
           <View style={styles.headerActions}>
-           <PDFPreviewButton data={data} columns={columns} iconStyle={styles.icon}/>
-            <ExcelPreviewButton  data={data} columns={columns} iconStyle={styles.icon}/>
+            <PDFPreviewButton data={data} columns={columns} iconStyle={styles.icon} />
+            <ExcelPreviewButton data={data} columns={columns} iconStyle={styles.icon} />
           </View>
         </View>
         <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>

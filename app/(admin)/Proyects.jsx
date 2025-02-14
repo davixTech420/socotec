@@ -1,14 +1,13 @@
 import React, { useCallback, useState } from 'react';
 import { View, StyleSheet, ScrollView, useWindowDimensions, Platform } from 'react-native';
-import { PaperProvider, Text, Card, Button, ProgressBar, useTheme, Snackbar } from 'react-native-paper';
-import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import { PaperProvider, Text, Card, Button, ProgressBar, useTheme, Snackbar, Chip, Searchbar, Avatar } from 'react-native-paper';
 import TablaComponente from "@/components/tablaComponent";
 import Breadcrumb from "@/components/BreadcrumbComponent";
 import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createProyect, getProyect, deleteProyect, activeProyect, inactiveProyect, updateProyect } from "@/services/adminServices";
+import { createProyect, getProyect, deleteProyect, activeProyect, inactiveProyect, updateProyect, getGroupNotProyect } from "@/services/adminServices";
 import { useFocusEffect } from '@react-navigation/native';
 import ExcelPreviewButton from "@/components/ExcelViewComponent"
 import PDFViewComponent from '@/components/PdfViewComponent';
@@ -28,6 +27,11 @@ const columns = [
 
 const Proyects = () => {
   const [data, setData] = useState([]);
+  //estos son los grupos sin proyecto
+  const [groupWhitProyect, setGroupWhitProyect] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("")
+
   const [isEditing, setIsEditing] = useState(false);
   const [editingProyectId, setEditingProyectId] = useState(null);
   const [snackbarMessage, setSnackbarMessage] = useState(null);
@@ -38,6 +42,7 @@ const Proyects = () => {
   useFocusEffect(
     useCallback(() => {
       getProyect().then(setData).catch(console.error)
+      getGroupNotProyect().then(setGroupWhitProyect).catch(console.error)
     }, []),
   );
 
@@ -71,8 +76,6 @@ const Proyects = () => {
       let newData;
 
       if (isEditing) {
-        console.log(editingProyectId,formData);
-        
         await updateProyect(editingProyectId, formData);
         newData = data.map((item) => (item.id === editingProyectId ? { ...item, ...formData } : item));
       } else {
@@ -138,6 +141,22 @@ const Proyects = () => {
     setOpenForm(true)
   }, []);
 
+
+  const handleToggleGroup = useCallback(async (group) => {
+    if (!group.id) {
+      console.error('Group ID is undefined');
+      return;
+    }
+    setSelectedGroup((prevGroupWhitProyect) =>
+      prevGroupWhitProyect.some((g) => g.id === group.id) ? prevGroupWhitProyect.filter((g) => g.id !== group.id) : [...prevGroupWhitProyect, group],
+    )
+  });
+
+
+  const filteredGroup = groupWhitProyect.filter((group) => group.nombre.toLowerCase().includes(searchQuery.toLowerCase()) && !selectedGroup.some((selectedGroup) => selectedGroup.id === group.id),);
+
+
+
   // Calculamos los totales usando parseInt y toFixed para evitar problemas de precisión
   const totalItems = data.length;
   const totalValue = data.reduce((sum, item) => {
@@ -172,8 +191,8 @@ const Proyects = () => {
               ]}
             />
             <View style={styles.headerActions}>
-            <PDFViewComponent data={data} columns={columns} iconStyle={styles.icon} />
-            <ExcelPreviewButton data={data} columns={columns} iconStyle={styles.icon} />
+              <PDFViewComponent data={data} columns={columns} iconStyle={styles.icon} />
+              <ExcelPreviewButton data={data} columns={columns} iconStyle={styles.icon} />
             </View>
           </View>
           <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
@@ -215,7 +234,7 @@ const Proyects = () => {
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
           duration={3000}
-          style={{ }}
+
           action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
         >
           <Text style={{ color: theme.colors.surface }}>{snackbarMessage?.text}</Text>
@@ -245,7 +264,39 @@ const Proyects = () => {
 
               />
             ))}
-
+            <View>
+              <Text>
+                Grupo Seleccionado
+              </Text>
+              <ScrollView horizontal style={styles.selectedGroup}>
+               {selectedGroup.map((group) => (
+                <Chip style={styles.selectedChip} key={group.id}
+                onClose={() => handleToggleGroup(group)}
+                avatar={<Avatar.Text size={24} label={group.nombre[0]}/>}
+                >
+{group.nombre}
+                </Chip>
+               ))}
+              </ScrollView>
+            </View>
+            <View style={styles.groupList}>
+              <Text>Grupos Disponibles</Text>
+              <Searchbar placeholder='Buscar'
+                onChangeText={setSearchQuery}
+                value={searchQuery}
+              />
+              <ScrollView horizontal style={styles.selectedGroup}>
+                {filteredGroup.map((group) => (
+                  <Chip key={group.id}
+                    onPress={() => handleToggleGroup(group)}
+                    avatar={<Avatar.Text size={24} label={group.nombre[0]} />}
+                    style={styles.selectedChip}
+                  >
+                    {group.nombre}
+                  </Chip>
+                ))}
+              </ScrollView>
+            </View>
           </View>
         } actions={[<Button onPress={resetForm}>Cancelar</Button>, <Button onPress={handleSubmit}>{isEditing ? "Actualizar" : "Crear"}</Button>]} />
       </PaperProvider>
@@ -335,5 +386,16 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  selectedChip:{
+    margin: 4,
+    backgroundColor: "#e0e0e0",
+  },
+  selectedGroupContainer:{
+    marginTop: 10,
+  },
+  groupList:{
+    maxHeight: 200, 
+    marginBottom:10,
+  }
 });
 export default Proyects;
