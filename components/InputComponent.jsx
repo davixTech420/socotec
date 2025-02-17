@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { View, StyleSheet, useWindowDimensions, Platform } from "react-native"
 import { TextInput, HelperText } from "react-native-paper"
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
-import DateTimePickerModal from "react-native-modal-datetime-picker"
+/* import DateTimePickerModal from "react-native-modal-datetime-picker"; */
 
 function InputComponent({
   type = "text",
@@ -20,7 +20,7 @@ function InputComponent({
   const { width } = useWindowDimensions()
   const isSmallScreen = width < 600
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
-  const [visiblePass,setVisiblePass] = useState(false);
+  const [visiblePass, setVisiblePass] = useState(false);
 
   const handleChange = (text) => {
     setInputValue(text)
@@ -87,16 +87,16 @@ function InputComponent({
       inputProps.onChangeText = (text) => {
         const validText = text.replace(/[^A-Za-z]/g, "");
         if (validText !== inputValue) {
-            setInputValue(validText);
-            onChangeText?.(validText); 
+          setInputValue(validText);
+          onChangeText?.(validText);
         }
-    };
-    inputProps.value = inputValue;
+      };
+      inputProps.value = inputValue;
       break
     case "descripcion":
       inputProps.left = <TextInput.Icon icon={() => <MaterialIcons name="description" size={24} color="black" />} />
       break
-        case "number":
+    case "number":
       inputProps.keyboardType = Platform.OS === "web" ? "numeric" : "number-pad"
       inputProps.left = <TextInput.Icon icon={() => <MaterialIcons name="numbers" size={24} color="black" />} />
       inputProps.maxLength = 10
@@ -104,11 +104,11 @@ function InputComponent({
         const validText = text.replace(/[^0-9]/g, "").slice(0, 10);
         const processedText = validText.length > 0 && validText[0] !== "3" ? "3" + validText.slice(1) : validText;
         if (processedText !== inputValue) {
-            setInputValue(processedText);
-            onChangeText?.(processedText); 
+          setInputValue(processedText);
+          onChangeText?.(processedText);
         }
-    };
-    inputProps.value = inputValue;
+      };
+      inputProps.value = inputValue;
       break
     case "precio":
       inputProps.keyboardType = "numeric"
@@ -130,7 +130,7 @@ function InputComponent({
       inputProps.multiline = true
       break
     case "date":
-      inputProps.editable = false
+      inputProps.editable = true
       inputProps.left = (
         <TextInput.Icon icon={() => <Ionicons name="calendar" size={24} color="black" />} onPress={showDatePicker} />
       )
@@ -153,15 +153,14 @@ function InputComponent({
       <HelperText type="error" visible={!isValid}>
         {errorMessage}
       </HelperText>
-      {type === "date" && (
+      {/* {type === "date" && (
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
           mode="date"
           onConfirm={handleConfirm}
           onCancel={hideDatePicker}
         />
-      )}
-       
+      )} */}
     </View>
   )
 }

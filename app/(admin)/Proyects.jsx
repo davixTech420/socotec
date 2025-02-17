@@ -64,6 +64,11 @@ const Proyects = () => {
   //esta funcion es la que envia el formulario para el back para crear
 
 
+  const dataToSubmit = {
+    ...formData,
+    grupos: selectedGroup.map((group) => group.id),
+  }
+
   const handleSubmit = useCallback(async () => {
     try {
       const requiredFields = isEditing ? ["nombre", "descripcion", "presupuesto", "cliente", "fechaInicio", "fechaEntrega"] : ["nombre", "descripcion", "presupuesto", "cliente", "fechaInicio", "fechaEntrega"];
@@ -79,7 +84,9 @@ const Proyects = () => {
         await updateProyect(editingProyectId, formData);
         newData = data.map((item) => (item.id === editingProyectId ? { ...item, ...formData } : item));
       } else {
-        const newProyect = await createProyect(formData);
+        const newProyect = await createProyect(dataToSubmit);
+        console.log(dataToSubmit);
+        
         if (!newProyect) throw new Error("No se ha podido crear el proyecto");
         newData = [...data, newProyect]
       }
@@ -99,6 +106,8 @@ const Proyects = () => {
     }
 
   }, [formData, data, isEditing, editingProyectId]);
+
+
 
 
   const resetForm = () => {
@@ -153,7 +162,7 @@ const Proyects = () => {
   });
 
 
-  const filteredGroup = groupWhitProyect.filter((group) => group.nombre.toLowerCase().includes(searchQuery.toLowerCase()) && !selectedGroup.some((selectedGroup) => selectedGroup.id === group.id),);
+  const filteredGroup = groupWhitProyect.filter((group) => group.estado == true && group.nombre.toLowerCase().includes(searchQuery.toLowerCase()) && !selectedGroup.some((selectedGroup) => selectedGroup.id === group.id),);
 
 
 

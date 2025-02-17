@@ -18,7 +18,7 @@ import Model3D from "./Model3D";
 import CalendarComponent from "./Calendar";
 import Group from "./Groups";
 import Finance from "./Finance";
-import { useProtectedRoute, useAuth } from "@/context/userContext"
+import { useProtectedRoute, useAuth } from "@/context/userContext";
 import ProfileScreen from "./MyAccount";
 
 
@@ -30,7 +30,7 @@ function AnimatedScreen({ children, style, staticButton }) {
     <Animated.View style={[styles.screen, style]}>
       <ScrollView contentContainerStyle={styles.screenContent}>
         {children}
-        
+
       </ScrollView>
     </Animated.View>
   )
@@ -67,11 +67,11 @@ function CustomDrawerContent(props) {
             return (
               <Button
                 key={route.key}
-                icon={({ size, color }) => drawerIcon({  color:isFocused ? color:"black" , size })}
+                icon={({ size, color }) => drawerIcon({ color: isFocused ? color : "black", size })}
                 mode={isFocused ? "contained" : "text"}
                 onPress={() => props.navigation.navigate(route.name)}
-                style={[styles.drawerItem,{backgroundColor:isFocused ? "#00ACE8" : "#fff"}]}
-                labelStyle={[styles.drawerItemLabel,{color:isFocused ? "white" : "black"}]}
+                style={[styles.drawerItem, { backgroundColor: isFocused ? "#00ACE8" : "#fff" }]}
+                labelStyle={[styles.drawerItemLabel, { color: isFocused ? "white" : "black" }]}
               >
                 {title}
               </Button>
@@ -155,9 +155,9 @@ export default function App() {
             header: ({ navigation, route, options }) => (
               <CustomAppBar title={options.title} navigation={navigation} drawerProgress={drawerProgress} />
             ),
-           
+
           }}
-          
+
 
           drawerPosition="left"
           onStateChange={(state) => {
@@ -273,7 +273,7 @@ export default function App() {
             name="Calendar"
             options={{
               title: "Calendario",
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color}/>,
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
             }}
           >
             {(props) => (

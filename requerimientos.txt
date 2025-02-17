@@ -55,14 +55,5 @@ hacer modelado 3d
 
 dependencias posibles a borrar 
 
-
-
-
-expo-sharing
-import * as FileSystem from "expo-file-system"
-import * as Print from "expo-print"
-
-
-npm install jspdf jspdf-autotable react-pdf
-npm install jspdf jspdf-autotable react-native-blob-util
+npm install @react-native-community/datetimepicker
 

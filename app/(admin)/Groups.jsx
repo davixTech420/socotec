@@ -185,7 +185,8 @@ const Groups = () => {
   }, [])
 
   const filteredUsers = users.filter(
-    (user) =>
+    (user) => 
+      user.estado === true &&
       user.nombre.toLowerCase().includes(searchQuery.toLowerCase()) &&
       !selectedUsers.some((selectedUser) => selectedUser.id === user.id),
   )
