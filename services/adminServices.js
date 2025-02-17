@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.4.206:${port}/api/admin`;
+const baseUrl = `http://10.48.5.62:${port}/api/admin`;
 
 
 
@@ -714,4 +714,4 @@ export const inactivePermission = async (id) => {
 * 
  * aca termina la funcionalidad para los permisos y calendario
  * 
- */
+ */ 

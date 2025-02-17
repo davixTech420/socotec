@@ -79,13 +79,13 @@ export default function CalendarComponent() {
     return marks
   }, [])
 
-useFocusEffect(
+/* useFocusEffect(
     useCallback(() => {
       getPermissions().then(setData).catch(console.error)
     }, []),
-  );
+  ); */
 
- /*  useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getPermissions()
@@ -97,7 +97,7 @@ useFocusEffect(
       }
     }
     fetchData()
-  }, [processPermissionsForCalendar]) */
+  }, [processPermissionsForCalendar])
 
   const handleDayPress = (day) => {
     setFormData({ ...formData, fechaInicio: day.dateString })
