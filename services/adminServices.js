@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.5.62:${port}/api/admin`;
+const baseUrl = `http://10.48.5.38:${port}/api/admin`;
 
 
 
@@ -67,9 +67,9 @@ export const inactivateUser = async (id) => {
         'Content-Type': 'application/json',
       },
     });
-    return response.data; // Retorna los datos de la respuesta
+    return response.data;
   } catch (error) {
-    console.error('Error al desactivar usuario:', error);
+    console.error('Error al desactivar usuario:',error);
   }
 };
 
@@ -331,7 +331,7 @@ export const createGroup = async (group) => {
 };
 
 
-export const updateGroup = async (id,group) => {
+export const updateGroup = async (id, group) => {
   try {
     const token = AsyncStorage.getItem("userToken");
     if (!token) {
@@ -398,7 +398,7 @@ export const inactivateGroup = async (id) => {
 
 
 export const getGroupNotProyect = async () => {
-  try{
+  try {
     const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
     if (!token) {
       console.error('No se encontró el token');
@@ -411,10 +411,10 @@ export const getGroupNotProyect = async () => {
       },
     });
 
-return response.data;
+    return response.data;
 
-  }catch(error){
-    return console.error("Error al obtener los grupos sin proyectos",error);  
+  } catch (error) {
+    return console.error("Error al obtener los grupos sin proyectos", error);
   }
 
 }
@@ -452,11 +452,12 @@ export const createUsersGroup = async (req, res) => {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
-    } });
- return response.data;
-} catch(error){
-  console.error('Error al crear el usuario del grupo:', error);
-}
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error al crear el usuario del grupo:', error);
+  }
 }
 
 
@@ -467,11 +468,12 @@ export const deleteUsersGroup = async (id) => {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
-    } });
- return response.data;
-} catch(error){
-  console.log('Error al eliminar el usuario del grupo:', error);
-}
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.log('Error al eliminar el usuario del grupo:', error);
+  }
 }
 
 
@@ -558,7 +560,7 @@ export const deleteProyect = async (id) => {
 }
 
 
-export const updateProyect = async (id,data) => {
+export const updateProyect = async (id, data) => {
   try {
     const token = AsyncStorage.getItem("userToken");
     const response = await axios.put(`${baseUrl}/proyects/${id}`, data, {

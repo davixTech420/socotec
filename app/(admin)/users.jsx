@@ -87,16 +87,16 @@ export default function Users() {
 
   const handleAction = useCallback(async (action, item) => {
     try {
-      await action(item.id)
-      setData((prevData) =>
+     await action(item.id)
+      /* setData((prevData) =>
         prevData.map((dataItem) =>
           dataItem.id === item.id ? { ...dataItem, estado: action === activateUser } : dataItem,
         ),
-      )
+      ) */
     } catch (error) {
       console.error(`Error al ${action === activateUser ? "activar" : "desactivar"} el usuario:`, error)
     }
-  }, [])
+  }, []);
 
   const handleEdit = useCallback((item) => {
     setFormData({
@@ -123,8 +123,8 @@ export default function Users() {
             ]}
           />
           <View style={styles.headerActions}>
-          <PDFPreviewButton data={data} columns={columns} iconStyle={styles.icon}/>
-            <ExcelPreviewButton columns={columns} data={data} iconStyle={styles.icon}/>
+            <PDFPreviewButton data={data} columns={columns} iconStyle={styles.icon} />
+            <ExcelPreviewButton columns={columns} data={data} iconStyle={styles.icon} />
           </View>
         </View>
         <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
