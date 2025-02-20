@@ -370,7 +370,6 @@ const TablaComponente = ({
                               
                             </DataTable.Cell>
                           ))}
-
                           <DataTable.Cell style={[styles.cell, getColumnStyle({ width: 120 })]}>
                             <View style={styles.actionButtons}>
                               <IconButton
