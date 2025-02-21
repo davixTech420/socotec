@@ -18,6 +18,7 @@ import Model3D from "./Model3D";
 import CalendarComponent from "./Calendar";
 import Group from "./Groups";
 import Finance from "./Finance";
+import Portfolio from "./Portfolio";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import ProfileScreen from "./MyAccount";
 
@@ -157,8 +158,6 @@ export default function App() {
             ),
 
           }}
-
-
           drawerPosition="left"
           onStateChange={(state) => {
             const isOpen = state.history[state.history.length - 1].type === "drawer"
@@ -195,8 +194,6 @@ export default function App() {
             )}
           </Drawer.Screen>
 
-
-
           <Drawer.Screen
             name="users"
             options={{
@@ -225,8 +222,6 @@ export default function App() {
             )}
           </Drawer.Screen>
 
-
-
           <Drawer.Screen
             name="inventario"
             options={{
@@ -242,6 +237,7 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
+
           <Drawer.Screen
             name="Proyects"
             options={{
@@ -255,6 +251,21 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
+
+          <Drawer.Screen
+            name="Portfolio"
+            options={{
+              title: "Portafolio",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="briefcase" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Portfolio {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
           <Drawer.Screen
             name="Finance"
             options={{
@@ -282,8 +293,6 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
-
-
 
           <Drawer.Screen
             name="report"
@@ -328,8 +337,6 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
-
-
         </Drawer.Navigator>
       </SafeAreaView>
     </PaperProvider>

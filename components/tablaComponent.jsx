@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react"
-import { StyleSheet, View, Platform, ScrollView, useWindowDimensions, TouchableOpacity } from "react-native"
+import { StyleSheet, View, Platform, ScrollView, useWindowDimensions, Image } from "react-native"
 import {
   DataTable,
   Text,
@@ -250,6 +250,13 @@ const TablaComponente = ({
           </Chip>
         )
       }
+      if (column.key === "imagenes") {
+        return (
+          <>
+            <Image source={{ uri: item.imagenes[0].uri }} style={{ width: 100, height: 100 }} />
+          </>
+        )
+      }
       if (column.render) {
         return column.render(item[column.key], item)
       }
@@ -365,9 +372,9 @@ const TablaComponente = ({
                         <DataTable.Row style={styles.row}>
                           {columns.map((column) => (
                             <DataTable.Cell key={String(column.key)} style={[styles.cell, getColumnStyle(column)]}>
-                              
-                                <Text style={styles.cellText}>{renderCell(column, item)}</Text>
-                              
+
+                              <Text style={styles.cellText}>{renderCell(column, item)}</Text>
+
                             </DataTable.Cell>
                           ))}
                           <DataTable.Cell style={[styles.cell, getColumnStyle({ width: 120 })]}>

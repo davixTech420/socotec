@@ -153,14 +153,15 @@ function InputComponent({
       <HelperText type="error" visible={!isValid}>
         {errorMessage}
       </HelperText>
-      {/* {type === "date" && (
+      {/*   {type === "date" && (
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
           mode="date"
           onConfirm={handleConfirm}
           onCancel={hideDatePicker}
         />
-      )} */}
+      )}
+        */} 
     </View>
   )
 }

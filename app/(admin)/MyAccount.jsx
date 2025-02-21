@@ -1,10 +1,9 @@
-import { useState,useEffect } from "react"
+import { useState, useEffect } from "react"
 import { StyleSheet, View, ScrollView, Platform, useWindowDimensions } from "react-native"
 import { TextInput, Avatar, Text, useTheme, Surface, Chip, IconButton } from "react-native-paper"
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { useAuth } from "@/context/userContext";
-import { Profiler } from "react-native-calendars"
 
 
 const AnimatedSurface = Animated.createAnimatedComponent(Surface)
@@ -17,21 +16,18 @@ const ProfileScreen = () => {
   const [profileData, setProfileData] = useState({
     nombre: "",
     email: "",
-    phone: "",
-    role: "Senior Developer",
-    department: "Engineering",
-    employeeId: "EMP-2024-001",
-    joinDate: "01/15/2022",
-    location: "San Francisco, CA",
+    telefono: "",
+    role: "",
+    password:"",
     skills: ["React Native", "Node.js", "AWS", "Python", "Docker"],
     languages: ["English", "Spanish", "French"],
   })
   const [editedData, setEditedData] = useState(profileData);
 
-   useEffect(() => {
-      user().then(setProfileData).catch(error => console.log('Error user data:', error));
-    }, []);
-  
+  useEffect(() => {
+    user().then(setProfileData).catch(error => console.log('Error user data:', error));
+  }, []);
+
 
   const handleSave = () => {
     setProfileData(editedData)
@@ -45,20 +41,6 @@ const ProfileScreen = () => {
     { icon: "check-circle-outline", label: "Tareas Completadas", value: "45", color: "#9C27B0" },
   ]
 
-  const renderFormField = (label, key, icon) => (
-    <View style={styles.formField}>
-      <MaterialCommunityIcons name={icon} size={24} color={theme.colors.primary} style={styles.formIcon} />
-      <TextInput
-        label={label}
-        value={editedData[key]}
-        onChangeText={(text) => setEditedData({ ...editedData, [key]: text })}
-        mode="outlined"
-        style={styles.formInput}
-        disabled={!isEditing}
-      />
-    </View>
-  )
-
   const isSmallScreen = width < 600
   const isMediumScreen = width >= 600 && width < 1024
 
@@ -70,7 +52,7 @@ const ProfileScreen = () => {
           <View style={styles.avatarSection}>
             <Avatar.Image
               size={isSmallScreen ? 80 : 120}
-              source={{ src: "https://i.pravatar.cc/300" }}
+              source={require("../../assets/images/favicon.png")}
               style={styles.avatar}
             />
             <View style={styles.onlineIndicator} />
@@ -117,16 +99,66 @@ const ProfileScreen = () => {
             />
           </View>
           <View style={[styles.formFields, !isSmallScreen && styles.formFieldsRow]}>
-            {renderFormField("Nombre", "nombre", "account")}
-            {renderFormField("Email", "email", "email")}
+          <View style={styles.formField}>
+      <MaterialCommunityIcons name="account" size={24} color={theme.colors.primary} style={styles.formIcon} />
+      <TextInput
+        label="Nombre"
+        value={profileData?.nombre}
+        onChangeText={(text) => setProfileData({ ...profileData, nombre: text })}
+        mode="outlined"
+        style={styles.formInput}
+        disabled={!isEditing}
+      />
+    </View>
+    <View style={styles.formField}>
+      <MaterialCommunityIcons name="email" size={24} color={theme.colors.primary} style={styles.formIcon} />
+      <TextInput
+        label="Email"
+        value={profileData?.email}
+        onChangeText={(text) => setProfileData({ ...profileData, email: text })}
+        mode="outlined"
+        style={styles.formInput}
+        disabled={!isEditing}
+      />
+    </View>
+           
           </View>
           <View style={[styles.formFields, !isSmallScreen && styles.formFieldsRow]}>
-            {renderFormField("Teléfono", "phone", "phone")}
-            {renderFormField("Rol", "role", "briefcase")}
+          <View style={styles.formField}>
+      <MaterialCommunityIcons name="phone" size={24} color={theme.colors.primary} style={styles.formIcon} />
+      <TextInput
+        value={profileData?.telefono}
+        label="Telefono"
+        onChangeText={(text) => setProfileData({ ...profileData, telefono: text })}
+        mode="outlined"
+        style={styles.formInput}
+        disabled={!isEditing}
+      />
+    </View>
+    <View style={styles.formField}>
+      <MaterialCommunityIcons name="briefcase" size={24} color={theme.colors.primary} style={styles.formIcon} />
+      <TextInput
+        value={profileData?.role}
+        label="Rol"
+        onChangeText={(text) => setProfileData({ ...profileData, role: text })}
+        mode="outlined"
+        style={styles.formInput}
+        disabled={!isEditing}
+      />
+    </View>
           </View>
           <View style={[styles.formFields, !isSmallScreen && styles.formFieldsRow]}>
-            {renderFormField("Departamento", "department", "domain")}
-            {renderFormField("Ubicación", "location", "map-marker")}
+          <View style={styles.formField}>
+      <MaterialCommunityIcons name="lock" size={24} color={theme.colors.primary} style={styles.formIcon} />
+      <TextInput
+        value={profileData?.password}
+        label="Contraseña"
+        onChangeText={(text) => setProfileData({ ...profileData, password: text })}
+        mode="outlined"
+        style={styles.formInput}
+        disabled={!isEditing}
+      />
+    </View>
           </View>
         </AnimatedSurface>
       </Animated.View>

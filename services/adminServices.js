@@ -1,10 +1,9 @@
 import axios from "axios";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.5.38:${port}/api/admin`;
+const baseUrl = `http://10.48.0.22:${port}/api/admin`;
 
 
 
@@ -717,3 +716,134 @@ export const inactivePermission = async (id) => {
  * aca termina la funcionalidad para los permisos y calendario
  * 
  */ 
+
+
+
+
+
+
+/*
+endpoint  para el portafolio
+*/
+
+export const getPortfolio = async () => {
+  try {
+    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
+    if (!token) {
+      console.error('No se encontró el token');
+      return; // O maneja el error como desees
+    }
+    const response = await axios.get(`${baseUrl}/portfolio`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data; // Retorna los datos de la respuesta
+  } catch (error) {
+    console.error('Error al obtener el portafolio:', error);
+  }
+};
+
+
+export const createPortfolio = async (data) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    if (!token) {
+      console.error('No se encontró el token');
+      return; // O maneja el error como desees
+    }
+    const response = await axios.post(`${baseUrl}/portfolio`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type":"multipart/form-data",
+        
+      },
+    });
+    return response.data; // Retorna los datos de la respuesta
+  } catch (error) {
+    console.error('Error al crear el portafolio:', error);
+  }
+};
+
+
+export const updatePortfolio = async (id, data) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    if (!token) {
+      console.error('No se encontró el token');
+      return; // O maneja el error como desees
+    }
+    const response = await axios.put(`${baseUrl}/portfolio/${id}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data; // Retorna los datos de la respuesta
+  } catch (error) {
+    console.error('Error al actualizar el portafolio:', error);
+  }
+}
+
+
+export const deletePortfolio = async (id) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    if (!token) {
+      console.error('No se encontró el token');
+      return; // O maneja el error como desees
+    }
+    const response = await axios.delete(`${baseUrl}/portfolio/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data; // Retorna los datos de la respuesta
+  } catch (error) {
+    console.error('Error al eliminar el portafolio:', error);
+  }
+};
+
+
+export const inactivePortfolio = async (id) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    if (!token) {
+      console.error('No se encontró el token');
+      return; // O maneja el error como desees
+    }
+    const response = await axios.put(`${baseUrl}/portfolio/${id}/inactive`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data; // Retorna los datos de la respuesta
+  } catch (error) {
+    console.error('Error al desactivar el portafolio:', error);
+  }
+};
+
+export const activePortfolio = async (id) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    if (!token) {
+      console.error('No se encontró el token');
+      return; // O maneja el error como desees
+    }
+    const response = await axios.put(`${baseUrl}/portfolio/${id}/active`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data; // Retorna los datos de la respuesta
+  } catch (error) {
+    console.error('Error al activar el portafolio:', error);
+  }
+};
+/**a
+ * aca termina las funcionalidades para el portafolio
+ */
