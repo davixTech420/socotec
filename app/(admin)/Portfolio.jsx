@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { View, StyleSheet, ScrollView, useWindowDimensions, Platform,Image } from 'react-native';
-import { PaperProvider, Text, Card, Button, ProgressBar, useTheme, Snackbar } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, useWindowDimensions, Platform, Image } from 'react-native';
+import { PaperProvider, Text, Card, Button, ProgressBar, useTheme, Snackbar,IconButton } from 'react-native-paper';
 import { useFocusEffect } from "@react-navigation/native"
 import TablaComponente from "@/components/tablaComponent";
 import Breadcrumb from "@/components/BreadcrumbComponent";
@@ -8,10 +8,12 @@ import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createPortfolio, getPortfolio, deleteInventory, activeInventory, inactiveInventory, updateInventory } from "@/services/adminServices";
+import { createPortfolio, getPortfolio, deletePortfolio, activePortfolio, inactivePortfolio, updateInventory } from "@/services/adminServices";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFViewComponent from '@/components/PdfViewComponent';
-import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
+import { SrcImagen } from '@/services/publicServices';
+
 
 const columns = [
   { key: 'id', title: 'ID', sortable: true, width: 50 },
@@ -39,9 +41,9 @@ const Portfolio = () => {
     ubicacion: '',
     presupuesto: '',
     descripcion: '',
-    superficie:"",
-    imagenes:[],
-    detalle:"",
+    superficie: "",
+    imagenes: [],
+    detalle: "",
   });
   const [openForm, setOpenForm] = useState(false);
   //estados de los estilos
@@ -54,37 +56,108 @@ const Portfolio = () => {
     }, []),
   );
 
+  /*  const handleSubmit = useCallback(async () => {
+     try {
+       const requiredFields = isEditing ? ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie","detalle"] : ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie","detalle"];
+       const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "")
+ 
+       if (emptyFields.length > 0) {
+         setOpenForm(false);
+         throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
+       }
+ 
+       let newData
+       if (isEditing) {
+         await updateInventory(editingInventoryId, formData)
+         newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item))
+       } else {
+         console.log("crear",formData);
+         
+         const newUser = await createPortfolio(formData)
+         if (!newUser) throw new Error("Error al crear el usuario")
+         newData = [...data, newUser.inventory]
+       }
+       setData(newData)
+       setSnackbarMessage({
+         text: `Portafolio ${isEditing ? "actualizado" : "creado"} exitosamente`,
+         type: "success",
+       })
+       resetForm()
+     } catch (error) {
+       setSnackbarMessage({ text: error.message, type: "error" })
+     } finally {
+       setSnackbarVisible(true)
+     }
+   }, [formData, isEditing, editingInventoryId, data]) */
+
+
   const handleSubmit = useCallback(async () => {
     try {
-      const requiredFields = isEditing ? ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie","detalle"] : ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie","detalle"];
-      const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "")
+      const requiredFields = isEditing
+        ? ['nombre', 'cliente', 'ubicacion', 'presupuesto', 'descripcion', 'superficie', 'detalle']
+        : ['nombre', 'cliente', 'ubicacion', 'presupuesto', 'descripcion', 'superficie', 'detalle'];
+      const emptyFields = requiredFields.filter(
+        (field) => !formData[field] || formData[field].trim() === ''
+      );
 
       if (emptyFields.length > 0) {
         setOpenForm(false);
-        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
+        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(', ')}`);
       }
 
-      let newData
-      if (isEditing) {
-        await updateInventory(editingInventoryId, formData)
-        newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item))
-      } else {
-        const newUser = await createPortfolio(formData)
-        if (!newUser) throw new Error("Error al crear el usuario")
-        newData = [...data, newUser.inventory]
+      const form = new FormData();
+
+      // Agregar imágenes al FormData
+      for (const image of formData.imagenes) {
+        if (Platform.OS === 'web') {
+          // En la web, necesitamos convertir la URI en un objeto File o Blob
+          const response = await fetch(image.uri);
+          const blob = await response.blob();
+          const file = new File([blob], image.name, { type: image.type });
+          form.append('imagenes', file);
+        } else {
+          // En móviles, podemos usar el objeto directamente
+          form.append('imagenes', {
+            uri: image.uri,
+            type: image.type,
+            name: image.name,
+          });
+        }
       }
-      setData(newData)
+
+      // Agregar otros datos del formulario al FormData
+      for (const key in formData) {
+        if (key !== 'imagenes') {
+          form.append(key, formData[key]);
+        }
+      }
+
+      let newData;
+      if (isEditing) {
+        await updateInventory(editingInventoryId, form); // Enviar FormData
+        newData = data.map((item) =>
+          item.id === editingInventoryId ? { ...item, ...formData } : item
+        );
+      } else {
+        
+
+        const newUser = await createPortfolio(form); // Enviar FormData
+        if (!newUser) throw new Error('Error al crear el usuario');
+        newData = [...data, newUser.proyect];
+      }
+      setData(newData);
       setSnackbarMessage({
-        text: `Portafolio ${isEditing ? "actualizado" : "creado"} exitosamente`,
-        type: "success",
-      })
-      resetForm()
+        text: `Portafolio ${isEditing ? 'actualizado' : 'creado'} exitosamente`,
+        type: 'success',
+      });
+      resetForm();
     } catch (error) {
-      setSnackbarMessage({ text: error.message, type: "error" })
+      setSnackbarMessage({ text: error.message, type: 'error' });
     } finally {
-      setSnackbarVisible(true)
+      setSnackbarVisible(true);
     }
-  }, [formData, isEditing, editingInventoryId, data])
+  }, [formData, isEditing, editingInventoryId, data]);
+
 
 
   const resetForm = () => {
@@ -99,11 +172,11 @@ const Portfolio = () => {
       await action(item.id)
       setData((prevData) =>
         prevData.map((dataItem) =>
-          dataItem.id === item.id ? { ...dataItem, estado: action === activeInventory } : dataItem,
+          dataItem.id === item.id ? { ...dataItem, estado: action === activePortfolio } : dataItem,
         ),
       )
     } catch (error) {
-      console.error(`Error al ${action === activeInventory ? "activar" : "desactivar"} el usuario:`, error)
+      console.error(`Error al ${action === activePortfolio ? "activar" : "desactivar"} el usuario:`, error)
     }
   }, [])
 
@@ -123,36 +196,98 @@ const Portfolio = () => {
     setOpenForm(true)
   }, [])
 
-
-  const pickImages = async () => {
+ /*  const pickImages = async () => {
     try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'image/*',
-        multiple: true, // Permite seleccionar múltiples imágenes
-      });
-      if (!result.canceled && result.assets) {
-        // Accede a las imágenes seleccionadas desde `result.assets`
-        const newImages = result.assets.map((asset) => ({ uri: asset.uri }));
-       
+      // Solicitar permisos
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permisos de galería denegados');
+        return;
+      }
 
-        // Actualiza el estado correctamente
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          imagenes: [...prevFormData.imagenes, ...newImages], // Añade las nuevas imágenes al array
+      // Abrir la galería de imágenes
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true, // Permite seleccionar múltiples imágenes
+        quality: 0.8, // Calidad de la imagen (0-1)
+      });
+
+      if (!result.canceled && result.assets) {
+        // Procesar las imágenes seleccionadas
+        const newImages = result.assets.map((asset) => ({
+          uri: asset.uri,
+          type: 'image/jpeg', // O 'image/png' dependiendo del formato
+          name: asset.uri.split('/').pop(), // Extrae el nombre del archivo de la URI
         }));
 
-        
-        
+        // Actualizar el estado
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          imagenes: [...prevFormData.imagenes, ...newImages],
+        }));
       }
     } catch (err) {
       console.log('Error seleccionando imágenes:', err);
     }
+  }; */
+
+
+
+
+
+
+  const pickImages = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Se necesitan permisos para acceder a la galería.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        const newImages = result.assets.map((asset) => ({
+          uri: asset.uri, // URI de la imagen seleccionada
+          type: asset.type,
+          name: asset.uri.split('/').pop(),
+          isFromAPI: false, // Marca la imagen como nueva (no proviene de la API)
+        }));
+
+        console.log('Nuevas imágenes seleccionadas:', newImages); // Depuración
+
+        setFormData((prevData) => ({
+          ...prevData,
+          imagenes: [...prevData.imagenes, ...newImages],
+        }));
+      }
+    } catch (error) {
+      console.error('Error seleccionando imágenes:', error);
+    }
   };
+
+  const removeImage = (index) => {
+    setFormData((prevData) => {
+      const newImages = [...prevData.imagenes];
+      newImages.splice(index, 1);
+      return { ...prevData, imagenes: newImages };
+    });    
+  };
+
+
+
+
+
+
 
 
   // para evitar problemas de precisión
   const totalItems = data.length;
-  
+
 
   // Calculamos los progress con valores seguros
   const calculateProgress = (value, max) => {
@@ -160,7 +295,7 @@ const Portfolio = () => {
     return parseFloat(progress.toFixed(2));
   };
   const itemsProgress = calculateProgress(totalItems, 1000);
-  
+
   const isSmallScreen = width < 600;
   return (
     <>
@@ -179,8 +314,8 @@ const Portfolio = () => {
               ]}
             />
             <View style={styles.headerActions}>
-            <PDFViewComponent data={data} columns={columns} iconStyle={styles.icon} />
-            <ExcelPreviewButton columns={columns} data={data} iconStyle={styles.icon} />
+              <PDFViewComponent data={data} columns={columns} iconStyle={styles.icon} />
+              <ExcelPreviewButton columns={columns} data={data} iconStyle={styles.icon} />
             </View>
           </View>
           <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
@@ -217,11 +352,11 @@ const Portfolio = () => {
                 onSearch={console.log}
                 onFilter={console.log}
                 onDelete={async (item) => {
-                  await deleteInventory(item.id)
+                  await deletePortfolio(item.id)
                   setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
                 }}
-                onToggleActive={(item) => handleAction(activeInventory, item)}
-                onToggleInactive={(item) => handleAction(inactiveInventory, item)}
+                onToggleActive={(item) => handleAction(activePortfolio, item)}
+                onToggleInactive={(item) => handleAction(inactivePortfolio, item)}
                 onDataUpdate={setData}
                 onCreate={handleSubmit}
                 onEdit={handleEdit}
@@ -246,7 +381,7 @@ const Portfolio = () => {
             justifyContent: 'space-between',
             flexWrap: 'wrap',
           }}>
-            {["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie","detalle" ].map((field) => (
+            {["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie", "detalle"].map((field) => (
               <InputComponent
                 key={field}
                 type={
@@ -262,10 +397,9 @@ const Portfolio = () => {
                             ? "descripcion"
                             : field === "superficie"
                               ? "text"
-                                : field === "detalle"
-                                  ? "descripcion"
-                                  : "text"
-
+                              : field === "detalle"
+                                ? "descripcion"
+                                : "text"
                 }
                 value={formData[field]}
                 onChangeText={(text) => setFormData((prev) => ({ ...prev, [field]: text }))}
@@ -275,28 +409,32 @@ const Portfolio = () => {
                 errorMessage={`Por favor, introduce un ${field} válido`}
               />
             ))}
-
-
-<View style={styles.containerImages}>
-      <Button mode="contained" onPress={pickImages} style={styles.buttonImages}>
-        Seleccionar Imágenes
-      </Button>
-      <ScrollView>
-        {formData.imagenes.map((image, index) => (
-          <Card key={index} style={styles.cardImages}>
-            <Card.Content>
-              <Image source={{ uri: image.uri }} style={styles.images} />
-            </Card.Content>
-          </Card>
-        ))}
-      </ScrollView>
-    </View>
-
-
+            <View style={styles.containerImages}>
+              <Button mode="contained" onPress={pickImages} style={styles.buttonImages}>
+                Seleccionar Imágenes
+              </Button>
+              <ScrollView>
+              {formData.imagenes.map((image, index) => {
+          console.log('URI de la imagen:', image.isFromAPI ? SrcImagen(image.uri) : image.uri); // Depuración
+          return (
+            <Card key={index} style={styles.cardImages}>
+              <Card.Content>
+                <Image
+                  source={{ uri: image.isFromAPI ? SrcImagen(image.uri) : image.uri }}
+                  style={styles.images}
+                />
+                <IconButton
+                  icon="close"
+                  onPress={() => removeImage(index)}
+               
+                />
+              </Card.Content>
+            </Card>
+          );
+        })}
+              </ScrollView>
+            </View>
           </View>
-
-
-
         } actions={[<Button onPress={resetForm}>Cancelar</Button>, <Button onPress={handleSubmit}>{isEditing ? "Actualizar" : "Crear"}</Button>]} />
       </PaperProvider>
       <AddComponent onOpen={() => setOpenForm(true)} />

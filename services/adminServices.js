@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.0.22:${port}/api/admin`;
+const baseUrl = `http://10.48.5.136:${port}/api/admin`;
 
 
 
@@ -68,7 +68,9 @@ export const inactivateUser = async (id) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error al desactivar usuario:',error);
+    throw error;
+    console.log('Error al desactivar usuario:', error);
+    
   }
 };
 
@@ -90,7 +92,8 @@ export const deleteUser = async (id) => {
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
-    console.error('Error al eliminar usuario:', error);
+    console.log('Error al eliminar usuario:', error);
+    throw error;
   }
 }
 
@@ -715,7 +718,7 @@ export const inactivePermission = async (id) => {
 * 
  * aca termina la funcionalidad para los permisos y calendario
  * 
- */ 
+ */
 
 
 
@@ -756,8 +759,8 @@ export const createPortfolio = async (data) => {
     const response = await axios.post(`${baseUrl}/portfolio`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type":"multipart/form-data",
-        
+        "Content-Type": "multipart/form-data",
+
       },
     });
     return response.data; // Retorna los datos de la respuesta

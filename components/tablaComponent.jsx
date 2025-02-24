@@ -17,6 +17,8 @@ import {
 } from "react-native-paper"
 import Animated, { FadeInUp, Layout } from "react-native-reanimated"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { SrcImagen } from "@/services/publicServices";
+import ImageCarousel from "@/components/ImageCarousel";
 
 const TablaComponente = ({
   data,
@@ -68,7 +70,6 @@ const TablaComponente = ({
     const result = data?.filter((item) =>
       Object.entries(item).some(([key, value]) => String(value).toLowerCase().includes(searchQuery.toLowerCase())),
     )
-
     if (sortBy) {
       result.sort((a, b) => {
         if (a[sortBy] < b[sortBy]) return sortOrder === "ascending" ? -1 : 1
@@ -76,7 +77,6 @@ const TablaComponente = ({
         return 0
       })
     }
-
     return result
   }, [data, searchQuery, sortBy, sortOrder])
 
@@ -131,10 +131,11 @@ const TablaComponente = ({
             type: "success",
           })
           setSnackbarVisible(true)
+
         })
         .catch((error) => {
           setSnackbarMessage({
-            text: `Error al eliminar el registro: ${error.message}`,
+            text: `Error al eliminar el registro: ${error.response.data.message}`,
             type: "error",
           })
           setSnackbarVisible(true)
@@ -253,7 +254,8 @@ const TablaComponente = ({
       if (column.key === "imagenes") {
         return (
           <>
-            <Image source={{ uri: item.imagenes[0].uri }} style={{ width: 100, height: 100 }} />
+            {/*   <ImageCarousel images={item?.imagenes} /> */}
+            <Image source={{ uri: SrcImagen(item.imagenes[0].uri) }} style={{ width: 100, height: 100 }} />
           </>
         )
       }

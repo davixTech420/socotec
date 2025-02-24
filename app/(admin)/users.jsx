@@ -88,11 +88,11 @@ export default function Users() {
   const handleAction = useCallback(async (action, item) => {
     try {
      await action(item.id)
-      /* setData((prevData) =>
+      setData((prevData) =>
         prevData.map((dataItem) =>
           dataItem.id === item.id ? { ...dataItem, estado: action === activateUser } : dataItem,
         ),
-      ) */
+      )
     } catch (error) {
       console.error(`Error al ${action === activateUser ? "activar" : "desactivar"} el usuario:`, error)
     }
