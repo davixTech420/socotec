@@ -7,10 +7,6 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/userContext';
 
-
-
-
-
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isAuthenticated } = useAuth();
@@ -50,7 +46,6 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
           }}
         />
-
         <Tabs.Screen
           name="Portafolio"
           options={{
@@ -59,7 +54,6 @@ export default function TabLayout() {
 
           }}
         />
-
         <Tabs.Screen
           name="singIn"
           options={{
@@ -69,7 +63,6 @@ export default function TabLayout() {
 
           }}
         />
-
         <Tabs.Screen
           name="singUp"
           options={{
@@ -78,7 +71,6 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account" size={28} color={color} />,
           }}
         />
-
       </Tabs>
     </>
   );

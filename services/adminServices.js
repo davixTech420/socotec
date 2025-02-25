@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.5.136:${port}/api/admin`;
+const baseUrl = `http://10.48.4.229:${port}/api/admin`;
 
 
 
@@ -66,11 +66,10 @@ export const inactivateUser = async (id) => {
         'Content-Type': 'application/json',
       },
     });
-    return response.data;
+      return response.data;   
   } catch (error) {
-    throw error;
     console.log('Error al desactivar usuario:', error);
-    
+    throw error;
   }
 };
 
@@ -364,6 +363,7 @@ export const deleteGroup = async (id) => {
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
     console.error('Error al eliminar el grupo:', error);
+    throw error;
   }
 };
 
@@ -558,6 +558,7 @@ export const deleteProyect = async (id) => {
     return response.data;
   } catch (error) {
     console.error("error al eliminar el proyecto: ", error);
+    throw error;
   }
 }
 

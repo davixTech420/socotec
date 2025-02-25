@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { View, StyleSheet, useWindowDimensions, Platform } from "react-native"
 import { TextInput, HelperText } from "react-native-paper"
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
-/* import DateTimePickerModal from "react-native-modal-datetime-picker"; */
+
 
 function InputComponent({
   type = "text",
@@ -153,15 +153,14 @@ function InputComponent({
       <HelperText type="error" visible={!isValid}>
         {errorMessage}
       </HelperText>
-      {/*   {type === "date" && (
-        <DateTimePickerModal
-          isVisible={isDatePickerVisible}
-          mode="date"
-          onConfirm={handleConfirm}
-          onCancel={hideDatePicker}
-        />
-      )}
-        */} 
+       {/*  {type === "date" && (
+        {Platform.OS === "web" ? (
+          <input type="date" value={inputValue} onChange={handleChange} />
+        ) : (
+          <TextInput value="" onChange={handleChange} mode="date" placeholder="Fecha de Nacimiento" />
+        )  }
+      )} */}
+        
     </View>
   )
 }

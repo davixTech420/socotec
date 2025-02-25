@@ -161,16 +161,7 @@ const Groups = () => {
     }
   }, [])
 
-  const handleDelete = useCallback(async (item) => {
-    try {
-      await deleteGroup(item.id)
-      setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-    } catch (error) {
-      console.error("Error al eliminar el grupo:", error)
-      setSnackbarMessage({ text: "Error al eliminar el grupo", type: "error" })
-      setSnackbarVisible(true)
-    }
-  }, [])
+  
 
   const toggleUserSelection = useCallback(async (user) => {
     if (!user?.id) {
@@ -222,7 +213,10 @@ const Groups = () => {
               data={data}
               columns={columns}
               keyExtractor={(item) => String(item.id)}
-              onDelete={handleDelete}
+              onDelete={async (item) => {
+                await deleteGroup(item.id)
+                setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
+              }}
               onToggleActive={(item) => handleAction(activateGroup, item)}
               onToggleInactive={(item) => handleAction(inactivateGroup, item)}
               onDataUpdate={setData}

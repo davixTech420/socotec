@@ -5,11 +5,11 @@ import { useAuth } from "@/context/userContext";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.5.136:${port}/api/public`;
+const baseUrl = `http://10.48.4.229:${port}/api/public`;
 
 
 export const SrcImagen = (path)=>{
-  return `http://10.48.5.136:${port}${path}`;
+  return `http://10.48.4.229:${port}${path}`;
 }
 //end point para enviar el email recien se registra un usuario
 export const emailRegistro = async (user) => {
@@ -63,6 +63,17 @@ export const changePassword = async (user) => {
     }).catch((error) => {
       console.log(error);
     });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+//obterner datos para la vista de portafolio
+export const getPortfolioActive = async () => {
+  try {
+    const response = await axios.get(`${baseUrl}/portfolio`);
+    return response.data;
   } catch (error) {
     console.log(error);
   }
