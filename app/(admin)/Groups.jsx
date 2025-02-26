@@ -90,24 +90,33 @@ const Groups = () => {
         usuarios: selectedUsers.map((user) => user.id),
       }
 
+
+let newData
       if (isEditing) {
         await updateGroup(editingGroupId, dataToSubmit)
-        setData((prevData) =>
+        newData = data.map((item) => (item.id === editingGroupId ? { ...item, ...dataToSubmit } : item))
+        /* setData((prevData) =>
           prevData.map((item) => (item.id === editingGroupId ? { ...item, ...dataToSubmit } : item)),
-        )
+        ) */
       } else {
         const newGroup = await createGroup(dataToSubmit)
         if (!newGroup) throw new Error("Error al crear el grupo")
-        setData((prevData) => [...prevData, newGroup.group])
-      }
+          newData = [...data, newGroup.group]
 
+
+
+        /* setData((prevData) => [...prevData, newGroup.group]) */
+      }
+      setData(newData)
       setSnackbarMessage({
         text: `Grupo ${isEditing ? "actualizado" : "creado"} exitosamente`,
         type: "success",
       })
       resetForm()
     } catch (error) {
-      setSnackbarMessage({ text: error.message, type: "error" })
+      resetForm();
+      setSnackbarMessage({ text: error.response.data.message, type: "error" })
+     
     } finally {
       setSnackbarVisible(true)
     }
@@ -117,7 +126,6 @@ const Groups = () => {
     setOpenForm(false)
     setIsEditing(false)
     setEditingGroupId(null)
-    setSnackbarVisible(false)
     setFormData({ nombre: "", descripcion: "" })
     setSelectedUsers([])
     setSearchQuery("")
@@ -132,18 +140,16 @@ const Groups = () => {
         ),
       )
     } catch (error) {
-      console.error(`Error al ${action === activateGroup ? "activar" : "desactivar"} el grupo:`, error)
+      console.log(`Error al ${action === activateGroup ? "activar" : "desactivar"} el grupo:`, error)
       setSnackbarMessage({
         text: `Error al ${action === activateGroup ? "activar" : "desactivar"} el grupo`,
         type: "error",
       })
-      setSnackbarVisible(true)
+      throw error;
     }
   }, [])
 
   const handleEdit = useCallback(async (item) => {
-    try {
-      setSnackbarVisible(false)
       setFormData({
         nombre: item.nombre,
         descripcion: item.descripcion,
@@ -153,12 +159,6 @@ const Groups = () => {
       setSelectedUsers(usersGroup.map((item) => item.User))
       setIsEditing(true)
       setOpenForm(true)
-
-    } catch (error) {
-      console.error("Error al cargar los usuarios del grupo:", error)
-      setSnackbarMessage({ text: "Error al cargar los usuarios del grupo", type: "error" })
-      setSnackbarVisible(true)
-    }
   }, [])
 
   
@@ -220,7 +220,7 @@ const Groups = () => {
               onToggleActive={(item) => handleAction(activateGroup, item)}
               onToggleInactive={(item) => handleAction(inactivateGroup, item)}
               onDataUpdate={setData}
-              onCreate={() => setOpenForm(true)}
+              onCreate={handleSubmit}
               onEdit={handleEdit}
             />
           </Card.Content>

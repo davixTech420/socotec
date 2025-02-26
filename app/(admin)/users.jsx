@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react"
 import { View, StyleSheet, ScrollView, Platform, useWindowDimensions } from "react-native"
 import { Text, Card, Button, useTheme, Snackbar, ProgressBar } from "react-native-paper"
-import { AntDesign } from "@expo/vector-icons"
 import TablaComponente from "@/components/tablaComponent"
 import Breadcrumb from "@/components/BreadcrumbComponent"
 import AddComponent from "@/components/AddComponent"
@@ -72,7 +71,8 @@ export default function Users() {
       })
       resetForm()
     } catch (error) {
-      setSnackbarMessage({ text: error.message, type: "error" })
+      resetForm()
+      setSnackbarMessage({ text: error.response.data.message, type: "error" })
     } finally {
       setSnackbarVisible(true)
     }
@@ -94,7 +94,8 @@ export default function Users() {
         ),
       )
     } catch (error) {
-      console.error(`Error al ${action === activateUser ? "activar" : "desactivar"} el usuario:`, error)
+      console.log(`Error al ${action === activateUser ? "activar" : "desactivar"} el usuario:`, error)
+      throw error;
     }
   }, []);
 

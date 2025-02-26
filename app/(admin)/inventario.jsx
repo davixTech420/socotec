@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { View, StyleSheet, ScrollView, useWindowDimensions, Platform } from 'react-native';
 import { PaperProvider, Text, Card, Button, ProgressBar, useTheme, Snackbar } from 'react-native-paper';
-import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from "@react-navigation/native"
 import TablaComponente from "@/components/tablaComponent";
 import Breadcrumb from "@/components/BreadcrumbComponent";
@@ -70,12 +69,13 @@ const Inventario = () => {
       }
       setData(newData)
       setSnackbarMessage({
-        text: `Usuario ${isEditing ? "actualizado" : "creado"} exitosamente`,
+        text: `Material ${isEditing ? "actualizado" : "creado"} exitosamente`,
         type: "success",
       })
       resetForm()
     } catch (error) {
-      setSnackbarMessage({ text: error.message, type: "error" })
+      resetForm();
+      setSnackbarMessage({ text: error.response.data.message, type: "error" })
     } finally {
       setSnackbarVisible(true)
     }
@@ -98,7 +98,8 @@ const Inventario = () => {
         ),
       )
     } catch (error) {
-      console.error(`Error al ${action === activeInventory ? "activar" : "desactivar"} el usuario:`, error)
+      console.log(`Error al ${action === activeInventory ? "activar" : "desactivar"} el material:`, error)
+      throw error;
     }
   }, [])
 
@@ -210,7 +211,6 @@ const Inventario = () => {
         </Snackbar>
 
         <AlertaScroll onOpen={openForm} onClose={resetForm} title={isEditing ? "Editar inventario" : "Nuevo inventario"} content={
-
           <View style={{
             flexDirection: isSmallScreen ? "column" : 'row',
             justifyContent: 'space-between',

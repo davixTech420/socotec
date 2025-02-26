@@ -18,6 +18,7 @@ const columns = [
   { key: 'descripcion', title: 'Descripcion', sortable: true, width: 80 },
   { key: 'presupuesto', title: 'Presupuesto', sortable: true, width: 100 },
   { key: 'cliente', title: 'Cliente', sortable: true },
+  {key: "groupId",title:"Grupo",sortable:true},
   { key: 'fechaInicio', title: 'Fecha Inicio', sortable: true },
   { key: 'fechaEntrega', title: 'Fecha Entrega', sortable: true },
   { key: 'estado', title: 'Estado', sortable: true },
@@ -59,15 +60,12 @@ const Proyects = () => {
     presupuesto: '',
     cliente: '',
     fechaInicio: '',
-    fechaEntrega: ''
+    fechaEntrega: '',
   });
   //esta funcion es la que envia el formulario para el back para crear
 
 
-  const dataToSubmit = {
-    ...formData,
-    grupos: selectedGroup.map((group) => group.id),
-  }
+
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -78,15 +76,20 @@ const Proyects = () => {
         throw new Error(`Por favor, rellena los campos: ${emptyFields.join(", ")}`);
       }
 
+      const dataToSubmit = {
+        ...formData,
+        grupo: selectedGroup.map((group) => group[0].id),
+      }
+
       let newData;
 
       if (isEditing) {
-        await updateProyect(editingProyectId, formData);
-        newData = data.map((item) => (item.id === editingProyectId ? { ...item, ...formData } : item));
+        await updateProyect(editingProyectId, dataToSubmit);
+        newData = data.map((item) => (item.id === editingProyectId ? { ...item, ...dataToSubmit } : item));
       } else {
         const newProyect = await createProyect(dataToSubmit);
         console.log(dataToSubmit);
-        
+
         if (!newProyect) throw new Error("No se ha podido crear el proyecto");
         newData = [...data, newProyect]
       }
@@ -97,6 +100,7 @@ const Proyects = () => {
       })
       resetForm();
     } catch (error) {
+      resetForm();
       setSnackbarMessage({
         text: error.message,
         type: "error",
@@ -122,6 +126,7 @@ const Proyects = () => {
       fechaInicio: '',
       fechaEntrega: ''
     });
+    setSelectedGroup(null);
     setSnackbarVisible(false);
   }
   const handleAction = useCallback(async (action, item) => {
@@ -156,6 +161,8 @@ const Proyects = () => {
       console.error('Group ID is undefined');
       return;
     }
+
+
     setSelectedGroup((prevGroupWhitProyect) =>
       prevGroupWhitProyect.some((g) => g.id === group.id) ? prevGroupWhitProyect.filter((g) => g.id !== group.id) : [...prevGroupWhitProyect, group],
     )
@@ -243,7 +250,6 @@ const Proyects = () => {
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
           duration={3000}
-
           action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
         >
           <Text style={{ color: theme.colors.surface }}>{snackbarMessage?.text}</Text>
@@ -278,14 +284,14 @@ const Proyects = () => {
                 Grupo Seleccionado
               </Text>
               <ScrollView horizontal style={styles.selectedGroup}>
-               {selectedGroup.map((group) => (
-                <Chip style={styles.selectedChip} key={group.id}
-                onClose={() => handleToggleGroup(group)}
-                avatar={<Avatar.Text size={24} label={group.nombre[0]}/>}
-                >
-{group.nombre}
-                </Chip>
-               ))}
+                {selectedGroup.map((group) => (
+                  <Chip style={styles.selectedChip} key={group.id}
+                    onClose={() => handleToggleGroup(group)}
+                    avatar={<Avatar.Text size={24} label={group.nombre[0]} />}
+                  >
+                    {group.nombre}
+                  </Chip>
+                ))}
               </ScrollView>
             </View>
             <View style={styles.groupList}>
@@ -395,16 +401,16 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  selectedChip:{
+  selectedChip: {
     margin: 4,
     backgroundColor: "#e0e0e0",
   },
-  selectedGroupContainer:{
+  selectedGroupContainer: {
     marginTop: 10,
   },
-  groupList:{
-    maxHeight: 200, 
-    marginBottom:10,
+  groupList: {
+    maxHeight: 200,
+    marginBottom: 10,
   }
 });
 export default Proyects;

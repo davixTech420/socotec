@@ -279,6 +279,19 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
+          <Drawer.Screen
+            name="Seleccion"
+            options={{
+              title: "Finanzas",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="finance" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Finance {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
 
           <Drawer.Screen
             name="Calendar"

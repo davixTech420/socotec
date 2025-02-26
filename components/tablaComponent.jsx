@@ -183,7 +183,7 @@ const TablaComponente = ({
         })
         .catch((error) => {
           setSnackbarMessage({
-            text: `Error al inactivar el registro: ${error.message}`,
+            text: `Error al inactivar el registro: ${error.response.data.message}`,
             type: "error",
           })
           setSnackbarVisible(true)

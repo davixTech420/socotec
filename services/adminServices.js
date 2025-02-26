@@ -24,6 +24,7 @@ export const createUser = async (user) => {
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
     console.log('Error al crear usuario:', error);
+    throw error;
   }
 }
 
@@ -107,7 +108,8 @@ export const updateUser = async (id, user) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error al actualizar usuario:', error);
+    console.log('Error al actualizar usuario:', error);
+    throw error;
   }
 }
 
@@ -165,7 +167,8 @@ export const createInventory = async (data) => {
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
-    console.error('Error al enviar inventario:', error);
+    console.log('Error al enviar inventario:', error);
+    throw error;
   }
 };
 
@@ -185,7 +188,8 @@ export const updateInventory = async (id, data) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error al actualizar el inventario:', error);
+    console.log('Error al actualizar el inventario:', error);
+    throw error;
   }
 }
 
@@ -228,7 +232,9 @@ export const deleteInventory = async (id) => {
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
-    console.error('Error al eliminar inventario:', error);
+    console.log('Error al eliminar inventario:', error);
+    throw error;
+
   }
 };
 
@@ -327,7 +333,8 @@ export const createGroup = async (group) => {
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
-    console.error('Error al crear el grupo:', error);
+    console.log('Error al crear el grupo:', error);
+    throw error;
   }
 };
 
@@ -347,7 +354,8 @@ export const updateGroup = async (id, group) => {
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
-    console.error('Error al actualizar el grupo:', error);
+    console.log('Error al actualizar el grupo:', error);
+    throw error;
   }
 };
 
@@ -362,7 +370,7 @@ export const deleteGroup = async (id) => {
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
-    console.error('Error al eliminar el grupo:', error);
+    console.log('Error al eliminar el grupo:', error);
     throw error;
   }
 };
@@ -393,7 +401,8 @@ export const inactivateGroup = async (id) => {
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
-    console.error('Error al desactivar el grupo:', error);
+    console.log('Error al desactivar el grupo:', error);
+    throw error;
   }
 };
 
@@ -528,7 +537,8 @@ export const createProyect = async (req, res) => {
 
 
   } catch (error) {
-    console.error('Error al crear el proyecto:', error);
+    console.log('Error al crear el proyecto:', error);
+    throw error;
   }
 };
 
@@ -557,7 +567,7 @@ export const deleteProyect = async (id) => {
     });
     return response.data;
   } catch (error) {
-    console.error("error al eliminar el proyecto: ", error);
+    console.log("error al eliminar el proyecto: ", error);
     throw error;
   }
 }
@@ -573,7 +583,8 @@ export const updateProyect = async (id, data) => {
     });
     return response.data;
   } catch (error) {
-    console.error("error al actualizar el proyecto: ", error);
+    console.log("error al actualizar el proyecto: ", error);
+    throw error;
   }
 }
 
@@ -806,7 +817,9 @@ export const deletePortfolio = async (id) => {
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
-    console.error('Error al eliminar el portafolio:', error);
+    console.log('Error al eliminar el portafolio:', error);
+    throw error;
+    
   }
 };
 
