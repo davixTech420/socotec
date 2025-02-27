@@ -115,7 +115,7 @@ let newData
       resetForm()
     } catch (error) {
       resetForm();
-      setSnackbarMessage({ text: error.response.data.message, type: "error" })
+      setSnackbarMessage({ text: error.response?.data.message || error.message, type: "error" })
      
     } finally {
       setSnackbarVisible(true)

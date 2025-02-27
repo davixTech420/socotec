@@ -7,8 +7,8 @@ import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createProyect, getProyect, deleteProyect, activeProyect, inactiveProyect, updateProyect, getGroupNotProyect } from "@/services/adminServices";
-import { useFocusEffect } from '@react-navigation/native';
+import { createProyect, getProyect, deleteProyect, activeProyect, inactiveProyect, updateProyect, getGroupNotProyect, getGroupProyect, deleteGroupProyect } from "@/services/adminServices";
+import { CommonActions, useFocusEffect } from '@react-navigation/native';
 import ExcelPreviewButton from "@/components/ExcelViewComponent"
 import PDFViewComponent from '@/components/PdfViewComponent';
 
@@ -18,7 +18,7 @@ const columns = [
   { key: 'descripcion', title: 'Descripcion', sortable: true, width: 80 },
   { key: 'presupuesto', title: 'Presupuesto', sortable: true, width: 100 },
   { key: 'cliente', title: 'Cliente', sortable: true },
-  {key: "groupId",title:"Grupo",sortable:true},
+  { key: "groupId", title: "Grupo", sortable: true },
   { key: 'fechaInicio', title: 'Fecha Inicio', sortable: true },
   { key: 'fechaEntrega', title: 'Fecha Entrega', sortable: true },
   { key: 'estado', title: 'Estado', sortable: true },
@@ -60,7 +60,7 @@ const Proyects = () => {
     presupuesto: '',
     cliente: '',
     fechaInicio: '',
-    fechaEntrega: '',
+    fechaEntrega: ''
   });
   //esta funcion es la que envia el formulario para el back para crear
 
@@ -95,14 +95,14 @@ const Proyects = () => {
       }
       setData(newData);
       setSnackbarMessage({
-        text: `Usuario ${isEditing ? "actualizado" : "creado"} exitosamente`,
+        text: `Proyecto ${isEditing ? "actualizado" : "creado"} exitosamente`,
         type: "success",
       })
       resetForm();
     } catch (error) {
       resetForm();
       setSnackbarMessage({
-        text: error.message,
+        text: error.message || error.response?.data.message,
         type: "error",
       })
     } finally {
@@ -141,7 +141,7 @@ const Proyects = () => {
     }
   }, []);
 
-  const handleEdit = useCallback((item) => {
+  const handleEdit = useCallback(async (item) => {
     setFormData({
       nombre: item.nombre,
       descripcion: item.descripcion,
@@ -151,27 +151,54 @@ const Proyects = () => {
       fechaEntrega: item.fechaEntrega,
     })
     setEditingProyectId(item.id)
+    const groupProyect = await getGroupProyect(item.groupId);
+    setSelectedGroup(groupProyect);
+    console.log(groupProyect);
     setIsEditing(true)
     setOpenForm(true)
   }, []);
 
 
+  /*  const handleToggleGroup = useCallback(async (group) => {
+     if (!group.id) {
+       console.error('Group ID is undefined');
+       return;
+     }
+     setSelectedGroup((prevGroupWhitProyect) =>
+       prevGroupWhitProyect.some((g) => g.id === group.id) ? prevGroupWhitProyect.filter((g) => g.id !== group.id) : [...prevGroupWhitProyect, group],
+     )
+ 
+   });
+ 
+   const filteredGroup = groupWhitProyect.filter((group) => group.estado == true && group.nombre.toLowerCase().includes(searchQuery.toLowerCase()) && !selectedGroup?.some((selectedGroup) => selectedGroup.id === group.id),); */
+
   const handleToggleGroup = useCallback(async (group) => {
-    if (!group.id) {
+    if (!group?.id) { // Verifica si group o group.id es undefined/null
       console.error('Group ID is undefined');
       return;
     }
+    await deleteGroupProyect(group.id);
 
 
-    setSelectedGroup((prevGroupWhitProyect) =>
-      prevGroupWhitProyect.some((g) => g.id === group.id) ? prevGroupWhitProyect.filter((g) => g.id !== group.id) : [...prevGroupWhitProyect, group],
-    )
+    setSelectedGroup((prevGroupWithProyect) => {
+      // Si el grupo ya está seleccionado, deselecciona todos (devuelve un array vacío)
+      if (prevGroupWithProyect?.some((g) => g.id === group.id)) {
+        return [];
+      }
+      // Si no está seleccionado, selecciona solo este grupo
+      return [group];
+    });
+  }, []);
+
+
+
+  const filteredGroup = groupWhitProyect.filter((group) => {
+    // Filtra los grupos que están activos (estado === true) y coinciden con la búsqueda
+    return (
+      group.estado === true &&
+      group.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   });
-
-
-  const filteredGroup = groupWhitProyect.filter((group) => group.estado == true && group.nombre.toLowerCase().includes(searchQuery.toLowerCase()) && !selectedGroup.some((selectedGroup) => selectedGroup.id === group.id),);
-
-
 
   // Calculamos los totales usando parseInt y toFixed para evitar problemas de precisión
   const totalItems = data.length;
@@ -190,6 +217,8 @@ const Proyects = () => {
   const itemsProgress = calculateProgress(totalItems, 1000);
   const valueProgress = calculateProgress(totalValue, 100000);
   const isSmallScreen = width < 600;
+
+
   return (
     <>
       <PaperProvider theme={theme}>
@@ -284,8 +313,18 @@ const Proyects = () => {
                 Grupo Seleccionado
               </Text>
               <ScrollView horizontal style={styles.selectedGroup}>
-                {selectedGroup.map((group) => (
+                {/* {selectedGroup && selectedGroup?.map((group) => (
                   <Chip style={styles.selectedChip} key={group.id}
+                    onClose={() => handleToggleGroup(group)}
+                    avatar={<Avatar.Text size={24} label={group.nombre[0]} />}
+                  >
+                    {group.nombre}
+                  </Chip>
+                ))} */}
+                {selectedGroup && [selectedGroup].flat().map((group) => (
+                  <Chip
+                    style={styles.selectedChip}
+                    key={group.id}
                     onClose={() => handleToggleGroup(group)}
                     avatar={<Avatar.Text size={24} label={group.nombre[0]} />}
                   >

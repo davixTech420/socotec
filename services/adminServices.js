@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.4.229:${port}/api/admin`;
+const baseUrl = `http://10.48.4.255:${port}/api/admin`;
 
 
 
@@ -534,8 +534,6 @@ export const createProyect = async (req, res) => {
       },
     });
     return response.data;
-
-
   } catch (error) {
     console.log('Error al crear el proyecto:', error);
     throw error;
@@ -621,6 +619,36 @@ export const inactiveProyect = async (req, res) => {
   }
 }
 
+
+
+export const getGroupProyect = async (id) => {
+  try {
+    const token = AsyncStorage.getItem("userToken");
+    const response = await axios.get(`${baseUrl}/groupProyect/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.log("Error al obtener el grupo del proyecto", error);
+  }
+}
+
+
+export const deleteGroupProyect = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.put( `deleteGroupProyect/${id}`,{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+  });
+    return response.data;
+  } catch (error) {
+    console.log("Error al obtener el grupo del proyecto", error);
+  }
+}
 /**
  * 
  * 

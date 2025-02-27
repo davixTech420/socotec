@@ -51,7 +51,11 @@ const Inventario = () => {
   const handleSubmit = useCallback(async () => {
     try {
       const requiredFields = isEditing ? ["nombreMaterial", "descripcion", "cantidad", "unidadMedida", "precioUnidad"] : ["nombreMaterial", "descripcion", "cantidad", "unidadMedida", "precioUnidad"];
-      const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "")
+     /*  const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "") */
+     const emptyFields = requiredFields.filter((field) => {
+      const value = formData[field];
+      return !value || (typeof value === 'string' && value.trim() === "");
+  });
 
       if (emptyFields.length > 0) {
         setOpenForm(false);
@@ -64,7 +68,7 @@ const Inventario = () => {
         newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item))
       } else {
         const newUser = await createInventory(formData)
-        if (!newUser) throw new Error("Error al crear el usuario")
+        if (!newUser) throw new Error("Error al crear el material")
         newData = [...data, newUser.inventory]
       }
       setData(newData)
@@ -75,7 +79,7 @@ const Inventario = () => {
       resetForm()
     } catch (error) {
       resetForm();
-      setSnackbarMessage({ text: error.response.data.message, type: "error" })
+      setSnackbarMessage({ text: error.response?.data.message || error.message, type: "error" })
     } finally {
       setSnackbarVisible(true)
     }

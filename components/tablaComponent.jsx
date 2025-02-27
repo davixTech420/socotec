@@ -18,7 +18,7 @@ import {
 import Animated, { FadeInUp, Layout } from "react-native-reanimated"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { SrcImagen } from "@/services/publicServices";
-import ImageCarousel from "@/components/ImageCarousel";
+
 
 const TablaComponente = ({
   data,
