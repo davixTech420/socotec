@@ -60,7 +60,8 @@ const Proyects = () => {
     presupuesto: '',
     cliente: '',
     fechaInicio: '',
-    fechaEntrega: ''
+    fechaEntrega: '',
+    grupo:""
   });
   //esta funcion es la que envia el formulario para el back para crear
 
@@ -124,7 +125,8 @@ const Proyects = () => {
       presupuesto: '',
       cliente: '',
       fechaInicio: '',
-      fechaEntrega: ''
+      fechaEntrega: '',
+      grupo:""
     });
     setSelectedGroup(null);
     setSnackbarVisible(false);

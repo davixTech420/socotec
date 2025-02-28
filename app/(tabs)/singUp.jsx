@@ -18,6 +18,7 @@ const [visiblePass,setVisiblePass] = useState(false);
   const [telefono, setTelefono] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [messageError,setMessageError] = useState("");
 
 //estas son los estados para abrir las alertas o dialogos de la vista de registrar
   const [isOpenError, setIsOpenError] = useState(false);
@@ -78,12 +79,14 @@ const [visiblePass,setVisiblePass] = useState(false);
           setIsOpenSucces(true);
         } else {
           setIsOpenError(true);
-          console.error('Error:', response.data);
+setMessageError(response.response?.data.message);
+          console.log('Error:', response.response?.data.message
+          );
         }
       } catch (error) {
-        console.error('Error:', error);
-       
+        setMessageError(error.response.data.message || "Error Inesperado");
         setIsOpenError(true);
+
       }
     }
   };
@@ -174,7 +177,7 @@ const [visiblePass,setVisiblePass] = useState(false);
 
         </Animated.View>
       </ScrollView>
-      <AlertaIcono onOpen={isOpenError} onClose={() => setIsOpenError(false)} icon="alert" title="Error" text="El correo no existe" actions={<>
+      <AlertaIcono onOpen={isOpenError} onClose={() => setIsOpenError(false)} icon="alert" title="Error" text={messageError} actions={<>
         <Button onPress={() => setIsOpenError(false)}>Cerrar</Button>
       </>
       } />

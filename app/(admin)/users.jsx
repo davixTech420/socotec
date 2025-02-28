@@ -72,7 +72,7 @@ export default function Users() {
       resetForm()
     } catch (error) {
       resetForm()
-      setSnackbarMessage({ text: error.response?.data.message || error.message , type: "error" })
+      setSnackbarMessage({ text: error.response?.data.message ||  error.response?.data.errors[0].msg  || error.message , type: "error" })
     } finally {
       setSnackbarVisible(true)
     }

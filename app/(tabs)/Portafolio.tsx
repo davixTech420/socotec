@@ -199,7 +199,7 @@ export default function Portafolio() {
           Proyectos Destacados
         </Text>
 
-        {portfolio && Object.values(portfolio).map((project, index) => (
+       {/*  {portfolio && Object.values(portfolio).map((project, index) => (
           <Animated.View
             key={project.id}
             entering={FadeInUp.delay(400 + index * 200).springify()}
@@ -240,7 +240,60 @@ export default function Portafolio() {
               </Card>
             </AnimatedSurface>
           </Animated.View>
-        ))}
+        ))} */}
+
+
+
+{portfolio && Object.values(portfolio).length > 0 ? (
+  Object.values(portfolio).map((project, index) => (
+    <Animated.View
+      key={project.id}
+      entering={FadeInUp.delay(400 + index * 200).springify()}
+    >
+      <AnimatedSurface
+        style={[
+          {
+            marginBottom: 16,
+            borderRadius: 16,
+            overflow: 'hidden',
+          },
+          cardStyle
+        ]}
+        elevation={2}
+      >
+        <Card
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          onPress={() => setSelectedProject(project)}
+        >
+          <Card.Cover source={{ uri: SrcImagen(project.imagenes[0].uri) }} />
+          <Card.Title
+            title={project.nombre}
+            titleVariant="titleLarge"
+          />
+          <Card.Content>
+            <Text variant="bodyLarge">{project.descripcion}</Text>
+          </Card.Content>
+          <Card.Actions>
+            <Button
+              mode="contained"
+              icon="eye"
+              onPress={() => setSelectedProject(project)}
+            >
+              Ver Proyecto
+            </Button>
+          </Card.Actions>
+        </Card>
+      </AnimatedSurface>
+    </Animated.View>
+  ))
+) : (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text variant="bodyLarge" style={{ textAlign: 'center' }}>
+      No hay datos disponibles.
+    </Text>
+  </View>
+)}
 
         {selectedProject && (
           <ProjectDetailsModal

@@ -259,6 +259,11 @@ const TablaComponente = ({
           </>
         )
       }
+
+      if(item[column.key] === null){
+        return <Text style={styles.cellText}>Sin datos</Text>
+
+      }
       if (column.render) {
         return column.render(item[column.key], item)
       }

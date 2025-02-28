@@ -21,6 +21,7 @@ const SignUp = () => {
   //estos son los errores errors son los helpertext
   //message es el mensaje que devuel
   const [errors, setErrors] = useState({});
+  const [messageError,setMessageError] = useState("");
   //estas son los estados para abrir las alertas o dialogos de la vista de  inicio de sesion o login
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenError, setIsOpenError] = useState(false);
@@ -52,23 +53,24 @@ const SignUp = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validateForm()) {
       //se envian los datos al endpoint
-      loginUser({  email, password }).then((response) => {
+      await loginUser({  email, password }).then((response) => {
         console.log(response);
-        response.success == true ? setIsOpenSucces(true) : setIsOpenError(true);
-      }).catch((error) => { console.log(error); setIsOpenError(true);});
+       
+        response.success == true ? setIsOpenSucces(true) : setMessageError(response.message); setIsOpenError(true);
+      }).catch((error) => { console.log(error); setMessageError(error.message); setIsOpenError(true);});
     }
   };
 
 
-  const handleSubmitForgotPassword = () => {
+  const handleSubmitForgotPassword = async () => {
       //se envian los datos al endpoint
-      forgotPassword({  email }).then((response) => {
+      await forgotPassword({  email }).then((response) => {
         console.log(response);
-        response.success == true ? setIsOpenSucces(true) : setIsOpenError(true);
-      }).catch((error) => { console.log(error); setIsOpenError(true);});
+        response.success == true ? setIsOpenSucces(true) : setMessageError(response.response?.data.message); setIsOpenError(true);
+      }).catch((error) => { console.log(error); setMessageError(error.response?.data.message);setIsOpen(false);setIsOpenError(true);});
     
   };
 
@@ -152,7 +154,7 @@ const SignUp = () => {
           </Animated.View>
         </Animated.View>
       </ScrollView>
-      <AlertaIcono onOpen={isOpenError} onClose={() => setIsOpenError(false)} icon="alert" title="Error" text="Credenciales incorrectas o usuario inactivo" actions={<>
+      <AlertaIcono onOpen={isOpenError} onClose={() => setIsOpenError(false)} icon="alert" title="Error" text={messageError} actions={<>
         <Button onPress={() => setIsOpenError(false)}>Cerrar</Button>
       </>
       } />

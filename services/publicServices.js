@@ -5,11 +5,11 @@ import { useAuth } from "@/context/userContext";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.4.255:${port}/api/public`;
+const baseUrl = `http://10.48.4.159:${port}/api/public`;
 
 
 export const SrcImagen = (path) => {
-  return `http://10.48.4.255:${port}${path}`;
+  return `http://10.48.4.159:${port}${path}`;
 }
 //end point para enviar el email recien se registra un usuario
 export const emailRegistro = async (user) => {
@@ -18,6 +18,8 @@ export const emailRegistro = async (user) => {
     return response;
   } catch (error) {
     console.log(error);
+    throw error;
+    
   }
 };
 
@@ -35,7 +37,8 @@ export const useLogin = () => {
         return { success: false, message: 'No se recibió token' };
       }
     } catch (error) {
-      return { success: false, message: error.message || 'Error desconocido' };
+      return { success: false, message: error.response?.data.message || 'Error desconocido' };
+     
     }
   };
   return loginUser;
@@ -49,9 +52,11 @@ export const forgotPassword = async (user) => {
       console.log(response);
     }).catch((error) => {
       console.log(error);
+      throw error;
     });
   } catch (error) {
     console.log(error);
+    throw error;
   }
 };
 
@@ -62,9 +67,11 @@ export const changePassword = async (user) => {
       router.replace("/singIn");
     }).catch((error) => {
       console.log(error);
+      throw error;
     });
   } catch (error) {
     console.log(error);
+    throw error;
   }
 };
 
