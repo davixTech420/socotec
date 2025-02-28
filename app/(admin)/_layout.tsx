@@ -21,6 +21,7 @@ import Finance from "./Finance";
 import Portfolio from "./Portfolio";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import ProfileScreen from "./MyAccount";
+import { router } from "expo-router"
 
 
 const Drawer = createDrawerNavigator()
@@ -138,6 +139,17 @@ export default function App() {
   if (!isAuthenticated) {
     return null
   }
+
+
+  user()
+    .then((userData) => {
+      if (userData.role != 'admin') {
+        router.replace("/(employee)/DashboardE");
+      }
+    })
+    .catch((error) => {
+      console.log('Error obteniendo el rol:', error);
+    });
 
   return (
     <PaperProvider theme={theme}>

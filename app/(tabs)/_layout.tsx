@@ -1,4 +1,5 @@
-import { Tabs, Stack } from 'expo-router';
+import { useState} from 'react';
+import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { HapticTab } from '@/components/HapticTab';
@@ -9,7 +10,17 @@ import { useAuth } from '@/context/userContext';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const { isAuthenticated } = useAuth();
+  const [role,setRole] = useState(null);
+
+  const { isAuthenticated,user } = useAuth();
+   user()
+          .then((userData) => {
+            setRole(userData.role);
+          })
+          .catch((error) => {
+            console.log('Error obteniendo el rol:', error);
+          });
+
   return (
     <>
       <Tabs
@@ -57,7 +68,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="singIn"
           options={{
-            href: isAuthenticated ? "/(admin)/Dashboard" : "/(tabs)/singIn",
+            href: isAuthenticated && role === "admin" ? "/(admin)/Dashboard" : role === "employee" ? "/(employee)/DashboardE" : "/(tabs)/singUp",
             title: isAuthenticated ? 'Dashboard' : 'Login',
             tabBarIcon: ({ color }) => <MaterialCommunityIcons name={isAuthenticated ? "view-dashboard" : "account"} size={28} color={color} />,
 

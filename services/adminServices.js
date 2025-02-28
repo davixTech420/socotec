@@ -129,6 +129,7 @@ export const getUsers = async () => {
         Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
         'Content-Type': 'application/json',
       },
+    
     });
 
     return response.data; // Retorna los datos de la respuesta

@@ -1,16 +1,35 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import {  StyleSheet} from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import indexEmplo from './DashboardE';
 import calculator from './calculator';
 import { Ionicons } from '@expo/vector-icons'; // Asegúrate de tener esta biblioteca instalada
 import calendar from './calendar';
 import reportes from './reportes';
+import { useProtectedRoute, useAuth } from "@/context/userContext";
+import {router}  from "expo-router";
 
 const Drawer = createDrawerNavigator();
 
 export default function App() {
+   const isAuthenticated = useProtectedRoute("/singIn");
+    const { user } = useAuth();
+
+     if (!isAuthenticated) {
+        return null
+      }
+    
+    
+      user()
+        .then((userData) => {
+          if (userData.role != 'employee') {
+            router.replace("/(admin)/Dashboard");
+          }
+        })
+        .catch((error) => {
+          console.log('Error obteniendo el rol:', error);
+        });
+
   return (
     <>
       <Drawer.Navigator

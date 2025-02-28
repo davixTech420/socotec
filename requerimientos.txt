@@ -55,5 +55,5 @@ hacer modelado 3d
 
 dependencias posibles a borrar 
 
-npm install @react-native-community/datetimepicker
+
 

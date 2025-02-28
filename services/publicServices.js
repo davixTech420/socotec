@@ -31,6 +31,7 @@ export const useLogin = () => {
       const response = await axios.post(`${baseUrl}/login`, user);
       if (response.data && response.data.token) {
         await login(response?.data.token);
+        
         router.replace("/(admin)/Dashboard");
         return { success: true };
       } else {
@@ -43,6 +44,11 @@ export const useLogin = () => {
   };
   return loginUser;
 };
+
+
+
+
+
 
 
 //end point para enviar el email de recuperacion

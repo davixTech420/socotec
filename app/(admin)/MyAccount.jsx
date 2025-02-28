@@ -4,6 +4,7 @@ import { TextInput, Avatar, Text, useTheme, Surface, Chip, IconButton } from "re
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { useAuth } from "@/context/userContext";
+import { updateUser } from "@/services/adminServices";
 
 
 const AnimatedSurface = Animated.createAnimatedComponent(Surface)
@@ -29,9 +30,19 @@ const ProfileScreen = () => {
   }, []);
 
 
-  const handleSave = () => {
-    setProfileData(editedData)
-    setIsEditing(false)
+  const handleSave = async () => {
+
+
+    try{
+      await updateUser(profileData.id,profileData).then((response) => console.log("Response:", response)).catch(error => console.log("Error:", error));
+      setIsEditing(false)
+
+
+    } catch(error){
+      console.log("Error updating user:", error);
+    }
+
+
   }
 
   const stats = [
@@ -43,6 +54,8 @@ const ProfileScreen = () => {
 
   const isSmallScreen = width < 600
   const isMediumScreen = width >= 600 && width < 1024
+
+ 
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -60,7 +73,7 @@ const ProfileScreen = () => {
           <View style={styles.headerInfo}>
             <Text style={[styles.name, isSmallScreen && styles.nameSmall]}>{profileData?.nombre}</Text>
             <Text style={styles.role}>{profileData.role}</Text>
-            <Chip icon="badge-account" style={styles.idChip}>
+            <Chip icon="badge-account"  style={styles.idChip}>
               ID: {profileData?.id}
             </Chip>
           </View>
@@ -106,6 +119,7 @@ const ProfileScreen = () => {
         value={profileData?.nombre}
         onChangeText={(text) => setProfileData({ ...profileData, nombre: text })}
         mode="outlined"
+        editable={false}
         style={styles.formInput}
         disabled={!isEditing}
       />
@@ -114,6 +128,7 @@ const ProfileScreen = () => {
       <MaterialCommunityIcons name="email" size={24} color={theme.colors.primary} style={styles.formIcon} />
       <TextInput
         label="Email"
+        editable={false}
         value={profileData?.email}
         onChangeText={(text) => setProfileData({ ...profileData, email: text })}
         mode="outlined"
@@ -140,20 +155,8 @@ const ProfileScreen = () => {
       <TextInput
         value={profileData?.role}
         label="Rol"
+        editable={false}
         onChangeText={(text) => setProfileData({ ...profileData, role: text })}
-        mode="outlined"
-        style={styles.formInput}
-        disabled={!isEditing}
-      />
-    </View>
-          </View>
-          <View style={[styles.formFields, !isSmallScreen && styles.formFieldsRow]}>
-          <View style={styles.formField}>
-      <MaterialCommunityIcons name="lock" size={24} color={theme.colors.primary} style={styles.formIcon} />
-      <TextInput
-        value={profileData?.password}
-        label="Contraseña"
-        onChangeText={(text) => setProfileData({ ...profileData, password: text })}
         mode="outlined"
         style={styles.formInput}
         disabled={!isEditing}
@@ -209,6 +212,7 @@ const styles = StyleSheet.create({
   avatar: {
     borderWidth: 4,
     borderColor: "#fff",
+    backgroundColor:"transparent",
   },
   onlineIndicator: {
     position: "absolute",
@@ -241,6 +245,8 @@ const styles = StyleSheet.create({
   },
   idChip: {
     alignSelf: "flex-start",
+    backgroundColor:"#7ed8f7",
+    color:"black",
   },
   statsGrid: {
     flexDirection: "row",
