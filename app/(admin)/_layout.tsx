@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { View, StyleSheet, ScrollView, SafeAreaView, Platform, StatusBar, Dimensions } from "react-native"
 import { createDrawerNavigator } from "@react-navigation/drawer"
 import { Provider as PaperProvider, Avatar, Text, Button, useTheme, IconButton, Appbar } from "react-native-paper"
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
+import { MaterialCommunityIcons, MaterialIcons,FontAwesome5 } from "@expo/vector-icons"
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,6 +14,7 @@ import Dashboard from "./Dashboard"
 import Inventario from "./inventario"
 import Proyects from "./Proyects"
 import Users from "./users";
+import Employee from "./Employee";
 import Model3D from "./Model3D";
 import CalendarComponent from "./Calendar";
 import Group from "./Groups";
@@ -220,6 +221,22 @@ export default function App() {
             )}
           </Drawer.Screen>
 
+
+          <Drawer.Screen
+            name="Employee"
+            options={{
+              title: "Empleados",
+              drawerIcon: ({ color }) => <FontAwesome5 name="user-tie" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Employee {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
+
           <Drawer.Screen
             name="Groups"
             options={{
@@ -291,19 +308,7 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
-          <Drawer.Screen
-            name="Seleccion"
-            options={{
-              title: "Finanzas",
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="finance" size={24} color={color} />,
-            }}
-          >
-            {(props) => (
-              <AnimatedScreen style={animatedStyle}>
-                <Finance {...props} />
-              </AnimatedScreen>
-            )}
-          </Drawer.Screen>
+          
 
           <Drawer.Screen
             name="Calendar"

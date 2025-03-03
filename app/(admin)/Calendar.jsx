@@ -191,7 +191,7 @@ export default function CalendarComponent() {
   }
 
   const options = [
-    { label: "Usuario 1", value: 1 },
+    { label: "Usuario 49", value: 49 },
     { label: "Usuario 2", value: 3 },
     { label: "Usuario 3", value: 4 },
   ]
