@@ -233,7 +233,7 @@ let newData
         content={
           <View style={styles.formContainer}>
             <InputComponent
-              type="text"
+              type="nombre"
               value={formData.nombre}
               onChangeText={(text) => setFormData((prev) => ({ ...prev, nombre: text }))}
               label="Nombre"
@@ -242,7 +242,7 @@ let newData
               errorMessage="Por favor, introduce un nombre válido"
             />
             <InputComponent
-              type="text"
+              type="descripcion"
               value={formData.descripcion}
               onChangeText={(text) => setFormData((prev) => ({ ...prev, descripcion: text }))}
               label="Descripción"
@@ -274,7 +274,7 @@ let newData
               value={searchQuery}
               style={styles.searchBar}
             />
-            <ScrollView style={styles.userList}>
+            <ScrollView vertical style={styles.userList}>
               {filteredUsers.map((user) => (
                 <Chip
                   key={user.id}

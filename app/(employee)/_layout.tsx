@@ -11,7 +11,7 @@ import Animated, {
   Extrapolate,
 } from "react-native-reanimated"
 import Dashboard from "./DashboardE"
-import Calendar from "./Calendar";
+import Calendar from "./CalendarE";
 import MyAccount from "./MyAccount";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import { router } from "expo-router"

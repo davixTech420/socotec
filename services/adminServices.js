@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.6.12:${port}/api/admin`;
+const baseUrl = `http://10.48.5.39:${port}/api/admin`;
 
 
 
@@ -38,6 +38,79 @@ const makeRequest = async (method, url, data = null) => {
   }
 };
 
+/**
+ * 
+ * endpoints para los movimientos
+ */
+
+
+export const createMotion = async (data) => {
+  return makeRequest('post', '/motions', data);
+}
+
+export const updateMotion = async (id, data) => {
+  return makeRequest('put', `/motions/${id}`, data);
+}
+
+export const deleteMotion = async (id) => {
+  return makeRequest('delete', `/motions/${id}`);
+}
+
+
+export const getMotions = async () => {
+  return makeRequest('get', '/motions');
+}
+
+export const inactiveMotion = async (id) => {
+  return makeRequest("put", `/motions/${id}/inactive`);
+}
+
+export const activeMotion = async (id) => {
+  return makeRequest("put", `/motions/${id}/active`);
+}
+
+
+/**
+ * aca temrina endpoint de los movimientos
+ */
+
+
+/**
+ * 
+ * endpoint de cuentas
+ */
+
+
+export const getAccounts = async () => {
+  return makeRequest('get', '/accounts');
+};
+
+export const createAccount = async (account) => {
+  return makeRequest('post', '/accounts', account);
+};
+
+export const updateAccount = async (id, account) => {
+  return makeRequest('put', `/accounts/${id}`, account);
+};
+
+export const deleteAccount = async (id) => {
+  return makeRequest('delete', `/accounts/${id}`);
+};
+
+
+export const activeAccount = async (id) => {
+  return makeRequest('put', `/accounts/${id}/active`);
+};
+
+export const inactiveAccount = async (id) => {
+  return makeRequest('put', `/accounts/${id}/inactive`);
+};
+
+
+
+/**
+ * aca termina endpoints de cuentas
+ */
 
 /**
  * 
@@ -121,7 +194,7 @@ export const inactivateUser = async (id) => {
         'Content-Type': 'application/json',
       },
     });
-      return response.data;   
+    return response.data;
   } catch (error) {
     console.log('Error al desactivar usuario:', error);
     throw error;
@@ -183,7 +256,7 @@ export const getUsers = async () => {
         Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
         'Content-Type': 'application/json',
       },
-    
+
     });
 
     return response.data; // Retorna los datos de la respuesta
@@ -657,9 +730,9 @@ export const activeProyect = async (req, res) => {
 }
 
 
-export const inactiveProyect = async (req, res) => {
+export const inactiveProyect = async (id) => {
   try {
-    const { id } = req.params;
+    
     const token = AsyncStorage.getItem("userToken");
     const response = await axios.put(`${baseUrl}/proyects/${id}/inactive`, {
       headers: {
@@ -694,11 +767,11 @@ export const getGroupProyect = async (id) => {
 export const deleteGroupProyect = async (id) => {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.put( `deleteGroupProyect/${id}`,{
+    const response = await axios.put(`deleteGroupProyect/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-  });
+    });
     return response.data;
   } catch (error) {
     console.log("Error al obtener el grupo del proyecto", error);
@@ -902,7 +975,7 @@ export const deletePortfolio = async (id) => {
   } catch (error) {
     console.log('Error al eliminar el portafolio:', error);
     throw error;
-    
+
   }
 };
 

@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { View, StyleSheet, useWindowDimensions, Platform } from "react-native"
 import { TextInput, HelperText } from "react-native-paper"
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 function InputComponent({
@@ -55,21 +56,25 @@ function InputComponent({
   }
 
   const showDatePicker = () => {
-    setDatePickerVisibility(true)
-  }
+    setDatePickerVisibility(true);
+  };
 
+  // Ocultar el DatePicker
   const hideDatePicker = () => {
-    setDatePickerVisibility(false)
-  }
+    setDatePickerVisibility(false);
+  };
 
-  const handleConfirm = (date) => {
-    const formattedDate = date.toISOString().split("T")[0]
-    setInputValue(formattedDate)
-    if (onChangeText) {
-      onChangeText(formattedDate)
+  const handleConfirm = (event, selectedDate) => {
+    hideDatePicker(); // Oculta el picker después de seleccionar una fecha
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0]; // Formatea la fecha a YYYY-MM-DD
+      setInputValue(formattedDate); // Actualiza el estado con la nueva fecha
+      if (onChangeText) {
+        onChangeText(formattedDate); // Llama a la función onChangeText si está definida
+      }
     }
-    hideDatePicker()
-  }
+  };
+
 
   const inputProps = {
     keyboardType: "default",
@@ -110,10 +115,18 @@ function InputComponent({
       };
       inputProps.value = inputValue;
       break
-    case "precio":
-      inputProps.keyboardType = "numeric"
-      inputProps.left = <TextInput.Icon icon={() => <MaterialIcons name="attach-money" size={24} color="black" />} />
-      break
+      case "precio":
+        inputProps.keyboardType = "numeric";
+        inputProps.left = <TextInput.Icon icon={() => <MaterialIcons name="attach-money" size={24} color="black" />} />;
+        inputProps.onChangeText = (text) => {
+          const validText = text.replace(/[^0-9]/g, ""); // Solo permite números
+          if (validText !== inputValue) {
+            setInputValue(validText);
+            onChangeText?.(validText);
+          }
+        };
+        inputProps.value = inputValue;
+        break
     case "email":
       inputProps.keyboardType = "email-address"
       inputProps.autoCapitalize = "none"
@@ -126,11 +139,17 @@ function InputComponent({
       inputProps.right = <TextInput.Icon onPress={() => setVisiblePass(!visiblePass)} icon={() => <Ionicons name={visiblePass ? "eye-off" : "eye"} size={24} />} />
       inputProps.secureTextEntry = !visiblePass
       break
+      case "ubicacion":
+        inputProps.left = <TextInput.Icon icon={() => <MaterialCommunityIcons name="map-marker-outline" size={24} color="black" />} />
+        break;
+        case "superficie":
+          inputProps.left = <TextInput.Icon icon={() => <MaterialCommunityIcons name="border-outside" size={24} color="black" />} />
+          break;
     case "textarea":
       inputProps.multiline = true
       break
     case "date":
-      inputProps.editable = true
+      inputProps.editable = false
       inputProps.left = (
         <TextInput.Icon icon={() => <Ionicons name="calendar" size={24} color="black" />} onPress={showDatePicker} />
       )
@@ -140,8 +159,12 @@ function InputComponent({
   }
 
   return (
-    <View style={[styles.container, isSmallScreen ? { width: "100%" } : { width: "48%" }]}>
-      <TextInput
+    <View style={[styles.container, isSmallScreen ? { width: "100%" } : { width: Platform.OS === "web" ? "100%" : "80%" }]}>
+
+
+    {type != "date" && Platform.OS === "web" ? (
+<>
+<TextInput
         label={label}
         mode={mode}
         placeholder={placeholder}
@@ -152,15 +175,22 @@ function InputComponent({
       />
       <HelperText type="error" visible={!isValid}>
         {errorMessage}
-      </HelperText>
-       {/*  {type === "date" && (
-        {Platform.OS === "web" ? (
-          <input type="date" value={inputValue} onChange={handleChange} />
-        ) : (
-          <TextInput value="" onChange={handleChange} mode="date" placeholder="Fecha de Nacimiento" />
-        )  }
-      )} */}
-        
+      </HelperText>  
+      {isDatePickerVisible && (
+        <DateTimePicker
+          mode="date"
+          value={new Date(inputValue)} 
+          is24Hour={true}   
+          display="default"
+          onChange={handleConfirm} 
+        />
+      )}
+      </>
+    ): (
+      <input type="date" value={inputValue} onChange={handleChange} />
+    ) }
+      
+     
     </View>
   )
 }

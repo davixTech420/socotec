@@ -7,7 +7,7 @@ const DropdownComponent = ({ options, onSelect, placeholder, value }) => {
   );
   return (
     <Picker
-      style={{ width: '100%' }}
+      style={{ width: '100%', position:"relative",marginInline:5,borderRadius:25 ,padding:12,borderColor:'#000',borderWidth:1 }}
       selectedValue={value}  // Usamos el valor pasado como prop
       onValueChange={onSelect}
     >

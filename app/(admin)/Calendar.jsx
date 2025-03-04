@@ -1,22 +1,23 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { View, StyleSheet, ScrollView, Platform } from "react-native"
 import { Calendar } from "react-native-calendars"
-import { Modal, Portal, Button, Text, useTheme, PaperProvider, 
-  Card } from "react-native-paper"
-import {  AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
+import {
+  Modal, Portal, Button, Text, useTheme, PaperProvider,
+  Card
+} from "react-native-paper"
 import Breadcrumb from "@/components/BreadcrumbComponent"
 import TablaComponente from "@/components/tablaComponent"
 import InputComponent from "@/components/InputComponent"
 import DropdownComponent from "@/components/DropdownComponent"
 import { router } from "expo-router"
 import {
+  getUsers,
   createPermission,
   getPermissions,
   deletePermission,
   activePermission,
   inactivePermission,
 } from "@/services/adminServices"
-import { useFocusEffect } from "@react-navigation/native"
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFViewComponent from "@/components/PdfViewComponent"
 
@@ -37,9 +38,11 @@ export default function CalendarComponent() {
   const [showForm, setShowForm] = useState(false)
   const [data, setData] = useState([])
   const [markedDates, setMarkedDates] = useState({})
+  const [isEditing, setIsEditing] = useState(false)
+  const [editingPermissionId, setEditingPermissionId] = useState(null)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState("");
-
+  const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({
     solicitanteId: "",
     aprobadorId: "",
@@ -79,15 +82,12 @@ export default function CalendarComponent() {
     return marks
   }, [])
 
-/* useFocusEffect(
-    useCallback(() => {
-      getPermissions().then(setData).catch(console.error)
-    }, []),
-  ); */
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        await getUsers().then(setUsers).catch(console.error);
         const response = await getPermissions()
         setData(response)
         const marks = processPermissionsForCalendar(response)
@@ -119,18 +119,31 @@ export default function CalendarComponent() {
       console.error("Error al enviar el formulario:", error)
     }
   }
+  const handleEdit = useCallback((item) => {
+    setFormData({
+      solicitanteId: item.solicitanteId,
+      aprobadorId: item.aprobadorId,
+      tipoPermiso: item.tipoPermiso,
+      fechaInicio: item.fechaInicio,
+      fechaFin: item.fechaFin,
+    })
+    setEditingPermissionId(item.id)
+    setIsEditing(true)
+    setShowForm(true)
+  }, []);
+
 
   const handleAction = useCallback(async (action, item) => {
     try {
       await action(item.id)
       setData((prevData) => {
-        prevData.map((itemData)=>{
-          if(itemData.id === item.id){
+        prevData.map((itemData) => {
+          if (itemData.id === item.id) {
             return { ...itemData, estado: action === activePermission }
           }
         })
       });
-      
+
     } catch (error) {
       setSnackbarMessage({ text: "Error al " + action === activePermission ? "activar" : "desactivar" + " el permiso", type: "error" })
       setSnackbarMessage(true);
@@ -144,57 +157,19 @@ export default function CalendarComponent() {
     setSelectedDate("")
   }
 
-  const handleToggleInactive = async (item) => {
-    try {
-      await inactivePermission(item.id)
-      setData((prevData) =>
-        prevData.map((dataItem) => (dataItem.id === item.id ? { ...dataItem, active: false } : dataItem)),
-      )
-      return Promise.resolve()
-    } catch (error) {
-      console.error("Error al desactivar el item:", error)
-      return Promise.reject(error)
-    }
-  }
-
-  const handleDelete = async (item) => {
-    try {
-      await deletePermission(item.id)
-      setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-      // Actualizar las marcas del calendario
-      const updatedMarks = processPermissionsForCalendar(data.filter((dataItem) => dataItem.id !== item.id))
-      setMarkedDates(updatedMarks)
-      return Promise.resolve()
-    } catch (error) {
-      console.error("Error al eliminar el item:", error)
-      return Promise.reject(error)
-    }
-  }
-
-  const handleToggleActive = async (item) => {
-    try {
-      await activePermission(item.id)
-      setData((prevData) =>
-        prevData.map((dataItem) => (dataItem.id === item.id ? { ...dataItem, active: true } : dataItem)),
-      )
-      return Promise.resolve()
-    } catch (error) {
-      console.error("Error al activar el item:", error)
-      return Promise.reject(error)
-    }
-  }
-
   const handleDataUpdate = (updatedData) => {
     setData(updatedData)
     const updatedMarks = processPermissionsForCalendar(updatedData)
     setMarkedDates(updatedMarks)
   }
 
-  const options = [
-    { label: "Usuario 49", value: 49 },
-    { label: "Usuario 2", value: 3 },
-    { label: "Usuario 3", value: 4 },
-  ]
+
+ /*  const usuarios = users.map((user) => ({ label: user.nombre, value: user.id })); */
+
+ const usuarios = users
+ .filter(user => user.estado === true) // Filtra solo los usuarios con estado true
+ .map(user => ({ label: user.nombre, value: user.id }));
+  
   const optionsTipoPermiso = [
     { label: "Vacaciones", value: "Vacaciones" },
     { label: "Medico", value: "Medico" },
@@ -217,8 +192,8 @@ export default function CalendarComponent() {
             ]}
           />
           <View style={styles.headerActions}>
-          <PDFViewComponent data={data} columns={columns} iconStyle={styles.icon}/>
-          <ExcelPreviewButton data={data} columns={columns} iconStyle={styles.icon}/>
+            <PDFViewComponent data={data} columns={columns} iconStyle={styles.icon} />
+            <ExcelPreviewButton data={data} columns={columns} iconStyle={styles.icon} />
           </View>
         </View>
         <Card style={styles.tableCard}>
@@ -282,10 +257,15 @@ export default function CalendarComponent() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-          onDelete={async (item) =>  await deletePermission(item.id)}
-              onToggleActive={handleToggleActive}
-              onToggleInactive={handleToggleInactive}
+              onDelete={async (item) => {
+                await deletePermission(item.id)
+                setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
+              }}
+              onToggleActive={(item) => handleAction(activePermission, item)}
+              onToggleInactive={(item) => handleAction(inactivePermission, item)}
               onDataUpdate={handleDataUpdate}
+              onEdit={handleEdit}
+
             />
           </Card.Content>
         </Card>
@@ -295,7 +275,7 @@ export default function CalendarComponent() {
               <View style={styles.modalContent}>
                 <View style={styles.headerCalendar}>
                   <Text variant="headlineMedium" style={styles.title}>
-                    Crear Permiso
+                    {isEditing ? "Editar Permiso" : "Crear Permiso"}
                   </Text>
                   <Text variant="bodySmall" style={styles.subtitle}>
                     Escoge el dia o dias para pedir permisos
@@ -303,17 +283,19 @@ export default function CalendarComponent() {
                 </View>
                 <View style={styles.form}>
                   <DropdownComponent
-                    options={options}
+                    options={usuarios}
                     onSelect={(value) => {
                       setFormData({ ...formData, solicitanteId: value })
                     }}
+                    value={formData.solicitanteId}
                     placeholder="Usuario Solicitante"
                   />
                   <DropdownComponent
-                    options={options}
+                    options={usuarios}
                     onSelect={(value) => {
                       setFormData({ ...formData, aprobadorId: value })
                     }}
+                    value={formData.aprobadorId}
                     placeholder="Usuario Aprobador"
                   />
                   <DropdownComponent
@@ -321,6 +303,7 @@ export default function CalendarComponent() {
                     onSelect={(value) => {
                       setFormData({ ...formData, tipoPermiso: value })
                     }}
+                    value={formData.tipoPermiso}
                     placeholder="Tipo de permiso"
                   />
                   <View style={styles.dateSection}>
@@ -345,7 +328,7 @@ export default function CalendarComponent() {
                   </View>
                 </View>
                 <View style={styles.actions}>
-                <Button mode="outlined" onPress={resetForm} style={styles.cancelButton}>
+                  <Button mode="outlined" onPress={resetForm} style={styles.cancelButton}>
                     Cancel
                   </Button>
                   <Button mode="contained" onPress={handleSubmit} style={styles.submitButton}>

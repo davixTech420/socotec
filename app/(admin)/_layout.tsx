@@ -19,6 +19,8 @@ import Model3D from "./Model3D";
 import CalendarComponent from "./Calendar";
 import Group from "./Groups";
 import Finance from "./Finance";
+import Account from "./Account";  
+import Motions from "./Motions";
 import Portfolio from "./Portfolio";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import ProfileScreen from "./MyAccount";
@@ -120,7 +122,7 @@ export default function App() {
   const { user } = useAuth()
   const theme = useTheme()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-
+  const [isFinanceOpen, setIsFinanceOpen] = useState(false);
   const drawerProgress = useSharedValue(0)
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -295,7 +297,7 @@ export default function App() {
             )}
           </Drawer.Screen>
 
-          <Drawer.Screen
+          {/* <Drawer.Screen
             name="Finance"
             options={{
               title: "Finanzas",
@@ -307,8 +309,37 @@ export default function App() {
                 <Finance {...props} />
               </AnimatedScreen>
             )}
+          </Drawer.Screen> */}
+
+
+          <Drawer.Screen
+            name="Account"
+            options={{
+              title: "Cuentas finanzas",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="finance" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Account {...props} />
+              </AnimatedScreen>
+            )}
           </Drawer.Screen>
-          
+          <Drawer.Screen
+            name="Motions"
+            options={{
+              title: "Movimientos finanzas",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="bank-transfer" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Motions {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
+
 
           <Drawer.Screen
             name="Calendar"
