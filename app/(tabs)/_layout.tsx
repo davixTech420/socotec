@@ -7,6 +7,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/userContext';
+import {router}  from "expo-router";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -20,6 +21,16 @@ export default function TabLayout() {
           .catch((error) => {
             console.log('Error obteniendo el rol:', error);
           });
+
+
+
+          const getHref = () => {
+            if (isAuthenticated) {
+              return role === "admin" ? router.navigate("/(admin)/Dashboard") : role === "employee" ? router.navigate("/(employee)/DashboardE") : router.navigate("/(tabs)/singUp");
+            }
+            return "/(tabs)/singUp";
+          };
+          
 
   return (
     <>
@@ -68,7 +79,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="singIn"
           options={{
-            href: isAuthenticated && role === "admin" ? "/(admin)/Dashboard" : role === "employee" ? "/(employee)/DashboardE" : "/(tabs)/singUp",
+            href: getHref() /* isAuthenticated && role === "admin" ? "/(admin)/Dashboard" : role === "employee" ? "/(employee)/DashboardE" : "/(tabs)/singUp", */,
             title: isAuthenticated ? 'Dashboard' : 'Login',
             tabBarIcon: ({ color }) => <MaterialCommunityIcons name={isAuthenticated ? "view-dashboard" : "account"} size={28} color={color} />,
 

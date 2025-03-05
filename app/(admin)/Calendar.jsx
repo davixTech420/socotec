@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState,useCallback } from "react"
 import { View, StyleSheet, ScrollView, Platform } from "react-native"
 import { Calendar } from "react-native-calendars"
 import {
   Modal, Portal, Button, Text, useTheme, PaperProvider,
-  Card
+  Card,Snackbar
 } from "react-native-paper"
 import Breadcrumb from "@/components/BreadcrumbComponent"
 import TablaComponente from "@/components/tablaComponent"
@@ -17,10 +17,11 @@ import {
   deletePermission,
   activePermission,
   inactivePermission,
+  updatePermission,
 } from "@/services/adminServices"
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFViewComponent from "@/components/PdfViewComponent"
-
+import { useFocusEffect } from "@react-navigation/native"
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
   { key: "solicitanteId", title: "Nombre Solicitante", sortable: true },
@@ -84,7 +85,8 @@ export default function CalendarComponent() {
 
 
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
+
     const fetchData = async () => {
       try {
         await getUsers().then(setUsers).catch(console.error);
@@ -97,28 +99,81 @@ export default function CalendarComponent() {
       }
     }
     fetchData()
-  }, [processPermissionsForCalendar])
+
+
+  },[]),
+ );
+
 
   const handleDayPress = (day) => {
     setFormData({ ...formData, fechaInicio: day.dateString })
     setSelectedDate(day.dateString)
     setShowForm(true)
   }
-
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     try {
-      const response = await createPermission(formData)
-      console.log(response)
-      setShowForm(false)
-      // Actualizar los datos y las marcas del calendario
-      const updatedData = await getPermissions()
-      setData(updatedData)
-      const updatedMarks = processPermissionsForCalendar(updatedData)
-      setMarkedDates(updatedMarks)
+      // Definir los campos requeridos según si estamos editando o creando
+      const requiredFields = isEditing 
+        ? ["solicitanteId", "aprobadorId", "tipoPermiso", "fechaInicio", "fechaFin", "estado"] 
+        : ["solicitanteId", "aprobadorId", "tipoPermiso", "fechaInicio", "fechaFin"];
+
+      // Verificar campos vacíos o inválidos
+      const emptyFields = requiredFields.filter((field) => {
+        const value = formData[field];
+        return !value || (typeof value === "string" && value.trim() === "");
+      });
+
+      if (emptyFields.length > 0) {
+        setShowForm(false);
+     
+        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
+      }
+
+      let newData;
+
+      if (isEditing) {
+        // Actualizar permiso existente
+        await updatePermission(editingPermissionId, formData);
+        newData = data.map((item) => 
+          item.id === editingPermissionId ? { ...item, ...formData } : item
+        );
+        // Actualizar datos y marcas del calendario
+        const updatedData = await getPermissions();
+        setData(updatedData);
+        const updatedMarks = await processPermissionsForCalendar(updatedData);
+        setMarkedDates(updatedMarks);
+      } else {
+        // Crear nuevo permiso
+        const response = await createPermission(formData);
+        setShowForm(false);
+        // Actualizar datos y marcas del calendario
+        const updatedData = await getPermissions();
+        setData(updatedData);
+        const updatedMarks = await processPermissionsForCalendar(updatedData);
+        setMarkedDates(updatedMarks);
+        newData = [...data, response];
+      }
+
+      setData(newData);
+      setSnackbarMessage({ 
+        text: isEditing ? "Permiso actualizado" : "Permiso creado", 
+        type: "success" 
+      });
+      resetForm();
     } catch (error) {
-      console.error("Error al enviar el formulario:", error)
+      resetForm();
+      setSnackbarMessage({ 
+        text: error.response?.data.message || error.response?.data.errors?.[0]?.msg || error.message, 
+        type: "error" 
+      });
+     
+    } finally {
+      setSnackbarVisible(true);
     }
-  }
+  }, [formData, isEditing, editingPermissionId, data]);
+
+
+
   const handleEdit = useCallback((item) => {
     setFormData({
       solicitanteId: item.solicitanteId,
@@ -126,6 +181,7 @@ export default function CalendarComponent() {
       tipoPermiso: item.tipoPermiso,
       fechaInicio: item.fechaInicio,
       fechaFin: item.fechaFin,
+      estado: item.estado
     })
     setEditingPermissionId(item.id)
     setIsEditing(true)
@@ -146,13 +202,14 @@ export default function CalendarComponent() {
 
     } catch (error) {
       setSnackbarMessage({ text: "Error al " + action === activePermission ? "activar" : "desactivar" + " el permiso", type: "error" })
-      setSnackbarMessage(true);
+      setSnackbarVisible(true);
     }
   }, []);
 
 
   const resetForm = () => {
     setShowForm(false)
+    setIsEditing(false);
     setFormData({ solicitanteId: "", aprobadorId: "", tipoPermiso: "", fechaInicio: "", fechaFin: "" })
     setSelectedDate("")
   }
@@ -163,17 +220,19 @@ export default function CalendarComponent() {
     setMarkedDates(updatedMarks)
   }
 
+  const usuarios = users
+    .filter(user => user.estado === true) // Filtra solo los usuarios con estado true
+    .map(user => ({ label: user.nombre, value: user.id }));
 
- /*  const usuarios = users.map((user) => ({ label: user.nombre, value: user.id })); */
-
- const usuarios = users
- .filter(user => user.estado === true) // Filtra solo los usuarios con estado true
- .map(user => ({ label: user.nombre, value: user.id }));
-  
   const optionsTipoPermiso = [
     { label: "Vacaciones", value: "Vacaciones" },
     { label: "Medico", value: "Medico" },
     { label: "Personal", value: "Personal" },
+  ]
+  const opcionesEstado = [
+    { label: "Pendiente", value: "Pendiente" },
+    { label: "Aprobado", value: "Aprobado" },
+    { label: "Rechazado", value: "Rechazado" },
   ]
 
   return (
@@ -269,6 +328,19 @@ export default function CalendarComponent() {
             />
           </Card.Content>
         </Card>
+
+
+        <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={3000}
+        style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
+        action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
+      >
+        <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
+      </Snackbar>
+
+
         <Portal>
           <Modal visible={showForm} onDismiss={() => setShowForm(false)} contentContainerStyle={styles.modalContainer}>
             <ScrollView>
@@ -324,7 +396,18 @@ export default function CalendarComponent() {
                         errorMessage="Por favor, introduce una fecha válida"
                         style={styles.input}
                       />
+
                     </View>
+
+                    {isEditing ? (<DropdownComponent
+                      options={opcionesEstado}
+                      onSelect={(value) => {
+                        setFormData({ ...formData, estado: value })
+                      }}
+                      value={formData.estado}
+                      placeholder="Estado"
+                    />) : null}
+
                   </View>
                 </View>
                 <View style={styles.actions}>

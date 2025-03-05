@@ -44,6 +44,7 @@ const TablaComponente = ({
       ...theme.colors,
       success: theme.colors.success || "#4CAF50",
       error: theme.colors.error || "#F44336",
+      warning: theme.colors.warning || "#FFB300",
     },
   }
   const { width } = useWindowDimensions()
@@ -240,14 +241,22 @@ const TablaComponente = ({
     (column, item) => {
       if (column.key === "estado") {
         const isActive = item[column.key]
+
         return (
           <Chip
             style={{
-              backgroundColor: isActive ? extendedTheme.colors.success : extendedTheme.colors.error,
+              backgroundColor: isActive == true || isActive == "Aprobado" ? extendedTheme.colors.success : isActive == "Pendiente" ? extendedTheme.colors.warning : extendedTheme.colors.error,
               color: extendedTheme.colors.surface,
             }}
           >
-            {isActive ? "Activo" : "Inactivo"}
+            {
+              isActive === true ? "Activo" :
+                isActive === false ? "Inactivo" :
+                  isActive === "Pendiente" ? "Pendiente" :
+                    isActive === "Aprobado" ? "Aprobado" :
+                      isActive === "Rechazado" ? "Rechazado" :
+                        "Estado desconocido"
+            }
           </Chip>
         )
       }
@@ -260,7 +269,7 @@ const TablaComponente = ({
         )
       }
 
-      if(item[column.key] === null){
+      if (item[column.key] === null) {
         return <Text style={styles.cellText}>Sin datos</Text>
 
       }
@@ -401,7 +410,10 @@ const TablaComponente = ({
                                 iconColor="#00ACE8"
                                 onPress={() => handleEdit(item)}
                               />
-                              <IconButton
+
+                              {item.estado === true || item.estado === false ? (
+                                <>
+                                <IconButton
                                 icon={item.estado ? "toggle-switch" : "toggle-switch-off"}
                                 size={20}
                                 iconColor={item.estado ? "#00ACE8" : "#666"}
@@ -414,6 +426,12 @@ const TablaComponente = ({
                                   }
                                 }}
                               />
+                                </>
+                              ) : null }
+
+                              
+
+
                             </View>
                           </DataTable.Cell>
                         </DataTable.Row>

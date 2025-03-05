@@ -36,7 +36,7 @@ const columns = [
 
 export default function CalendarComponent() {
   const { user } = useAuth()
-  const [logueado,setLogueado] = useState(false);
+  const [logueado,setLogueado] = useState(null);
   const [selectedDate, setSelectedDate] = useState("")
   const [showForm, setShowForm] = useState(false)
   const [data, setData] = useState([])
@@ -45,7 +45,7 @@ export default function CalendarComponent() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const [formData, setFormData] = useState({
-    solicitanteId: "",
+    solicitanteId: "", 
     aprobadorId: "",
     tipoPermiso: "",
     fechaInicio: "",
@@ -79,22 +79,19 @@ export default function CalendarComponent() {
         })
       }
     })
-
     return marks
   }, [])
 
-useFocusEffect(
-    useCallback(() => {
-      user().then(setLogueado).catch(console.error)
-    }, []),
-  );
+
 
   
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     const fetchData = async () => {
       try {
-        const response = await getMyPermissions(logueado?.id)
+        const userData = await user();
+        setLogueado(userData);
+        const response = await getMyPermissions(userData.id)
         setData(response)
         const marks = processPermissionsForCalendar(response)
         setMarkedDates(marks)
@@ -102,8 +99,8 @@ useFocusEffect(
         console.error("Error al obtener los datos:", error)
       }
     }
-    fetchData()
-  }, [processPermissionsForCalendar])
+    fetchData();
+  }, []),);
 
   const handleDayPress = (day) => {
     setFormData({ ...formData, fechaInicio: day.dateString })
@@ -146,22 +143,11 @@ useFocusEffect(
 
   const resetForm = () => {
     setShowForm(false)
-    setFormData({ solicitanteId: "", aprobadorId: "", tipoPermiso: "", fechaInicio: "", fechaFin: "" })
+    setFormData({solicitanteId:logueado.id, tipoPermiso: "", fechaInicio: "", fechaFin: "" })
     setSelectedDate("")
   }
 
-  const handleToggleInactive = async (item) => {
-    try {
-      await inactivePermission(item.id)
-      setData((prevData) =>
-        prevData.map((dataItem) => (dataItem.id === item.id ? { ...dataItem, active: false } : dataItem)),
-      )
-      return Promise.resolve()
-    } catch (error) {
-      console.error("Error al desactivar el item:", error)
-      return Promise.reject(error)
-    }
-  }
+  
 
   const handleDelete = async (item) => {
     try {
@@ -177,18 +163,7 @@ useFocusEffect(
     }
   }
 
-  const handleToggleActive = async (item) => {
-    try {
-      await activePermission(item.id)
-      setData((prevData) =>
-        prevData.map((dataItem) => (dataItem.id === item.id ? { ...dataItem, active: true } : dataItem)),
-      )
-      return Promise.resolve()
-    } catch (error) {
-      console.error("Error al activar el item:", error)
-      return Promise.reject(error)
-    }
-  }
+  
 
   const handleDataUpdate = (updatedData) => {
     setData(updatedData)
@@ -289,8 +264,8 @@ useFocusEffect(
               onSearch={console.log}
               onFilter={console.log}
           onDelete={async (item) =>  await deletePermission(item.id)}
-              onToggleActive={handleToggleActive}
-              onToggleInactive={handleToggleInactive}
+              onToggleActive={(item) => handleAction(activePermission, item.id)}
+              onToggleInactive={(item) => handleAction(inactivePermission, item.id)}
               onDataUpdate={handleDataUpdate}
             />
           </Card.Content>
@@ -308,20 +283,7 @@ useFocusEffect(
                   </Text>
                 </View>
                 <View style={styles.form}>
-                  <DropdownComponent
-                    options={options}
-                    onSelect={(value) => {
-                      setFormData({ ...formData, solicitanteId: value })
-                    }}
-                    placeholder="Usuario Solicitante"
-                  />
-                  <DropdownComponent
-                    options={options}
-                    onSelect={(value) => {
-                      setFormData({ ...formData, aprobadorId: value })
-                    }}
-                    placeholder="Usuario Aprobador"
-                  />
+                 
                   <DropdownComponent
                     options={optionsTipoPermiso}
                     onSelect={(value) => {

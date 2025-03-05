@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { View, StyleSheet, ScrollView, SafeAreaView, Platform, StatusBar, Dimensions } from "react-native"
 import { createDrawerNavigator } from "@react-navigation/drawer"
 import { Provider as PaperProvider, Avatar, Text, Button, useTheme, IconButton, Appbar } from "react-native-paper"
-import { MaterialCommunityIcons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,45 +11,61 @@ import Animated, {
   Extrapolate,
 } from "react-native-reanimated"
 import Dashboard from "./DashboardE"
-import Calendar from "./CalendarE";
-import MyAccount from "./MyAccount";
-import { useProtectedRoute, useAuth } from "@/context/userContext";
+import Calendar from "./CalendarE"
+import MyAccount from "./MyAccount"
+import { useProtectedRoute, useAuth } from "@/context/userContext"
 import { router } from "expo-router"
-
 
 const Drawer = createDrawerNavigator()
 const { width: SCREEN_WIDTH } = Dimensions.get("window")
-const DRAWER_WIDTH = SCREEN_WIDTH * (Platform.OS == "web" ? 0.2 : 0.7);
+const DRAWER_WIDTH = SCREEN_WIDTH * (Platform.OS == "web" ? 0.2 : 0.7)
+
 function AnimatedScreen({ children, style, staticButton }) {
   return (
     <Animated.View style={[styles.screen, style]}>
-      <ScrollView contentContainerStyle={styles.screenContent}>
-        {children}
-
-      </ScrollView>
+      <ScrollView contentContainerStyle={styles.screenContent}>{children}</ScrollView>
     </Animated.View>
   )
 }
+
 function CustomDrawerContent(props) {
   const { logout, user } = useAuth()
   const theme = useTheme()
 
-  //obtener el usuario logueado
-  const [userData, setUserData] = useState(null);
-  useEffect(() => {
-    user().then(setUserData).catch(error => console.log('Error user data:', error));
-  }, []);
-  /** */
+  // Obtener el usuario logueado
+  const [userData, setUserData] = useState(null)
 
-  //cerrar la sesion en el contexto general
+  // Use useCallback to memoize the fetch function
+  const fetchUserData = useCallback(async () => {
+    try {
+      const data = await user()
+      setUserData(data)
+    } catch (error) {
+      console.log("Error user data:", error)
+    }
+  }, [user])
+
+  useEffect(() => {
+    // Only fetch if we don't already have user data
+    if (!userData) {
+      fetchUserData()
+    }
+  }, [fetchUserData, userData])
+
+  // Cerrar la sesion en el contexto general
   const handleSignOut = () => {
     logout()
   }
+
   return (
     <SafeAreaView style={[styles.drawerContent, { backgroundColor: theme.colors.surface }]}>
       <ScrollView>
         <View style={styles.userInfoSection}>
-          <Avatar.Image source={require("../../assets/images/favicon.png")} size={80} style={{ backgroundColor: "transparent" }} />
+          <Avatar.Image
+            source={require("../../assets/images/favicon.png")}
+            size={80}
+            style={{ backgroundColor: "transparent" }}
+          />
           <Text style={[styles.title, { color: "#00ACE8" }]}>{userData?.nombre || "Usuario"}</Text>
           <Text style={[styles.caption, { color: theme.colors.secondary }]}>
             {userData?.email || "usuario@socotec.com"}
@@ -86,6 +102,7 @@ function CustomDrawerContent(props) {
     </SafeAreaView>
   )
 }
+
 function CustomAppBar({ title, navigation, drawerProgress }) {
   const theme = useTheme()
 
@@ -95,7 +112,6 @@ function CustomAppBar({ title, navigation, drawerProgress }) {
       transform: [{ rotate: `${rotate}deg` }],
     }
   })
-
 
   return (
     <Appbar.Header style={{ backgroundColor: "#00ACE8" }}>
@@ -112,9 +128,39 @@ export default function App() {
   const { user } = useAuth()
   const theme = useTheme()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [logueado,setLogueado] = useState(false);
-
+  const [logueado, setLogueado] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [hasRedirected, setHasRedirected] = useState(false)
   const drawerProgress = useSharedValue(0)
+
+  // Use useCallback to memoize the checkUserRole function
+  const checkUserRole = useCallback(async () => {
+    if (!isAuthenticated) return
+
+    try {
+      setIsLoading(true)
+      const userData = await user()
+      setLogueado(userData)
+
+      // Only redirect once
+      if (userData && userData.role !== "employee" && !hasRedirected) {
+        setHasRedirected(true)
+        router.replace("/(admin)/Dashboard")
+      }
+    } catch (error) {
+      console.log("Error obteniendo el rol:", error)
+      setLogueado(false) // Set to false on error to avoid loading state
+    } finally {
+      setIsLoading(false)
+    }
+  }, [isAuthenticated, user, hasRedirected])
+
+  useEffect(() => {
+    // Only check if we don't have user data yet or if authentication status changes
+    if (isAuthenticated && logueado === null) {
+      checkUserRole()
+    }
+  }, [isAuthenticated, checkUserRole, logueado])
 
   const animatedStyle = useAnimatedStyle(() => {
     const translateX = interpolate(drawerProgress.value, [0, 1], [0, DRAWER_WIDTH])
@@ -134,24 +180,33 @@ export default function App() {
     return null
   }
 
+  // Render loading state if user data is still being fetched
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <Text>Cargando...</Text>
+      </View>
+    )
+  }
 
-  user()
-    .then((userData) => {
-      setLogueado(userData);
-      if (userData.role != 'employee') {
-        router.replace("/(admin)/Dashboard");
-      }
-    })
-    .catch((error) => {
-      console.log('Error obteniendo el rol:', error);
-    });
+  // If we've tried to load the user but failed, show an error
+  if (logueado === false) {
+    return (
+      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <Text>Error al cargar los datos del usuario</Text>
+        <Button mode="contained" onPress={checkUserRole} style={{ marginTop: 20 }}>
+          Reintentar
+        </Button>
+      </View>
+    )
+  }
 
   return (
     <PaperProvider theme={theme}>
       <SafeAreaView style={styles.container}>
         <Drawer.Navigator
           initialRouteName="DashboardE"
-          drawerContent={(props) => <CustomDrawerContent {...props} user={user} />}
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
           screenOptions={{
             drawerStyle: {
               backgroundColor: "transparent",
@@ -163,13 +218,14 @@ export default function App() {
             header: ({ navigation, route, options }) => (
               <CustomAppBar title={options.title} navigation={navigation} drawerProgress={drawerProgress} />
             ),
-
           }}
           drawerPosition="left"
           onStateChange={(state) => {
-            const isOpen = state.history[state.history.length - 1].type === "drawer"
-            setIsDrawerOpen(isOpen)
-            drawerProgress.value = withTiming(isOpen ? 1 : 0, { duration: 300 })
+            if (state.history && state.history.length > 0) {
+              const isOpen = state.history[state.history.length - 1].type === "drawer"
+              setIsDrawerOpen(isOpen)
+              drawerProgress.value = withTiming(isOpen ? 1 : 0, { duration: 300 })
+            }
           }}
         >
           <Drawer.Screen
@@ -214,7 +270,6 @@ export default function App() {
             )}
           </Drawer.Screen>
 
-
           <Drawer.Screen
             name="Caledar"
             options={{
@@ -242,29 +297,19 @@ export default function App() {
             )}
           </Drawer.Screen>
 
-
-
-
-  <Drawer.Screen
-  name="MyAccount"
-  options={{
-    title: "Mi Cuenta",
-    drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
-  }}
->
-  {(props) => (
-    <AnimatedScreen style={animatedStyle}>
-      <MyAccount {...props} />
-    </AnimatedScreen>
-  )}
-</Drawer.Screen>
-
-         
-
-
-
-
-
+          <Drawer.Screen
+            name="MyAccount"
+            options={{
+              title: "Mi Cuenta",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <MyAccount {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
         </Drawer.Navigator>
       </SafeAreaView>
     </PaperProvider>
@@ -328,4 +373,5 @@ const styles = StyleSheet.create({
     right: 20,
     borderRadius: 30,
   },
-}) 
+})
+

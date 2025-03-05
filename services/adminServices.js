@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.5.39:${port}/api/admin`;
+const baseUrl = `http://10.48.6.12:${port}/api/admin`;
 
 
 
@@ -824,17 +824,21 @@ export const createPermission = async (req) => {
 };
 
 
-export const updatePermission = async (req) => {
+export const updatePermission = async (id,data) => {
   try {
-    const token = AsycnStorage.getItem("userToken");
-    const response = await axios.put(`${baseUrl}/permissions`, req, {
+    const token = AsyncStorage.getItem("userToken");
+    const response = await axios.put(`${baseUrl}/permissions/${id}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
     });
     return response.data;
   } catch (error) {
     console.error("Error al actualizar el permiso", error);
+    throw error;
+    
+    
   }
 };
 
