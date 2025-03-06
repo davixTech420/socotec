@@ -15,6 +15,7 @@ function InputComponent({
   style = {},
   label = "",
   mode = "outlined",
+  editable = true,
 }) {
   const [inputValue, setInputValue] = useState(value)
   const [isValid, setIsValid] = useState(true)
@@ -163,8 +164,8 @@ function InputComponent({
     <View style={[styles.container, isSmallScreen ? { width: "100%" } : { width: Platform.OS === "web" ? "100%" : "80%" }]}>
       {type === "date" && Platform.OS === "web" ? (
         <>
-        <Text style={{ fontWeight:"500" }}>Fecha Fin</Text>
-        <input type="date" style={styles.inputDate} value={inputValue} onChange={(e) => handleChange(e.target.value)}/>
+       
+        <input type="date"  readOnly={!editable}  style={styles.inputDate} value={inputValue} onChange={(e) => handleChange(e.target.value)}/>
         </>
       ) : (
         <>
@@ -175,6 +176,7 @@ function InputComponent({
             value={inputValue}
             onChangeText={handleChange}
             error={!isValid}
+            editable={editable}
             {...inputProps}
           />
           <HelperText type="error" visible={!isValid}>
@@ -187,6 +189,7 @@ function InputComponent({
               is24Hour={true}
               display="default"
               onChange={handleConfirm}
+              disabled={!editable}
             />
           )}
         </>

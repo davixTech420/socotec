@@ -39,6 +39,7 @@ export default function Employee() {
         { label: "Auxiliar", value: "Auxiliar" },
         { label: "Ingeniero", value: "Ingeniero" },
         { label: "Arquitecto", value: "Arquitecto" },
+        { label: "TeamLider", value: "TeamLider" },
     ]
       useFocusEffect(
         useCallback(() => {

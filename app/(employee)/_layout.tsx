@@ -13,6 +13,8 @@ import Animated, {
 import Dashboard from "./DashboardE"
 import Calendar from "./CalendarE"
 import MyAccount from "./MyAccount"
+import MyGroup from "./MyGroup"
+import Proyect from "./Proyect";
 import { useProtectedRoute, useAuth } from "@/context/userContext"
 import { router } from "expo-router"
 
@@ -257,7 +259,7 @@ export default function App() {
             )}
           </Drawer.Screen>
           <Drawer.Screen
-            name="Candar"
+            name="CalendarE"
             options={{
               title: "Mis Permisos",
               drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
@@ -271,28 +273,28 @@ export default function App() {
           </Drawer.Screen>
 
           <Drawer.Screen
-            name="Caledar"
+            name="MyGroup"
             options={{
-              title: "Proyectos",
+              title: "Mi Grupo De Trabajo",
               drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
             }}
           >
             {(props) => (
               <AnimatedScreen style={animatedStyle}>
-                <Calendar {...props} />
+                <MyGroup {...props} />
               </AnimatedScreen>
             )}
           </Drawer.Screen>
           <Drawer.Screen
-            name="Calenda"
+            name="Proyect"
             options={{
-              title: "Mi Grupo",
+              title: "Proyecto",
               drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
             }}
           >
             {(props) => (
               <AnimatedScreen style={animatedStyle}>
-                <Calendar {...props} />
+                <Proyect {...props} />
               </AnimatedScreen>
             )}
           </Drawer.Screen>
