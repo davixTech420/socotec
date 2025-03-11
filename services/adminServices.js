@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.5.120:${port}/api/admin`;
+const baseUrl = `http://10.48.6.22:${port}/api/admin`;
 
 
 
@@ -932,12 +932,12 @@ export const createPortfolio = async (data) => {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data",
-
       },
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
-    console.error('Error al crear el portafolio:', error);
+    console.error('Error al crear el portafolio:',error);
+    throw error;
   }
 };
 
@@ -952,12 +952,13 @@ export const updatePortfolio = async (id, data) => {
     const response = await axios.put(`${baseUrl}/portfolio/${id}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
     console.error('Error al actualizar el portafolio:', error);
+    throw error;
   }
 }
 
