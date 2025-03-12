@@ -1,4 +1,4 @@
-/* import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ScrollView, Platform, Dimensions, Modal, View } from 'react-native';
 import { Card, Text, Button, useTheme, Surface, Avatar, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -266,7 +266,9 @@ export default function Portafolio() {
   );
 }
 
- */
+
+
+/* 
 import React, { useState, useCallback, useMemo } from 'react';
 import { ScrollView, Platform, Dimensions, Modal, View, FlatList, InteractionManager } from 'react-native';
 import { Card, Text, Button, useTheme, Surface, IconButton, Chip, Divider, ActivityIndicator } from 'react-native-paper';
@@ -279,10 +281,10 @@ import { getPortfolioActive, SrcImagen } from '@/services/publicServices';
 const AnimatedSurface = Animated.createAnimatedComponent(Surface);
 const windowWidth = Dimensions.get('window').width;
 
-// Project categories for filtering
+
 const CATEGORIES = ['Todos', 'Residencial', 'Comercial', 'Sustentable', 'Urbano'];
 
-// Safer image loading component
+
 const SafeImage = ({ uri, style }) => {
   const theme = useTheme();
   const [loading, setLoading] = useState(true);
@@ -328,15 +330,15 @@ const ProjectDetailsModal = ({ visible, project, onDismiss }: ProjectDetailsModa
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isReady, setIsReady] = useState(false);
   
-  // Safety check
+ 
   if (!project || !project.imagenes || !Array.isArray(project.imagenes) || project.imagenes.length === 0) {
     return null;
   }
   
-  // Ensure we have a valid image index
+
   const safeImageIndex = Math.min(currentImageIndex, project.imagenes.length - 1);
   
-  // Use InteractionManager to delay heavy rendering until after animations complete
+  
   React.useEffect(() => {
     if (visible) {
       const interactionPromise = InteractionManager.runAfterInteractions(() => {
@@ -350,7 +352,7 @@ const ProjectDetailsModal = ({ visible, project, onDismiss }: ProjectDetailsModa
     }
   }, [visible]);
   
-  // Get a safe image URI
+ 
   const getImageUri = (index) => {
     try {
       if (project.imagenes && project.imagenes[index] && project.imagenes[index].uri) {
@@ -379,7 +381,7 @@ const ProjectDetailsModal = ({ visible, project, onDismiss }: ProjectDetailsModa
       onDismiss={onDismiss}
       transparent
       animationType="fade"
-      onRequestClose={onDismiss} // Handle back button on Android
+      onRequestClose={onDismiss} 
     >
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.9)' }}>
         <SafeAreaView style={{ flex: 1 }}>
@@ -523,7 +525,7 @@ const ProjectDetailsModal = ({ visible, project, onDismiss }: ProjectDetailsModa
   );
 };
 
-// Project card component for better code organization and performance
+
 const ProjectCard = React.memo(({ project, onPress }) => {
   const theme = useTheme();
   const scale = useSharedValue(1);
@@ -540,12 +542,12 @@ const ProjectCard = React.memo(({ project, onPress }) => {
     scale.value = 1;
   };
   
-  // Safety check
+ 
   if (!project || !project.imagenes || !Array.isArray(project.imagenes) || project.imagenes.length === 0) {
     return null;
   }
   
-  // Get a safe image URI
+
   const getImageUri = () => {
     try {
       if (project.imagenes[0] && project.imagenes[0].uri) {
@@ -559,7 +561,7 @@ const ProjectCard = React.memo(({ project, onPress }) => {
   };
   
   const handleProjectPress = () => {
-    // Use InteractionManager to ensure animations complete before heavy work
+ 
     InteractionManager.runAfterInteractions(() => {
       onPress(project);
     });
@@ -657,18 +659,18 @@ export default function CompanyPortfolio() {
 
   useFocusEffect(fetchPortfolio);
 
-  // Handle modal opening safely
+
   const handleOpenProject = useCallback((project) => {
-    // Validate project data before opening modal
+    
     if (project && project.id && project.imagenes && Array.isArray(project.imagenes) && project.imagenes.length > 0) {
       setSelectedProject(project);
     } else {
       console.warn('Attempted to open invalid project:', project);
-      // Could show an error toast here
+      
     }
   }, []);
 
-  // Filter projects by category
+ 
   const filteredProjects = useMemo(() => {
     if (!portfolio || Object.values(portfolio).length === 0) return [];
     
@@ -695,7 +697,7 @@ export default function CompanyPortfolio() {
         }}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* Company Header */}
+        
         <Animated.View entering={FadeInDown.delay(200).springify().damping(20)}>
           <Surface
             style={{
@@ -779,13 +781,13 @@ export default function CompanyPortfolio() {
           </Surface>
         </Animated.View>
 
-        {/* Projects Section */}
+      
         <View style={{ marginTop: 32 }}>
           <Text variant="headlineMedium" style={{ marginBottom: 16, fontWeight: 'bold' }}>
             Nuestros Proyectos
           </Text>
           
-          {/* Category Filter */}
+      
           <ScrollView 
             horizontal 
             showsHorizontalScrollIndicator={false}
@@ -806,7 +808,7 @@ export default function CompanyPortfolio() {
             </View>
           </ScrollView>
           
-          {/* Projects Grid */}
+        
           {loading ? (
             <View style={{ padding: 40, alignItems: 'center' }}>
               <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -862,7 +864,7 @@ export default function CompanyPortfolio() {
           )}
         </View>
 
-        {/* Project Details Modal */}
+        
         <ProjectDetailsModal
           visible={!!selectedProject}
           project={selectedProject}
@@ -872,3 +874,4 @@ export default function CompanyPortfolio() {
     </SafeAreaView>
   );
 }
+*/
