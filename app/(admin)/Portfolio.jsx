@@ -30,6 +30,7 @@ import {
 import ExcelPreviewButton from "@/components/ExcelViewComponent"
 import PDFViewComponent from "@/components/PdfViewComponent"
 import * as ImagePicker from "expo-image-picker"
+import * as FileSystem from 'expo-file-system';
 import { SrcImagen } from "@/services/publicServices"
 
 const columns = [
@@ -94,150 +95,11 @@ const Portfolio = () => {
     return emptyFields
   }, [])
 
-  const handleSubmit = useCallback(async () => {
-    try {
-      setLoading(true)
-      const requiredFields = ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie", "detalle"]
-      const emptyFields = validateRequiredFields(formData, requiredFields)
-
-      if (emptyFields.length > 0) {
-        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`)
-      }
-
-      const form = new FormData()
-
-      // Agregar imágenes al FormData
-      if (formData.imagenes && formData.imagenes.length > 0) {
-        for (const image of formData.imagenes) {
-          if (image.isFromAPI && isEditing) {
-            // Para imágenes existentes de la API durante la edición
-            form.append("imagenes", image.uri)
-          } else if (Platform.OS === "web") {
-            try {
-              // En la web, convertir la URI en un objeto File o Blob
-              const response = await fetch(image.uri)
-              const blob = await response.blob()
-              const fileName = image.name || `image-${Date.now()}.jpg`
-              const fileType = image.type || "image/jpeg"
-              const file = new File([blob], fileName, { type: fileType })
-              form.append("imagenes", file)
-            } catch (error) {
-              console.error("Error processing web image:", error)
-              // Si hay un error, intentar enviar la URI directamente
-              form.append("imagenes", image.uri)
-            }
-          } else {
-            // En móviles, usar el objeto directamente
-            form.append("imagenes", {
-              uri: image.uri,
-              type: image.type || "image/jpeg",
-              name: image.name || `image-${Date.now()}.jpg`,
-            })
-          }
-        }
-      }
-
-      // Agregar otros datos del formulario al FormData
-      for (const key in formData) {
-        if (key !== "imagenes" && formData[key] !== undefined) {
-          form.append(key, formData[key])
-        }
-      }
-
-      let newData
-      if (isEditing) {
-        await updatePortfolio(editingInventoryId, form)
-        newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item))
-      } else {
-        const newUser = await createPortfolio(form)
-        if (!newUser) throw new Error("Error al crear el proyecto")
-        newData = [...data, newUser.proyect]
-      }
-
-      setData(newData)
-      setSnackbarMessage({
-        text: `Portafolio ${isEditing ? "actualizado" : "creado"} exitosamente`,
-        type: "success",
-      })
-  resetForm()
-    } catch (error) {
-      console.error("Error in handleSubmit:", error)
-      setSnackbarMessage({ text: error.message, type: "error" })
-    } finally {
-      setLoading(false)
-      setSnackbarVisible(true)
-    }
-  }, [formData, isEditing, editingInventoryId, data, validateRequiredFields])
-
-
  
 
-
-  /* const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(async () => {
     try {
       setLoading(true);
-      const requiredFields = ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie", "detalle"]
-      const emptyFields = validateRequiredFields(formData, requiredFields)
-
-      if (emptyFields.length > 0) {
-        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`)
-      }
-      const form = new FormData();
-      // Agregar imágenes
-      if (formData.imagenes && formData.imagenes.length > 0) {
-        for (const image of formData.imagenes) {
-          if (image.isFromAPI) {
-            // Enviar solo la URI de las imágenes que ya existen
-            form.append("existingImages[]", image.uri);
-          } else if (Platform.OS === "web") {
-            const response = await fetch(image.uri);
-            const blob = await response.blob();
-            form.append("imagenes", new File([blob], image.name, { type: image.type }));
-          } else {
-            form.append("imagenes", { uri: image.uri, type: image.type, name: image.name });
-          }
-        }
-      }
-  
-      // Agregar otros datos del formulario
-      for (const key in formData) {
-        if (key !== "imagenes") {
-          form.append(key, formData[key]);
-        }
-      }
-  
-      let newData
-      if (isEditing) {
-        await updatePortfolio(editingInventoryId, form)
-        newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item))
-      } else {
-        const newUser = await createPortfolio(form)
-        if (!newUser) throw new Error("Error al crear el proyecto")
-        newData = [...data, newUser.proyect]
-      }
-      setData(newData)
-      setSnackbarMessage({
-        text: `Portafolio ${isEditing ? "actualizado" : "creado"} exitosamente`,
-        type: "success",
-      })
-  resetForm()
-    } catch (error) {
-      console.error("Error in handleSubmit:", error)
-      setSnackbarMessage({ text: error.message, type: "error" })
-    } finally {
-      setLoading(false)
-      setSnackbarVisible(true)
-    }
-  }, [formData,isEditing, editingInventoryId,data,validateRequiredFields]); */
-
-
-
-
-
- /*  const handleSubmit = useCallback(async () => {
-    try {
-      setLoading(true);
-  
       // Campos obligatorios
       const requiredFields = ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie", "detalle"];
       const emptyFields = validateRequiredFields(formData, requiredFields);
@@ -245,9 +107,7 @@ const Portfolio = () => {
       if (emptyFields.length > 0) {
         throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
       }
-  
       const form = new FormData();
-  
       // Agregar imágenes
       if (formData.imagenes && formData.imagenes.length > 0) {
         for (const image of formData.imagenes) {
@@ -256,9 +116,7 @@ const Portfolio = () => {
             form.append("existingImages[]", image.uri);
           } else {
             if (Platform.OS === "web") {
-
               try {
-                
                 const response = await fetch(image.uri);
                 const blob = await response.blob();
                 form.append("imagenes", new File([blob], image.name || `photo_${Date.now()}.jpg`, { type: image.type || "image/jpeg" }));
@@ -266,7 +124,6 @@ const Portfolio = () => {
                 form.append("imagenes", image.uri);
               }
               // En la web, convertir la imagen en un blob y luego crear un archivo
-             
             } else { 
               form.append("imagenes", {
                 uri :image.uri,
@@ -294,6 +151,8 @@ const Portfolio = () => {
         await updatePortfolio(editingInventoryId, form);
         newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item));
       } else {
+        console.log(formData);
+        
         const newUser = await createPortfolio(form);
         if (!newUser) throw new Error("Error al crear el proyecto");
         newData = [...data, newUser.proyect];
@@ -313,7 +172,87 @@ const Portfolio = () => {
       setLoading(false);
       setSnackbarVisible(true);
     }
-  }, [formData, isEditing, editingInventoryId, data, validateRequiredFields]); */
+  }, [formData, isEditing, editingInventoryId, data, validateRequiredFields]);
+
+
+  /* const handleSubmit = useCallback(async () => {
+    try {
+        setLoading(true);
+        // Campos obligatorios
+        const requiredFields = ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie", "detalle"];
+        const emptyFields = validateRequiredFields(formData, requiredFields);
+
+        if (emptyFields.length > 0) {
+            throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
+        }
+        const form = new FormData();
+        // Agregar imágenes
+        if (formData.imagenes && formData.imagenes.length > 0) {
+            for (const image of formData.imagenes) {
+                if (image.isFromAPI) {
+                    // Imagen que ya existe en la API, solo enviamos la URI
+                    form.append("existingImages[]", image.uri);
+                } else {
+                    if (Platform.OS === "web") {
+                        try {
+                            const response = await fetch(image.uri);
+                            const blob = await response.blob();
+                            form.append("imagenes", new File([blob], image.name || `photo_${Date.now()}.jpg`, { type: image.type || "image/jpeg" }));
+                        } catch (error) {
+                            form.append("imagenes", image.uri);
+                        }
+                        // En la web, convertir la imagen en un blob y luego crear un archivo
+                    } else {
+                        try {
+                            const base64 = await FileSystem.readAsStringAsync(image.uri, FileSystem.EncodingType.Base64 );
+                            form.append("imagenes", `${base64}`);
+                        } catch (error) {
+                            console.error("Error al leer el archivo:", error);
+                            throw new Error(`Error al leer el archivo: ${error.message}`);
+                        }
+                    }
+                }
+            }
+        }
+        // Agregar otros datos del formulario
+        for (const key in formData) {
+            if (key !== "imagenes") {
+                form.append(key, formData[key]);
+            }
+        }
+
+        // Verificar el contenido de FormData antes de enviarlo
+        for (let [key, value] of form.entries()) {
+            console.log(`${key}:`, value);
+        }
+
+        let newData;
+        if (isEditing) {
+            await updatePortfolio(editingInventoryId, form);
+            newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item));
+        } else {
+            console.log(formData);
+
+            const newUser = await createPortfolio(form);
+            if (!newUser) throw new Error("Error al crear el proyecto");
+            newData = [...data, newUser.proyect];
+        }
+
+        setData(newData);
+        setSnackbarMessage({
+            text: `Portafolio ${isEditing ? "actualizado" : "creado"} exitosamente`,
+            type: "success",
+        });
+
+        resetForm();
+    } catch (error) {
+        console.error("Error in handleSubmit:", error);
+        setSnackbarMessage({ text: error.message, type: "error" });
+    } finally {
+        setLoading(false);
+        setSnackbarVisible(true);
+    }
+}, [formData, isEditing, editingInventoryId, data, validateRequiredFields]); */
   
   
 
@@ -425,6 +364,8 @@ const Portfolio = () => {
       setSnackbarVisible(true)
     }
   }
+
+
 
   const removeImage = (index) => {
     setFormData((prevData) => {

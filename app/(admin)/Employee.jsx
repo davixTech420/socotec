@@ -6,7 +6,7 @@ import Breadcrumb from "@/components/BreadcrumbComponent"
 import AddComponent from "@/components/AddComponent"
 import { AlertaScroll } from "@/components/alerta"
 import InputComponent from "@/components/InputComponent"
-import { deleteUser, activateUser, inactivateUser, updateUser, createUser,getEmployees,createEmployee } from "@/services/adminServices"
+import { deleteUser, activateUser, inactivateUser, updateUser, getEmployees, createEmployee } from "@/services/adminServices"
 import { useFocusEffect } from "@react-navigation/native"
 import { router } from "expo-router"
 import DropdownComponent from "@/components/DropdownComponent"
@@ -19,7 +19,7 @@ const columns = [
     { key: "telefono", title: "Teléfono", sortable: true, width: 80 },
     { key: "email", title: "Email", sortable: true, width: 100 },
     { key: "estado", title: "Estado", sortable: true },
-    {key: "cargo", title: "Cargo", sortable: true},
+    { key: "cargo", title: "Cargo", sortable: true },
     { key: "role", title: "Rol", sortable: true },
     { key: "createdAt", title: "Creado", sortable: true },
     { key: "updatedAt", title: "Modificado", sortable: true },
@@ -28,7 +28,7 @@ const columns = [
 export default function Employee() {
     const [data, setData] = useState([])
     const [openForm, setOpenForm] = useState(false)
-    const [formData, setFormData] = useState({ nombre: "", email: "", telefono: "", cargo : "", password: "" })
+    const [formData, setFormData] = useState({ nombre: "", email: "", telefono: "", cargo: "", password: "", role: "employee" })
     const [isEditing, setIsEditing] = useState(false)
     const [editingUserId, setEditingUserId] = useState(null)
     const [snackbarVisible, setSnackbarVisible] = useState(false)
@@ -40,17 +40,23 @@ export default function Employee() {
         { label: "Ingeniero", value: "Ingeniero" },
         { label: "Arquitecto", value: "Arquitecto" },
         { label: "TeamLider", value: "TeamLider" },
+        { label: "Deliniante", value: "Deliniante" },
+        { label: "Talento Humano", value: "Talento" },
+        { label: "Director/ra Talento Humano", value: "DirectorTalento" },
+        { label: "Director/ra Contable", value: "DirectorContable" },
+        { label: "Contador/ra", value: "Contador" },
+        { label: "Director/ra SSET", value: "Directorsset" },
+        { label: "SSET", value: "Sset" },
     ]
-      useFocusEffect(
+    useFocusEffect(
         useCallback(() => {
-          getEmployees().then(setData).catch(console.error)
+            getEmployees().then(setData).catch(console.error)
         }, []),
-      )
-  
+    )
 
     const handleSubmit = useCallback(async () => {
         try {
-            const requiredFields = isEditing ? ["nombre", "email", "telefono", "cargo"] : ["nombre", "email", "telefono","cargo", "password"]
+            const requiredFields = isEditing ? ["nombre", "email", "telefono", "cargo"] : ["nombre", "email", "telefono", "cargo", "password"]
             const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "")
 
             if (emptyFields.length > 0) {
@@ -86,7 +92,7 @@ export default function Employee() {
         setOpenForm(false)
         setIsEditing(false)
         setEditingUserId(null)
-        setFormData({ nombre: "", email: "", telefono: "", cargo: "", password: "" })
+        setFormData({ nombre: "", email: "", telefono: "", cargo: "", password: "", role: "employee" })
     }
 
     const handleAction = useCallback(async (action, item) => {
@@ -110,6 +116,7 @@ export default function Employee() {
             telefono: item.telefono,
             cargo: item.cargo,
             password: "",
+            role: item.role
         })
         setEditingUserId(item.id)
         setIsEditing(true)

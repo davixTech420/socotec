@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { View, StyleSheet, useWindowDimensions, Platform,Text } from "react-native"
+import { View, StyleSheet, useWindowDimensions, Platform, Text } from "react-native"
 import { TextInput, HelperText } from "react-native-paper"
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -33,8 +33,8 @@ function InputComponent({
       validateInput(text)
     }
   }
-  
-  
+
+
   const validateInput = (text) => {
     let valid = true
 
@@ -164,8 +164,7 @@ function InputComponent({
     <View style={[styles.container, isSmallScreen ? { width: "100%" } : { width: Platform.OS === "web" ? "100%" : "80%" }]}>
       {type === "date" && Platform.OS === "web" ? (
         <>
-       
-        <input type="date"  readOnly={!editable}  style={styles.inputDate} value={inputValue} onChange={(e) => handleChange(e.target.value)}/>
+          <input type="date" readOnly={!editable} style={styles.inputDate} value={inputValue} onChange={(e) => handleChange(e.target.value)} />
         </>
       ) : (
         <>
@@ -182,16 +181,16 @@ function InputComponent({
           <HelperText type="error" visible={!isValid}>
             {errorMessage}
           </HelperText>
-          {isDatePickerVisible && (
+          {editable == true ? isDatePickerVisible && (
             <DateTimePicker
               mode="date"
               value={new Date(inputValue)}
               is24Hour={true}
               display="default"
               onChange={handleConfirm}
-              disabled={!editable}
             />
-          )}
+          ) : null
+          }
         </>
       )}
     </View>
@@ -201,7 +200,7 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 7,
   },
-  inputDate:{
+  inputDate: {
     borderRadius: 18,
     padding: 8,
     textAlign: "center",

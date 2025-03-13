@@ -12,7 +12,7 @@ import {
   deletePermission,
   updatePermission,
 } from "@/services/adminServices"
-import { getMyPermissions } from "@/services/employeeService";
+import { getMyPermissions, getPermissionsMyGroup } from "@/services/employeeService";
 import { useFocusEffect } from "@react-navigation/native"
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFViewComponent from "@/components/PdfViewComponent"
@@ -20,6 +20,7 @@ import { useAuth } from "@/context/userContext"
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
+  { key: "solicitanteId", title: "Solicitante", sortable: true, width: 50 },
   { key: "tipoPermiso", title: "Tipo Permiso", sortable: true, width: 80 },
   { key: "fechaInicio", title: "Fecha Inicio", sortable: true, width: 80 },
   { key: "fechaFin", title: "Fecha Fin", sortable: true, width: 80 },
@@ -87,7 +88,13 @@ export default function CalendarComponent() {
         const userData = await user();
         setLogueado(userData);
         setFormData({ ...formData, solicitanteId: userData.id });
-        const response = await getMyPermissions(userData.id)
+        let response
+        if (userData.cargo === "TeamLider") {
+          response = await getPermissionsMyGroup(userData.id)
+
+        } else {
+          response = await getMyPermissions(userData.id)
+        }
         setData(response)
         const marks = processPermissionsForCalendar(response)
         setMarkedDates(marks)
@@ -167,8 +174,6 @@ export default function CalendarComponent() {
   }, [formData, isEditing, editingPermissionId, data]);
 
 
-
-
   const resetForm = () => {
     setShowForm(false)
     setIsEditing(false);
@@ -179,7 +184,7 @@ export default function CalendarComponent() {
   const handleEdit = useCallback((item) => {
     setFormData({
       solicitanteId: item.solicitanteId,
-      aprobadorId: item.aprobadorId,
+      aprobadorId: logueado.cargo === "TeamLider" ? logueado.id : item.aprobadorId,
       tipoPermiso: item.tipoPermiso,
       fechaInicio: item.fechaInicio,
       fechaFin: item.fechaFin,
@@ -189,20 +194,20 @@ export default function CalendarComponent() {
     setIsEditing(true)
     setShowForm(true)
   }, []);
-
-
-
   const handleDataUpdate = (updatedData) => {
     setData(updatedData)
     const updatedMarks = processPermissionsForCalendar(updatedData)
     setMarkedDates(updatedMarks)
   }
-
-
   const optionsTipoPermiso = [
     { label: "Vacaciones", value: "Vacaciones" },
     { label: "Medico", value: "Medico" },
     { label: "Personal", value: "Personal" },
+  ]
+  const optionsState = [
+    { label: "Pendiente", value: "Pendiente" },
+    { label: "Aprobado", value: "Aprobado" },
+    { label: "Rechazado", value: "Rechazado" },
   ]
 
   return (
@@ -292,8 +297,6 @@ export default function CalendarComponent() {
             />
           </Card.Content>
         </Card>
-
-
         <Snackbar
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
@@ -303,9 +306,6 @@ export default function CalendarComponent() {
         >
           <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
         </Snackbar>
-
-
-
         <Portal>
           <Modal visible={showForm} onDismiss={() => setShowForm(false)} contentContainerStyle={styles.modalContainer}>
             <ScrollView>
@@ -319,23 +319,22 @@ export default function CalendarComponent() {
                   </Text>
                 </View>
                 <View style={styles.form}>
-
                   <DropdownComponent
                     options={optionsTipoPermiso}
                     onSelect={(value) => {
                       if (!isEditing || formData.estado === "Pendiente"
-                      ) {  
+                      ) {
                         setFormData({ ...formData, tipoPermiso: value });
                       }
                     }}
                     value={formData.tipoPermiso}
                     placeholder="Tipo de permiso"
                   />
+
                   <View style={styles.dateSection}>
                     <Text variant="bodyMedium" style={styles.dateLabel}>
                       Fechas
                     </Text>
-
                     {isEditing ? (
                       <>
                         <Text style={{ fontWeight: "500" }}>Fecha Inicio</Text>
@@ -356,12 +355,10 @@ export default function CalendarComponent() {
                       </>
                     ) : (<Text variant="bodyLarge" style={styles.selectedDate}>
                       {formData.fechaInicio}
-                    </Text>)}
-
-
+                    </Text>)
+                    }
                     <Text style={{ fontWeight: "500" }}>Fecha Fin</Text>
                     <View style={styles.timeContainer}>
-
                       <InputComponent
                         type="date"
                         value={formData.fechaFin}
@@ -374,6 +371,25 @@ export default function CalendarComponent() {
                         editable={formData.estado === "Aprobado" || formData.estado === "Rechazado" ? false : true}
                       />
                     </View>
+
+
+
+                    {logueado && logueado.cargo === "TeamLider" ? (
+                      <DropdownComponent
+                        options={optionsState}
+                        onSelect={(value) => {
+                          if (!isEditing || formData.estado === "Pendiente"
+                          ) {
+                            setFormData({ ...formData, estado: value });
+                          }
+                        }}
+                        value={formData.estado}
+                        placeholder="Estado"
+                      />
+                    ) : null
+                    }
+
+
                   </View>
                 </View>
                 <View style={styles.actions}>

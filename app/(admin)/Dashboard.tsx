@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, RefreshControl, useWindowDimensions, FlatList } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, RefreshControl, useWindowDimensions  } from 'react-native';
 import { LineChart, ProgressChart, BarChart, PieChart } from 'react-native-chart-kit';
-import Animated, { FadeInUp, FadeInRight, useAnimatedStyle, withSpring, useSharedValue, withTiming } from 'react-native-reanimated';
-import { PaperProvider, Button, IconButton, Surface, Chip, Avatar, List, Card, DataTable, Searchbar, Menu, Divider, Portal, Modal } from "react-native-paper";
+import Animated, { FadeInUp, useSharedValue  } from 'react-native-reanimated';
+import { PaperProvider, Surface, Chip, DataTable, Searchbar } from "react-native-paper";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 

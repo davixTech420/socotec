@@ -15,6 +15,7 @@ import Calendar from "./CalendarE"
 import MyAccount from "./MyAccount"
 import MyGroup from "./MyGroup"
 import Proyect from "./Proyect";
+import Inventario from "./inventario";
 import { useProtectedRoute, useAuth } from "@/context/userContext"
 import { router } from "expo-router"
 
@@ -261,7 +262,7 @@ export default function App() {
           <Drawer.Screen
             name="CalendarE"
             options={{
-              title: "Mis Permisos",
+              title: logueado?.cargo === "TeamLider" ? "Permisos" : "Mis Permisos",
               drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
             }}
           >
@@ -285,7 +286,11 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
-          <Drawer.Screen
+
+
+          {logueado?.cargo ==="TeamLider" || logueado?.cargo === "Deliniante" ? (
+
+<Drawer.Screen
             name="Proyect"
             options={{
               title: "Proyecto",
@@ -298,6 +303,27 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
+
+          ) : null  }
+
+
+          {logueado?.cargo === "DirectorContable" || logueado?.cargo === "Contador" ? (
+<Drawer.Screen
+            name="Inventario"
+            options={{
+              title: "Inventario",
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Inventario {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+          ) : null }
+
+          
 
           <Drawer.Screen
             name="MyAccount"
@@ -376,4 +402,3 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
 })
-
