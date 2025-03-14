@@ -286,10 +286,7 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
-
-
           {logueado?.cargo ==="TeamLider" || logueado?.cargo === "Deliniante" ? (
-
 <Drawer.Screen
             name="Proyect"
             options={{

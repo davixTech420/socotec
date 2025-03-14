@@ -1,6 +1,4 @@
-"use client"
-
-import { useState, useEffect } from "react"
+/* import { useState, useEffect } from "react"
 import { View, StyleSheet, Pressable } from "react-native"
 import {
   Text,
@@ -994,4 +992,533 @@ const styles = StyleSheet.create({
 })
 
 export default MyGroup
+
+ */
+
+"use client"
+
+import { useState } from "react"
+import { View, StyleSheet, ScrollView } from "react-native"
+import {
+  Appbar,
+  Avatar,
+  Card,
+  Chip,
+  Divider,
+  FAB,
+  IconButton,
+  Modal,
+  Portal,
+  Searchbar,
+  Surface,
+  Text,
+  TextInput,
+  Button,
+  useTheme,
+  Provider as PaperProvider,
+  DefaultTheme,
+} from "react-native-paper"
+import Animated, {
+  FadeIn,
+  FadeOut,
+  SlideInRight,
+  SlideOutRight,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated"
+
+// Sample data
+const initialTeamMembers = [
+  { id: "1", name: "Alex Johnson", role: "UI Designer", avatar: "https://i.pravatar.cc/150?img=1", tasks: 2 },
+  { id: "2", name: "Maria Garcia", role: "Frontend Developer", avatar: "https://i.pravatar.cc/150?img=5", tasks: 3 },
+  { id: "3", name: "James Wilson", role: "Backend Developer", avatar: "https://i.pravatar.cc/150?img=3", tasks: 1 },
+  { id: "4", name: "Sarah Chen", role: "Product Manager", avatar: "https://i.pravatar.cc/150?img=4", tasks: 4 },
+  { id: "5", name: "David Kim", role: "QA Engineer", avatar: "https://i.pravatar.cc/150?img=7", tasks: 2 },
+]
+
+const initialTasks = [
+  {
+    id: "1",
+    title: "Design new dashboard",
+    description: "Create wireframes for the new analytics dashboard",
+    status: "In Progress",
+    assignee: "1",
+    priority: "High",
+  },
+  {
+    id: "2",
+    title: "Fix login bug",
+    description: "Users are experiencing issues with social login",
+    status: "To Do",
+    assignee: "3",
+    priority: "Critical",
+  },
+  {
+    id: "3",
+    title: "Update documentation",
+    description: "Update API documentation with new endpoints",
+    status: "In Progress",
+    assignee: "2",
+    priority: "Medium",
+  },
+  {
+    id: "4",
+    title: "User testing",
+    description: "Conduct user testing for the new features",
+    status: "To Do",
+    assignee: "4",
+    priority: "High",
+  },
+]
+
+// Custom theme
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: "#5C6BC0",
+    accent: "#82B1FF",
+    background: "#F5F7FA",
+    surface: "#FFFFFF",
+    error: "#EF5350",
+    text: "#263238",
+    onSurface: "#263238",
+    disabled: "#B0BEC5",
+    placeholder: "#607D8B",
+    backdrop: "rgba(0, 0, 0, 0.5)",
+    notification: "#FF9800",
+  },
+}
+
+// Priority colors
+const priorityColors = {
+  Low: "#8BC34A",
+  Medium: "#FFC107",
+  High: "#FF9800",
+  Critical: "#F44336",
+}
+
+// Status colors
+const statusColors = {
+  "To Do": "#9E9E9E",
+  "In Progress": "#42A5F5",
+  "In Review": "#7E57C2",
+  Done: "#66BB6A",
+}
+
+const TeamManagement = () => {
+  const [teamMembers, setTeamMembers] = useState(initialTeamMembers)
+  const [tasks, setTasks] = useState(initialTasks)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedMember, setSelectedMember] = useState(null)
+  const [taskModalVisible, setTaskModalVisible] = useState(false)
+  const [newTask, setNewTask] = useState({ title: "", description: "", priority: "Medium", status: "To Do" })
+  const [isAssigningTask, setIsAssigningTask] = useState(false)
+  const theme = useTheme()
+
+  // Animation values
+  const fabScale = useSharedValue(1)
+
+  // Filtered team members based on search
+  const filteredTeamMembers = teamMembers.filter(
+    (member) =>
+      member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      member.role.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
+
+  // Get tasks for a specific team member
+  const getMemberTasks = (memberId) => {
+    return tasks.filter((task) => task.assignee === memberId)
+  }
+
+  // Handle task assignment
+  const handleAssignTask = () => {
+    if (newTask.title.trim() === "") return
+
+    const taskId = Date.now().toString()
+    const task = {
+      id: taskId,
+      title: newTask.title,
+      description: newTask.description,
+      status: newTask.status,
+      assignee: selectedMember.id,
+      priority: newTask.priority,
+    }
+
+    setTasks([...tasks, task])
+    setNewTask({ title: "", description: "", priority: "Medium", status: "To Do" })
+    setTaskModalVisible(false)
+
+    // Update team member task count
+    setTeamMembers(
+      teamMembers.map((member) => (member.id === selectedMember.id ? { ...member, tasks: member.tasks + 1 } : member)),
+    )
+  }
+
+  // Animated styles
+  const fabAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: fabScale.value }],
+    }
+  })
+
+  // Handle FAB press animation
+  const handleFabPress = () => {
+    fabScale.value = withSpring(1.2, {}, () => {
+      fabScale.value = withSpring(1)
+    })
+    setIsAssigningTask(true)
+  }
+
+  return (
+    <PaperProvider theme={theme}>
+      <View style={styles.container}>
+        <Appbar.Header>
+          <Appbar.Content title="Team Management" />
+          <Appbar.Action icon="dots-vertical" onPress={() => {}} />
+        </Appbar.Header>
+
+        <View style={styles.searchContainer}>
+          <Searchbar
+            placeholder="Search team members"
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            style={styles.searchbar}
+          />
+        </View>
+
+        {isAssigningTask ? (
+          <Animated.View
+            entering={FadeIn.duration(300)}
+            exiting={FadeOut.duration(300)}
+            style={styles.assignTaskHeader}
+          >
+            <Text variant="titleMedium">Select a team member to assign a task</Text>
+            <IconButton icon="close" size={24} onPress={() => setIsAssigningTask(false)} />
+          </Animated.View>
+        ) : null}
+
+        <ScrollView style={styles.content}>
+          {filteredTeamMembers.map((member) => (
+            <Animated.View
+              key={member.id}
+              entering={SlideInRight.duration(300).delay(Number.parseInt(member.id) * 100)}
+              exiting={SlideOutRight.duration(300)}
+            >
+              <Card
+                style={styles.memberCard}
+                onPress={() => {
+                  if (isAssigningTask) {
+                    setSelectedMember(member)
+                    setTaskModalVisible(true)
+                  } else {
+                    setSelectedMember(member === selectedMember ? null : member)
+                  }
+                }}
+              >
+                <Card.Content style={styles.memberCardContent}>
+                  <View style={styles.memberInfo}>
+                    <Avatar.Image size={50} source={{ uri: member.avatar }} />
+                    <View style={styles.memberDetails}>
+                      <Text variant="titleMedium">{member.name}</Text>
+                      <Text variant="bodyMedium">{member.role}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.memberStats}>
+                    <Chip icon="clipboard-list" mode="outlined">
+                      {member.tasks} tasks
+                    </Chip>
+                  </View>
+                </Card.Content>
+
+                {selectedMember && selectedMember.id === member.id && !isAssigningTask && (
+                  <Animated.View entering={FadeIn.duration(300)}>
+                    <Divider />
+                    <Card.Content style={styles.tasksContainer}>
+                      <Text variant="titleSmall" style={styles.tasksHeader}>
+                        Assigned Tasks
+                      </Text>
+                      {getMemberTasks(member.id).length > 0 ? (
+                        getMemberTasks(member.id).map((task) => (
+                          <Surface key={task.id} style={styles.taskItem} elevation={1}>
+                            <View style={styles.taskHeader}>
+                              <Text variant="bodyMedium" style={styles.taskTitle}>
+                                {task.title}
+                              </Text>
+                              <Chip
+                                style={[styles.statusChip, { backgroundColor: statusColors[task.status] }]}
+                                textStyle={styles.statusText}
+                              >
+                                {task.status}
+                              </Chip>
+                            </View>
+                            <Text variant="bodySmall" style={styles.taskDescription}>
+                              {task.description}
+                            </Text>
+                            <View style={styles.taskFooter}>
+                              <Chip
+                                style={[styles.priorityChip, { backgroundColor: priorityColors[task.priority] }]}
+                                textStyle={styles.priorityText}
+                                icon="flag"
+                              >
+                                {task.priority}
+                              </Chip>
+                            </View>
+                          </Surface>
+                        ))
+                      ) : (
+                        <Text style={styles.noTasks}>No tasks assigned</Text>
+                      )}
+                    </Card.Content>
+                  </Animated.View>
+                )}
+              </Card>
+            </Animated.View>
+          ))}
+        </ScrollView>
+
+        <Animated.View style={[styles.fabContainer, fabAnimatedStyle]}>
+          <FAB
+            icon="plus"
+            style={styles.fab}
+            onPress={handleFabPress}
+            label={isAssigningTask ? "Assigning..." : "Assign Task"}
+            extended
+          />
+        </Animated.View>
+
+        <Portal>
+          <Modal
+            visible={taskModalVisible}
+            onDismiss={() => setTaskModalVisible(false)}
+            contentContainerStyle={styles.modalContainer}
+          >
+            <Text variant="headlineSmall" style={styles.modalTitle}>
+              Assign Task to {selectedMember?.name}
+            </Text>
+
+            <TextInput
+              label="Task Title"
+              value={newTask.title}
+              onChangeText={(text) => setNewTask({ ...newTask, title: text })}
+              style={styles.input}
+              mode="outlined"
+            />
+
+            <TextInput
+              label="Description"
+              value={newTask.description}
+              onChangeText={(text) => setNewTask({ ...newTask, description: text })}
+              style={styles.input}
+              multiline
+              numberOfLines={3}
+              mode="outlined"
+            />
+
+            <Text variant="bodyMedium" style={styles.inputLabel}>
+              Priority:
+            </Text>
+            <View style={styles.chipContainer}>
+              {["Low", "Medium", "High", "Critical"].map((priority) => (
+                <Chip
+                  key={priority}
+                  selected={newTask.priority === priority}
+                  onPress={() => setNewTask({ ...newTask, priority })}
+                  style={[
+                    styles.selectableChip,
+                    newTask.priority === priority && { backgroundColor: priorityColors[priority] },
+                  ]}
+                  textStyle={newTask.priority === priority ? styles.selectedChipText : {}}
+                >
+                  {priority}
+                </Chip>
+              ))}
+            </View>
+
+            <Text variant="bodyMedium" style={styles.inputLabel}>
+              Status:
+            </Text>
+            <View style={styles.chipContainer}>
+              {["To Do", "In Progress", "In Review", "Done"].map((status) => (
+                <Chip
+                  key={status}
+                  selected={newTask.status === status}
+                  onPress={() => setNewTask({ ...newTask, status })}
+                  style={[
+                    styles.selectableChip,
+                    newTask.status === status && { backgroundColor: statusColors[status] },
+                  ]}
+                  textStyle={newTask.status === status ? styles.selectedChipText : {}}
+                >
+                  {status}
+                </Chip>
+              ))}
+            </View>
+
+            <View style={styles.modalActions}>
+              <Button mode="outlined" onPress={() => setTaskModalVisible(false)} style={styles.modalButton}>
+                Cancel
+              </Button>
+              <Button
+                mode="contained"
+                onPress={handleAssignTask}
+                style={styles.modalButton}
+                disabled={!newTask.title.trim()}
+              >
+                Assign Task
+              </Button>
+            </View>
+          </Modal>
+        </Portal>
+      </View>
+    </PaperProvider>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  searchContainer: {
+    padding: 16,
+    backgroundColor: theme.colors.surface,
+  },
+  searchbar: {
+    elevation: 2,
+  },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
+  assignTaskHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: theme.colors.primary + "20",
+  },
+  memberCard: {
+    marginBottom: 12,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  memberCardContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+  },
+  memberInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  memberDetails: {
+    marginLeft: 16,
+  },
+  memberStats: {
+    flexDirection: "row",
+  },
+  tasksContainer: {
+    paddingVertical: 12,
+  },
+  tasksHeader: {
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+  taskItem: {
+    padding: 12,
+    marginVertical: 6,
+    borderRadius: 8,
+  },
+  taskHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  taskTitle: {
+    fontWeight: "600",
+    flex: 1,
+  },
+  taskDescription: {
+    marginVertical: 4,
+    color: theme.colors.onSurface + "99",
+  },
+  taskFooter: {
+    flexDirection: "row",
+    marginTop: 8,
+  },
+  statusChip: {
+    height: 24,
+    paddingHorizontal: 8,
+  },
+  statusText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+  },
+  priorityChip: {
+    height: 24,
+    paddingHorizontal: 8,
+  },
+  priorityText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+  },
+  noTasks: {
+    fontStyle: "italic",
+    color: theme.colors.placeholder,
+    marginTop: 8,
+  },
+  fabContainer: {
+    position: "absolute",
+    right: 16,
+    bottom: 16,
+  },
+  fab: {
+    backgroundColor: theme.colors.primary,
+  },
+  modalContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    margin: 20,
+    borderRadius: 12,
+  },
+  modalTitle: {
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  input: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    marginBottom: 8,
+    fontWeight: "500",
+  },
+  chipContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 16,
+  },
+  selectableChip: {
+    margin: 4,
+  },
+  selectedChipText: {
+    color: "#FFFFFF",
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 16,
+  },
+  modalButton: {
+    marginLeft: 8,
+  },
+})
+
+export default TeamManagement
+
+
 

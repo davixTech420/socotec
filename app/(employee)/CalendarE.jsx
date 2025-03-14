@@ -339,7 +339,6 @@ export default function CalendarComponent() {
                       <>
                         <Text style={{ fontWeight: "500" }}>Fecha Inicio</Text>
                         <View style={styles.timeContainer}>
-
                           <InputComponent
                             type="date"
                             value={formData.fechaInicio}
@@ -371,9 +370,6 @@ export default function CalendarComponent() {
                         editable={formData.estado === "Aprobado" || formData.estado === "Rechazado" ? false : true}
                       />
                     </View>
-
-
-
                     {logueado && logueado.cargo === "TeamLider" ? (
                       <DropdownComponent
                         options={optionsState}
