@@ -384,8 +384,6 @@ export default function CalendarComponent() {
                       />
                     ) : null
                     }
-
-
                   </View>
                 </View>
                 <View style={styles.actions}>

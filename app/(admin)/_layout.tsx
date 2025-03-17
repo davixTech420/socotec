@@ -18,10 +18,10 @@ import Employee from "./Employee";
 import Model3D from "./Model3D";
 import CalendarComponent from "./Calendar";
 import Group from "./Groups";
-import Finance from "./Finance";
 import Account from "./Account";  
 import Motions from "./Motions";
 import Portfolio from "./Portfolio";
+import Task from "./Task";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import ProfileScreen from "./MyAccount";
 import { router } from "expo-router"
@@ -253,6 +253,24 @@ export default function App() {
             )}
           </Drawer.Screen>
 
+
+
+          <Drawer.Screen
+            name="Task"
+            options={{
+              title: "Tareas",
+              drawerIcon: ({ color }) => <MaterialIcons name="task" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Task {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
+
+
           <Drawer.Screen
             name="inventario"
             options={{
@@ -297,21 +315,6 @@ export default function App() {
             )}
           </Drawer.Screen>
 
-          {/* <Drawer.Screen
-            name="Finance"
-            options={{
-              title: "Finanzas",
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="finance" size={24} color={color} />,
-            }}
-          >
-            {(props) => (
-              <AnimatedScreen style={animatedStyle}>
-                <Finance {...props} />
-              </AnimatedScreen>
-            )}
-          </Drawer.Screen> */}
-
-
           <Drawer.Screen
             name="Account"
             options={{
@@ -338,8 +341,6 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
-
-
 
           <Drawer.Screen
             name="Calendar"

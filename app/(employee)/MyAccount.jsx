@@ -36,13 +36,9 @@ const ProfileScreen = () => {
     try{
       await updateUser(profileData.id,profileData).then((response) => console.log("Response:", response)).catch(error => console.log("Error:", error));
       setIsEditing(false)
-
-
     } catch(error){
       console.log("Error updating user:", error);
     }
-
-
   }
 
   const stats = [
@@ -136,7 +132,6 @@ const ProfileScreen = () => {
         disabled={!isEditing}
       />
     </View>
-           
           </View>
           <View style={[styles.formFields, !isSmallScreen && styles.formFieldsRow]}>
           <View style={styles.formField}>
@@ -144,7 +139,13 @@ const ProfileScreen = () => {
       <TextInput
         value={profileData?.telefono}
         label="Telefono"
-        onChangeText={(text) => setProfileData({ ...profileData, telefono: text })}
+        onChangeText={(text) => {
+          // Elimina todos los caracteres que no sean números
+          const validText = text.replace(/[^0-9]/g, "").slice(0, 10);
+          if (validText !== profileData.telefono) {
+            setProfileData({ ...profileData, telefono: validText });
+          }
+        }}
         mode="outlined"
         style={styles.formInput}
         disabled={!isEditing}

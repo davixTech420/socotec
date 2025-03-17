@@ -3,10 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.5.67:${port}/api/admin`;
-
-
-
+const baseUrl = `http://10.48.5.196:${port}/api/admin`;
 
 
 const makeRequest = async (method, url, data = null) => {
@@ -37,6 +34,45 @@ const makeRequest = async (method, url, data = null) => {
     throw error;
   }
 };
+
+
+/**
+ * endpoints para las tareas
+ */
+export const getTask = async ()=> {
+  return makeRequest('get', '/task');
+}
+
+export const createTask = async (data) => {
+  return makeRequest('post', '/task', data);
+}
+
+export const updateTask = async (id, data) => {
+  return makeRequest('put', `/task/${id}`, data);
+}
+
+export const deleteTask = async (id) => {
+  return makeRequest('delete', `/task/${id}`);
+}
+
+export const activeTask = async (id) => {
+  return makeRequest('put', `/task/${id}/active`);
+}
+
+export const inactiveTask = async (id) => {
+  return makeRequest('put', `/task/${id}/inactive`);
+}
+
+
+/**
+ * end endpoint para las tareas
+ */
+
+
+
+
+
+
 
 /**
  * 
