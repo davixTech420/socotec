@@ -12,7 +12,7 @@ import Animated, {
   SlideOutLeft
 } from 'react-native-reanimated';
 import { createTask,getTaskMyGroup } from '@/services/employeeService'; 
-import { useAuth } from "@/context/userContext"
+import { useAuth } from "@/context/userContext";
 import { useFocusEffect } from 'expo-router';
 
 const { width } = Dimensions.get('window');
@@ -175,7 +175,7 @@ const TaskBoard = () => {
   const [visible, setVisible] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [logueado,setLogueado] = useState(null);
-  const { user } = useAuth()
+  const { user } = useAuth();
   const [newTask, setNewTask] = useState({
     titulo: '',
     descripcion: '',
@@ -224,8 +224,7 @@ const TaskBoard = () => {
       titulo: '',
       descripcion: '',
       status: 'To Do',
-      priority: 'Medium',
-      dueDate: '',
+      priority: 'Medium'
     });
     hideModal();
   };
