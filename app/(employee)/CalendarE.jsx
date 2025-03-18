@@ -370,7 +370,7 @@ export default function CalendarComponent() {
                         editable={formData.estado === "Aprobado" || formData.estado === "Rechazado" ? false : true}
                       />
                     </View>
-                    {logueado && logueado.cargo === "TeamLider" ? (
+                    { isEditing && logueado && logueado.cargo === "TeamLider" ? (
                       <DropdownComponent
                         options={optionsState}
                         onSelect={(value) => {

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, Pressable, Text } from 'react-native';
 import { Card, Avatar, Button, FAB, Portal, Modal, TextInput, Chip, Title, Paragraph, Divider, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -12,6 +12,8 @@ import Animated, {
   SlideOutLeft
 } from 'react-native-reanimated';
 import { createTask,getTaskMyGroup } from '@/services/employeeService'; 
+import { useAuth } from "@/context/userContext"
+import { useFocusEffect } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -82,15 +84,15 @@ const TaskCard = ({ task, teamMembers, onPress }) => {
         <Card style={[styles.taskCard, { borderLeftColor: priorityColors[task.priority] }]}>
           <Card.Content>
             <View style={styles.taskHeader}>
-              <Title style={styles.taskTitle}>{task.title}</Title>
+              <Title style={styles.taskTitle}>{task.titulo}</Title>
               <Chip 
                 style={{ backgroundColor: statusColors[task.status] }} 
                 textStyle={{ color: 'white', fontSize: 10 }}
               >
-                {task.status}
+                {task.estado}
               </Chip>
             </View>
-            <Paragraph style={styles.taskDescription}>{task.description}</Paragraph>
+            <Paragraph style={styles.taskDescription}>{task.descripcion}</Paragraph>
             <Divider style={styles.divider} />
             <View style={styles.taskFooter}>
               <View style={styles.assigneeContainer}>
@@ -99,7 +101,7 @@ const TaskCard = ({ task, teamMembers, onPress }) => {
               </View>
               <View style={styles.taskMeta}>
                 <MaterialCommunityIcons name="calendar-clock" size={16} color={theme.colors.primary} />
-                <Text style={styles.dueDate}>{task.dueDate}</Text>
+                <Text style={styles.dueDate}>{task.createdAt}</Text>
               </View>
             </View>
           </Card.Content>
@@ -112,7 +114,7 @@ const TaskCard = ({ task, teamMembers, onPress }) => {
 // Team Member Component
 const TeamMember = ({ member, tasks, onPress, isSelected }) => {
   const theme = useTheme();
-  const memberTasks = tasks.filter(task => task.assignedTo === member.id);
+  const memberTasks = tasks.filter(task => task.asignadoId === member.id);
   const completedTasks = memberTasks.filter(task => task.status === 'Done').length;
   const progress = memberTasks.length > 0 ? completedTasks / memberTasks.length : 0;
   
@@ -151,7 +153,7 @@ const TeamMember = ({ member, tasks, onPress, isSelected }) => {
       >
         <Avatar.Image size={60} source={{ uri: member.avatar }} />
         <View style={styles.memberInfo}>
-          <Title style={styles.memberName}>{member.name}</Title>
+          <Title style={styles.memberName}>{member.nombre}</Title>
           <Paragraph style={styles.memberRole}>{member.role}</Paragraph>
           <View style={styles.progressContainer}>
             <View style={styles.progressBackground}>
@@ -172,15 +174,29 @@ const TaskBoard = () => {
   const [tasks, setTasks] = useState(initialTasks);
   const [visible, setVisible] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
+  const [logueado,setLogueado] = useState(null);
+  const { user } = useAuth()
   const [newTask, setNewTask] = useState({
-    title: '',
-    description: '',
+    titulo: '',
+    descripcion: '',
     status: 'To Do',
     priority: 'Medium',
     dueDate: '',
   });
-  const [taskView, setTaskView] = useState('all'); // 'all' or 'member'
-  
+  const [taskView, setTaskView] = useState('all');
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        const userData = await user();
+        setLogueado(userData);
+        const api = await getTaskMyGroup(userData.id);
+        setTeamMembers(api.users);
+        setTasks(api.tasks);
+      }
+      fetchData();
+    }, []),
+  );
+
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
   
@@ -205,8 +221,8 @@ const TaskBoard = () => {
     
     setTasks([...tasks, task]);
     setNewTask({
-      title: '',
-      description: '',
+      titulo: '',
+      descripcion: '',
       status: 'To Do',
       priority: 'Medium',
       dueDate: '',
@@ -216,7 +232,7 @@ const TaskBoard = () => {
   
   const filteredTasks = taskView === 'all' 
     ? tasks 
-    : tasks.filter(task => task.assignedTo === selectedMember?.id);
+    : tasks.filter(task => task.asignadoId === selectedMember?.id);
   
   // Animation for task list
   const taskListRef = useRef(null);
@@ -258,7 +274,7 @@ const TaskBoard = () => {
       
       <View style={styles.filterContainer}>
         <Title style={styles.taskListTitle}>
-          {taskView === 'all' ? 'All Tasks' : `${selectedMember?.name}'s Tasks`}
+          {taskView === 'all' ? 'All Tasks' : `${selectedMember?.nombre}'s Tasks`}
         </Title>
         {selectedMember && (
           <Button 
@@ -384,7 +400,7 @@ const TaskBoard = () => {
             <Button 
               mode="contained" 
               onPress={handleAddTask}
-              disabled={!newTask.title}
+              disabled={!newTask.titulo}
               style={styles.modalButton}
             >
               Create Task
