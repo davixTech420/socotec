@@ -11,10 +11,10 @@ import Animated, {
   SlideInRight,
   SlideOutLeft
 } from 'react-native-reanimated';
+import Breadcrumb from '@/components/BreadcrumbComponent';
 import { createTask,getTaskMyGroup } from '@/services/employeeService'; 
 import { useAuth } from "@/context/userContext";
-import { useFocusEffect } from 'expo-router';
-
+import { useFocusEffect,router } from 'expo-router';
 const { width } = Dimensions.get('window');
 
 // Sample data
@@ -39,7 +39,6 @@ const priorityColors = {
   Medium: '#FFB74D',
   Low: '#4CAF50',
 };
-
 // Status colors
 const statusColors = {
   'To Do': '#9C27B0',
@@ -52,9 +51,7 @@ const TaskCard = ({ task, teamMembers, onPress }) => {
   const theme = useTheme();
   const scale = useSharedValue(1);
   const rotation = useSharedValue(0);
-  
-  const assignedMember = teamMembers.find(member => member.id === task.assignedTo);
-
+  const assignedMember = teamMembers.find(member => member.id === task.asignadoId);
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -63,17 +60,14 @@ const TaskCard = ({ task, teamMembers, onPress }) => {
       ],
     };
   });
-
   const handlePressIn = () => {
     scale.value = withSpring(1.05);
     rotation.value = withSpring(1);
   };
-
   const handlePressOut = () => {
     scale.value = withSpring(1);
     rotation.value = withSpring(0);
   };
-
   return (
     <Pressable 
       onPress={onPress} 
@@ -115,15 +109,12 @@ const TaskCard = ({ task, teamMembers, onPress }) => {
 const TeamMember = ({ member, tasks, onPress, isSelected }) => {
   const theme = useTheme();
   const memberTasks = tasks.filter(task => task.asignadoId === member.id);
-  const completedTasks = memberTasks.filter(task => task.status === 'Done').length;
+  const completedTasks = memberTasks.filter(task => task.estado === false).length;
   const progress = memberTasks.length > 0 ? completedTasks / memberTasks.length : 0;
-  
   const progressWidth = useSharedValue(0);
-  
   React.useEffect(() => {
     progressWidth.value = withSpring(progress);
   }, [progress]);
-  
   // Fixed: Use direct color values instead of interpolateColor
   const progressStyle = useAnimatedStyle(() => {
     // Determine color based on progress value
@@ -135,7 +126,6 @@ const TeamMember = ({ member, tasks, onPress, isSelected }) => {
     } else {
       backgroundColor = '#4CAF50'; // Success/green for high progress
     }
-    
     return {
       width: `${progressWidth.value * 100}%`,
       backgroundColor,
@@ -177,11 +167,9 @@ const TaskBoard = () => {
   const [logueado,setLogueado] = useState(null);
   const { user } = useAuth();
   const [newTask, setNewTask] = useState({
+    asignadoId:"",
     titulo: '',
-    descripcion: '',
-    status: 'To Do',
-    priority: 'Medium',
-    dueDate: '',
+    descripcion: ''
   });
   const [taskView, setTaskView] = useState('all');
   useFocusEffect(
@@ -196,10 +184,8 @@ const TaskBoard = () => {
       fetchData();
     }, []),
   );
-
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
-  
   const handleSelectMember = (member) => {
     if (selectedMember && selectedMember.id === member.id) {
       setSelectedMember(null);
@@ -209,23 +195,20 @@ const TaskBoard = () => {
       setTaskView('member');
     }
   };
-  
-  const handleAddTask = () => {
-    if (!newTask.title) return;
-    
+  const handleAddTask = async () => {
+    if (!newTask.titulo) return;
     const task = {
       id: tasks.length + 1,
       ...newTask,
       assignedTo: selectedMember ? selectedMember.id : null,
     };
-    
     setTasks([...tasks, task]);
     setNewTask({
+      asignadoId:selectedMember?.id,
       titulo: '',
-      descripcion: '',
-      status: 'To Do',
-      priority: 'Medium'
+      descripcion: ''
     });
+await createTask(newTask).then(console.log).catch(console.error);
     hideModal();
   };
   
@@ -235,24 +218,22 @@ const TaskBoard = () => {
   
   // Animation for task list
   const taskListRef = useRef(null);
-  
   return (
     <View style={styles.container}>
-    
       <View style={styles.header}>
+        <Breadcrumb
+                    items={[
+                      {
+                        label: "Dashboard",
+                        onPress: () => router.navigate("/(employee)/DashboardE"),
+                      },
+                      {
+                        label: "Mi Grupo De Trabajo",
+                      },
+                    ]}
+                  />
         <Title style={styles.headerTitle}>Team Tasks</Title>
-        <Button 
-          mode="contained" 
-          onPress={showModal}
-          icon={({ size, color }) => (
-            <MaterialCommunityIcons name="plus" size={size} color={color} />
-          )}
-        >
-          New Task
-        </Button>
       </View>
-      
-     
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
@@ -269,8 +250,6 @@ const TaskBoard = () => {
           />
         ))}
       </ScrollView>
-      
-      
       <View style={styles.filterContainer}>
         <Title style={styles.taskListTitle}>
           {taskView === 'all' ? 'All Tasks' : `${selectedMember?.nombre}'s Tasks`}
@@ -287,8 +266,6 @@ const TaskBoard = () => {
           </Button>
         )}
       </View>
-      
-   
       <ScrollView 
         ref={taskListRef}
         style={styles.tasksContainer}
@@ -315,8 +292,6 @@ const TaskBoard = () => {
           </View>
         )}
       </ScrollView>
-      
-   
       <Portal>
         <Modal 
           visible={visible} 
@@ -324,25 +299,22 @@ const TaskBoard = () => {
           contentContainerStyle={styles.modalContainer}
         >
           <Title style={styles.modalTitle}>Create New Task</Title>
-          
           <TextInput
             label="Task Title"
-            value={newTask.title}
-            onChangeText={text => setNewTask({...newTask, title: text})}
+            value={newTask.titulo}
+            onChangeText={text => setNewTask({...newTask, titulo: text})}
             style={styles.input}
             mode="outlined"
           />
-          
           <TextInput
             label="Description"
-            value={newTask.description}
-            onChangeText={text => setNewTask({...newTask, description: text})}
+            value={newTask.descripcion}
+            onChangeText={text => setNewTask({...newTask, descripcion: text})}
             style={styles.input}
             multiline
             numberOfLines={3}
             mode="outlined"
           />
-          
           <View style={styles.inputRow}>
             <View style={styles.inputHalf}>
               <Text style={styles.inputLabel}>Priority</Text>
@@ -384,15 +356,6 @@ const TaskBoard = () => {
               </View>
             </View>
           </View>
-          
-          <TextInput
-            label="Due Date"
-            value={newTask.dueDate}
-            onChangeText={text => setNewTask({...newTask, dueDate: text})}
-            style={styles.input}
-            mode="outlined"
-            placeholder="YYYY-MM-DD"
-          />
           
           <View style={styles.modalActions}>
             <Button onPress={hideModal} style={styles.modalButton}>Cancel</Button>

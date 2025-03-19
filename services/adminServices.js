@@ -751,10 +751,10 @@ export const updateProyect = async (id, data) => {
 }
 
 
-export const activeProyect = async (req, res) => {
+export const activeProyect = async (id) => {
   try {
     const token = AsyncStorage.getItem("userToken");
-    const response = await axios.put(`${baseUrl}/proyects/${req.id}/active`, {
+    const response = await axios.put(`${baseUrl}/proyects/${id}/active`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

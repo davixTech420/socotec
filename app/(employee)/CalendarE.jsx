@@ -78,10 +78,6 @@ export default function CalendarComponent() {
     return marks
   }, [])
 
-
-
-
-
   useFocusEffect(useCallback(() => {
     const fetchData = async () => {
       try {
@@ -89,9 +85,8 @@ export default function CalendarComponent() {
         setLogueado(userData);
         setFormData({ ...formData, solicitanteId: userData.id });
         let response
-        if (userData.cargo === "TeamLider") {
+        if (userData.cargo === "TeamLider" || userData.cargo === "DirectorContable") {
           response = await getPermissionsMyGroup(userData.id)
-
         } else {
           response = await getMyPermissions(userData.id)
         }
@@ -184,7 +179,7 @@ export default function CalendarComponent() {
   const handleEdit = useCallback((item) => {
     setFormData({
       solicitanteId: item.solicitanteId,
-      aprobadorId: logueado.cargo === "TeamLider" ? logueado.id : item.aprobadorId,
+      aprobadorId: logueado.cargo === "TeamLider" || logueado.cargo === "DirectorContable" ? logueado.id : item.aprobadorId,
       tipoPermiso: item.tipoPermiso,
       fechaInicio: item.fechaInicio,
       fechaFin: item.fechaFin,
@@ -370,7 +365,7 @@ export default function CalendarComponent() {
                         editable={formData.estado === "Aprobado" || formData.estado === "Rechazado" ? false : true}
                       />
                     </View>
-                    { isEditing && logueado && logueado.cargo === "TeamLider" ? (
+                    { isEditing && logueado && logueado?.cargo === "TeamLider" || logueado?.cargo === "DirectorContable" ? (
                       <DropdownComponent
                         options={optionsState}
                         onSelect={(value) => {
