@@ -1,67 +1,89 @@
-import { useState, useEffect, useCallback } from "react"
-import { View, StyleSheet, ScrollView, SafeAreaView, Platform, StatusBar, Dimensions } from "react-native"
-import { createDrawerNavigator } from "@react-navigation/drawer"
-import { Provider as PaperProvider, Avatar, Text, Button, useTheme, IconButton, Appbar } from "react-native-paper"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+  Platform,
+  StatusBar,
+  Dimensions,
+} from "react-native";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import {
+  Provider as PaperProvider,
+  Avatar,
+  Text,
+  Button,
+  useTheme,
+  IconButton,
+  Appbar,
+} from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   interpolate,
   Extrapolate,
-} from "react-native-reanimated"
-import Dashboard from "./DashboardE"
-import Calendar from "./CalendarE"
-import MyAccount from "./MyAccount"
-import MyGroup from "./MyGroup"
+} from "react-native-reanimated";
+import Dashboard from "./DashboardE";
+import Calendar from "./CalendarE";
+import MyAccount from "./MyAccount";
+import MyGroup from "./MyGroup";
 import Proyect from "./Proyect";
 import Inventario from "./inventario";
-import { useProtectedRoute, useAuth } from "@/context/userContext"
-import { router } from "expo-router"
+import AccountE from "./AccountE";
+import MotionsE from "./MotionsE";
+import { useProtectedRoute, useAuth } from "@/context/userContext";
+import { router } from "expo-router";
 
-const Drawer = createDrawerNavigator()
-const { width: SCREEN_WIDTH } = Dimensions.get("window")
-const DRAWER_WIDTH = SCREEN_WIDTH * (Platform.OS == "web" ? 0.2 : 0.7)
+const Drawer = createDrawerNavigator();
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const DRAWER_WIDTH = SCREEN_WIDTH * (Platform.OS == "web" ? 0.2 : 0.7);
 
 function AnimatedScreen({ children, style, staticButton }) {
   return (
     <Animated.View style={[styles.screen, style]}>
-      <ScrollView contentContainerStyle={styles.screenContent}>{children}</ScrollView>
+      <ScrollView contentContainerStyle={styles.screenContent}>
+        {children}
+      </ScrollView>
     </Animated.View>
-  )
+  );
 }
 
 function CustomDrawerContent(props) {
-  const { logout, user } = useAuth()
-  const theme = useTheme()
+  const { logout, user } = useAuth();
+  const theme = useTheme();
 
   // Obtener el usuario logueado
-  const [userData, setUserData] = useState(null)
+  const [userData, setUserData] = useState(null);
 
   // Use useCallback to memoize the fetch function
   const fetchUserData = useCallback(async () => {
     try {
-      const data = await user()
-      setUserData(data)
+      const data = await user();
+      setUserData(data);
     } catch (error) {
-      console.log("Error user data:", error)
+      console.log("Error user data:", error);
     }
-  }, [user])
+  }, [user]);
 
   useEffect(() => {
     // Only fetch if we don't already have user data
     if (!userData) {
-      fetchUserData()
+      fetchUserData();
     }
-  }, [fetchUserData, userData])
+  }, [fetchUserData, userData]);
 
   // Cerrar la sesion en el contexto general
   const handleSignOut = () => {
-    logout()
-  }
+    logout();
+  };
 
   return (
-    <SafeAreaView style={[styles.drawerContent, { backgroundColor: theme.colors.surface }]}>
+    <SafeAreaView
+      style={[styles.drawerContent, { backgroundColor: theme.colors.surface }]}
+    >
       <ScrollView>
         <View style={styles.userInfoSection}>
           <Avatar.Image
@@ -69,32 +91,44 @@ function CustomDrawerContent(props) {
             size={80}
             style={{ backgroundColor: "transparent" }}
           />
-          <Text style={[styles.title, { color: "#00ACE8" }]}>{userData?.nombre || "Usuario"}</Text>
+          <Text style={[styles.title, { color: "#00ACE8" }]}>
+            {userData?.nombre || "Usuario"}
+          </Text>
           <Text style={[styles.caption, { color: theme.colors.secondary }]}>
             {userData?.email || "usuario@socotec.com"}
           </Text>
         </View>
         <View style={styles.drawerSection}>
           {props.state.routes.map((route, index) => {
-            const { title, drawerIcon } = props.descriptors[route.key].options
-            const isFocused = props.state.index === index
+            const { title, drawerIcon } = props.descriptors[route.key].options;
+            const isFocused = props.state.index === index;
             return (
               <Button
                 key={route.key}
-                icon={({ size, color }) => drawerIcon({ color: isFocused ? color : "black", size })}
+                icon={({ size, color }) =>
+                  drawerIcon({ color: isFocused ? color : "black", size })
+                }
                 mode={isFocused ? "contained" : "text"}
                 onPress={() => props.navigation.navigate(route.name)}
-                style={[styles.drawerItem, { backgroundColor: isFocused ? "#00ACE8" : "#fff" }]}
-                labelStyle={[styles.drawerItemLabel, { color: isFocused ? "white" : "black" }]}
+                style={[
+                  styles.drawerItem,
+                  { backgroundColor: isFocused ? "#00ACE8" : "#fff" },
+                ]}
+                labelStyle={[
+                  styles.drawerItemLabel,
+                  { color: isFocused ? "white" : "black" },
+                ]}
               >
                 {title}
               </Button>
-            )
+            );
           })}
         </View>
       </ScrollView>
       <Button
-        icon={({ size }) => <MaterialCommunityIcons name="logout" size={size} color="#ff0000" />}
+        icon={({ size }) => (
+          <MaterialCommunityIcons name="logout" size={size} color="#ff0000" />
+        )}
         textColor="#ff0000"
         mode="outlined"
         onPress={handleSignOut}
@@ -103,72 +137,86 @@ function CustomDrawerContent(props) {
         Cerrar Sesión
       </Button>
     </SafeAreaView>
-  )
+  );
 }
 
 function CustomAppBar({ title, navigation, drawerProgress }) {
-  const theme = useTheme()
+  const theme = useTheme();
 
   const animatedStyle = useAnimatedStyle(() => {
-    const rotate = interpolate(drawerProgress.value, [0, 1], [0, 180], Extrapolate.CLAMP)
+    const rotate = interpolate(
+      drawerProgress.value,
+      [0, 1],
+      [0, 180],
+      Extrapolate.CLAMP
+    );
     return {
       transform: [{ rotate: `${rotate}deg` }],
-    }
-  })
+    };
+  });
 
   return (
     <Appbar.Header style={{ backgroundColor: "#00ACE8" }}>
       <Animated.View style={animatedStyle}>
-        <IconButton icon="menu" color={theme.colors.surface} size={24} onPress={navigation.toggleDrawer} />
+        <IconButton
+          icon="menu"
+          color={theme.colors.surface}
+          size={24}
+          onPress={navigation.toggleDrawer}
+        />
       </Animated.View>
       <Appbar.Content title={title} color={theme.colors.surface} />
     </Appbar.Header>
-  )
+  );
 }
 
 export default function App() {
-  const isAuthenticated = useProtectedRoute("/singIn")
-  const { user } = useAuth()
-  const theme = useTheme()
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [logueado, setLogueado] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [hasRedirected, setHasRedirected] = useState(false)
-  const drawerProgress = useSharedValue(0)
+  const isAuthenticated = useProtectedRoute("/singIn");
+  const { user } = useAuth();
+  const theme = useTheme();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [logueado, setLogueado] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasRedirected, setHasRedirected] = useState(false);
+  const drawerProgress = useSharedValue(0);
 
   // Use useCallback to memoize the checkUserRole function
   const checkUserRole = useCallback(async () => {
-    if (!isAuthenticated) return
+    if (!isAuthenticated) return;
 
     try {
-      setIsLoading(true)
-      const userData = await user()
-      setLogueado(userData)
+      setIsLoading(true);
+      const userData = await user();
+      setLogueado(userData);
 
       // Only redirect once
       if (userData && userData.role !== "employee" && !hasRedirected) {
-        setHasRedirected(true)
-        router.replace("/(admin)/Dashboard")
+        setHasRedirected(true);
+        router.replace("/(admin)/Dashboard");
       }
     } catch (error) {
-      console.log("Error obteniendo el rol:", error)
-      setLogueado(false) // Set to false on error to avoid loading state
+      console.log("Error obteniendo el rol:", error);
+      setLogueado(false); // Set to false on error to avoid loading state
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [isAuthenticated, user, hasRedirected])
+  }, [isAuthenticated, user, hasRedirected]);
 
   useEffect(() => {
     // Only check if we don't have user data yet or if authentication status changes
     if (isAuthenticated && logueado === null) {
-      checkUserRole()
+      checkUserRole();
     }
-  }, [isAuthenticated, checkUserRole, logueado])
+  }, [isAuthenticated, checkUserRole, logueado]);
 
   const animatedStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(drawerProgress.value, [0, 1], [0, DRAWER_WIDTH])
-    const borderRadius = interpolate(drawerProgress.value, [0, 1], [0, 20])
-    const scale = interpolate(drawerProgress.value, [0, 1], [1, 0.8])
+    const translateX = interpolate(
+      drawerProgress.value,
+      [0, 1],
+      [0, DRAWER_WIDTH]
+    );
+    const borderRadius = interpolate(drawerProgress.value, [0, 1], [0, 20]);
+    const scale = interpolate(drawerProgress.value, [0, 1], [1, 0.8]);
     return {
       transform: [
         { translateX: withTiming(translateX, { duration: 300 }) },
@@ -176,32 +224,46 @@ export default function App() {
       ],
       borderRadius: withTiming(borderRadius, { duration: 300 }),
       overflow: "hidden",
-    }
-  })
+    };
+  });
 
   if (!isAuthenticated) {
-    return null
+    return null;
   }
 
   // Render loading state if user data is still being fetched
   if (isLoading) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <Text>Cargando...</Text>
       </View>
-    )
+    );
   }
 
   // If we've tried to load the user but failed, show an error
   if (logueado === false) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <Text>Error al cargar los datos del usuario</Text>
-        <Button mode="contained" onPress={checkUserRole} style={{ marginTop: 20 }}>
+        <Button
+          mode="contained"
+          onPress={checkUserRole}
+          style={{ marginTop: 20 }}
+        >
           Reintentar
         </Button>
       </View>
-    )
+    );
   }
 
   return (
@@ -219,15 +281,22 @@ export default function App() {
             overlayColor: "transparent",
             sceneContainerStyle: { backgroundColor: "transparent" },
             header: ({ navigation, route, options }) => (
-              <CustomAppBar title={options.title} navigation={navigation} drawerProgress={drawerProgress} />
+              <CustomAppBar
+                title={options.title}
+                navigation={navigation}
+                drawerProgress={drawerProgress}
+              />
             ),
           }}
           drawerPosition="left"
           onStateChange={(state) => {
             if (state.history && state.history.length > 0) {
-              const isOpen = state.history[state.history.length - 1].type === "drawer"
-              setIsDrawerOpen(isOpen)
-              drawerProgress.value = withTiming(isOpen ? 1 : 0, { duration: 300 })
+              const isOpen =
+                state.history[state.history.length - 1].type === "drawer";
+              setIsDrawerOpen(isOpen);
+              drawerProgress.value = withTiming(isOpen ? 1 : 0, {
+                duration: 300,
+              });
             }
           }}
         >
@@ -236,7 +305,11 @@ export default function App() {
             options={{
               title: "Dashboard",
               drawerIcon: ({ color }) => (
-                <MaterialCommunityIcons name="view-dashboard-outline" size={24} color={color} />
+                <MaterialCommunityIcons
+                  name="view-dashboard-outline"
+                  size={24}
+                  color={color}
+                />
               ),
             }}
           >
@@ -262,8 +335,15 @@ export default function App() {
           <Drawer.Screen
             name="CalendarE"
             options={{
-              title: logueado?.cargo === "TeamLider" ? "Permisos" : "Mis Permisos",
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
+              title:
+                logueado?.cargo === "TeamLider" ? "Permisos" : "Mis Permisos",
+              drawerIcon: ({ color }) => (
+                <MaterialCommunityIcons
+                  name="calendar"
+                  size={24}
+                  color={color}
+                />
+              ),
             }}
           >
             {(props) => (
@@ -277,7 +357,13 @@ export default function App() {
             name="MyGroup"
             options={{
               title: "Mi Grupo De Trabajo",
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
+              drawerIcon: ({ color }) => (
+                <MaterialCommunityIcons
+                  name="calendar"
+                  size={24}
+                  color={color}
+                />
+              ),
             }}
           >
             {(props) => (
@@ -286,47 +372,105 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
-          {logueado?.cargo ==="TeamLider" || logueado?.cargo === "Deliniante" ? (
-<Drawer.Screen
-            name="Proyect"
-            options={{
-              title: "Proyecto",
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
-            }}
-          >
-            {(props) => (
-              <AnimatedScreen style={animatedStyle}>
-                <Proyect {...props} />
-              </AnimatedScreen>
-            )}
-          </Drawer.Screen>
+          {logueado?.cargo === "TeamLider" ||
+          logueado?.cargo === "Deliniante" ? (
+            <Drawer.Screen
+              name="Proyect"
+              options={{
+                title: "Proyecto",
+                drawerIcon: ({ color }) => (
+                  <MaterialCommunityIcons
+                    name="calendar"
+                    size={24}
+                    color={color}
+                  />
+                ),
+              }}
+            >
+              {(props) => (
+                <AnimatedScreen style={animatedStyle}>
+                  <Proyect {...props} />
+                </AnimatedScreen>
+              )}
+            </Drawer.Screen>
+          ) : null}
 
-          ) : null  }
+          {logueado?.cargo === "DirectorContable" ||
+          logueado?.cargo === "Contador" ? (
+            <>
+              <Drawer.Screen
+                name="Inventario"
+                options={{
+                  title: "Inventario",
+                  drawerIcon: ({ color }) => (
+                    <MaterialCommunityIcons
+                      name="calendar"
+                      size={24}
+                      color={color}
+                    />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <AnimatedScreen style={animatedStyle}>
+                    <Inventario {...props} />
+                  </AnimatedScreen>
+                )}
+              </Drawer.Screen>
 
+              <Drawer.Screen
+                name="AccountE"
+                options={{
+                  title: "Cuentas",
+                  drawerIcon: ({ color }) => (
+                    <MaterialCommunityIcons
+                      name="calendar"
+                      size={24}
+                      color={color}
+                    />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <AnimatedScreen style={animatedStyle}>
+                    <AccountE {...props} />
+                  </AnimatedScreen>
+                )}
+              </Drawer.Screen>
 
-          {logueado?.cargo === "DirectorContable" || logueado?.cargo === "Contador" ? (
-<Drawer.Screen
-            name="Inventario"
-            options={{
-              title: "Inventario",
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
-            }}
-          >
-            {(props) => (
-              <AnimatedScreen style={animatedStyle}>
-                <Inventario {...props} />
-              </AnimatedScreen>
-            )}
-          </Drawer.Screen>
-          ) : null }
-
-          
+              <Drawer.Screen
+                name="MotionsE"
+                options={{
+                  title: "Movimientos",
+                  drawerIcon: ({ color }) => (
+                    <MaterialCommunityIcons
+                      name="calendar"
+                      size={24}
+                      color={color}
+                    />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <AnimatedScreen style={animatedStyle}>
+                    <MotionsE {...props} />
+                  </AnimatedScreen>
+                )}
+              </Drawer.Screen>
+            </>
+          ) : null}
 
           <Drawer.Screen
             name="MyAccount"
             options={{
               title: "Mi Cuenta",
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
+              drawerIcon: ({ color }) => (
+                <MaterialCommunityIcons
+                  name="calendar"
+                  size={24}
+                  color={color}
+                />
+              ),
             }}
           >
             {(props) => (
@@ -338,7 +482,7 @@ export default function App() {
         </Drawer.Navigator>
       </SafeAreaView>
     </PaperProvider>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -398,4 +542,4 @@ const styles = StyleSheet.create({
     right: 20,
     borderRadius: 30,
   },
-})
+});

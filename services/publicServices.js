@@ -4,11 +4,11 @@ import { useAuth } from "@/context/userContext";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.5.196:${port}/api/public`;
+const baseUrl = `http://10.48.0.61:${port}/api/public`;
 
 
 export const SrcImagen = (path) => {
-  return `http://10.48.5.196:${port}${path}`;
+  return `http://10.48.0.61:${port}${path}`;
 }
 //end point para enviar el email recien se registra un usuario
 export const emailRegistro = async (user) => {
