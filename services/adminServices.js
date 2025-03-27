@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://10.48.0.61:${port}/api/admin`;
+const baseUrl = `http://10.48.5.50:${port}/api/admin`;
 
 
 const makeRequest = async (method, url, data = null) => {
@@ -35,6 +35,10 @@ const makeRequest = async (method, url, data = null) => {
   }
 };
 
+
+export const getDashboard = async () => {
+  return makeRequest('get', '/dashboard');
+}
 
 /**
  * endpoints para las tareas

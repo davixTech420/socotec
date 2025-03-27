@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, RefreshControl, useWindowDimensions  } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, RefreshControl, useWindowDimensions, Platform  } from 'react-native';
 import { LineChart, ProgressChart, BarChart, PieChart } from 'react-native-chart-kit';
 import Animated, { FadeInUp, useSharedValue  } from 'react-native-reanimated';
 import { PaperProvider, Surface, Chip, DataTable, Searchbar } from "react-native-paper";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { getDashboard } from '@/services/adminServices';
 
 
 const AnimatedSurface = Animated.createAnimatedComponent(Surface);
@@ -36,9 +38,6 @@ const customerData = [
 ];
 
 export default function AnalyticsDashboardPro() {
-
-
-
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,12 +47,21 @@ export default function AnalyticsDashboardPro() {
   const { width: screenWidth } = useWindowDimensions();
   const scrollY = useSharedValue(0);
   const scrollViewRef = useRef(null);
+  const [data, setData] = useState({});
 
+
+ useFocusEffect(
+     useCallback(() => {
+       getDashboard().then(setData).catch(console.error)
+     }, []),
+   );
+
+   console.log(data);
   const lineChartData = {
     labels: salesData.map(item => item.date.slice(5)),
     datasets: [{
       data: salesData.map(item => item.amount),
-      color: () => "#6bd9fe"  /* (opacity = 1) => `rgba(72, 187, 120, ${opacity})` */,
+      color: () => "#6bd9fe",
       strokeWidth: 2
     }]
   };
@@ -94,7 +102,7 @@ export default function AnalyticsDashboardPro() {
   };
 
   const stats = [
-    { title: 'Total Revenue', value: '$12,628', change: '+12.5%', icon: 'currency-usd' },
+    { title: 'Total Inventario', value:"{data.inventarios.length()}" , change: '+12.5%', icon: 'currency-usd' },
     { title: 'Total Sales', value: '2,420', change: '+8.4%', icon: 'cart-outline' },
     { title: 'Total Visits', value: '4,125', change: '+15.3%', icon: 'eye-outline' },
     { title: 'Conversion', value: '2.8%', change: '+3.1%', icon: 'chart-line' },
@@ -180,7 +188,6 @@ export default function AnalyticsDashboardPro() {
 
   return (
     <PaperProvider>
-    
       <ScrollView 
         style={styles.container}
         refreshControl={
@@ -193,10 +200,6 @@ export default function AnalyticsDashboardPro() {
         ref={scrollViewRef}
       >
         <View style={styles.content}>
-
-
-
-
           <View style={styles.searchContainer}>
             <Searchbar
               placeholder="Search..."
@@ -260,7 +263,7 @@ export default function AnalyticsDashboardPro() {
             <Text style={styles.cardTitle}>Revenue Overview</Text>
             <LineChart
               data={lineChartData}
-              width={screenWidth - 40}
+              width={Platform.OS==="android" ? screenWidth*0.8 : screenWidth*0.89}
               height={220}
               chartConfig={chartConfig}
               bezier
@@ -268,7 +271,7 @@ export default function AnalyticsDashboardPro() {
               withInnerLines={false}
               withOuterLines={true}
               withDots={true}
-              withShadow={false}
+              withShadow={true}
             />
           </Animated.View>
 

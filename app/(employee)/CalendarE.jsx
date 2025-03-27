@@ -1,22 +1,34 @@
-import React, { useState, useCallback } from "react"
-import { View, StyleSheet, ScrollView, Platform } from "react-native"
-import { Calendar } from "react-native-calendars"
-import { Modal, Portal, Button, Text, useTheme, PaperProvider, Card, Snackbar } from "react-native-paper"
-import Breadcrumb from "@/components/BreadcrumbComponent"
-import TablaComponente from "@/components/tablaComponent"
-import InputComponent from "@/components/InputComponent"
-import DropdownComponent from "@/components/DropdownComponent"
-import { router } from "expo-router"
+import React, { useState, useCallback } from "react";
+import { View, StyleSheet, ScrollView, Platform } from "react-native";
+import { Calendar } from "react-native-calendars";
+import {
+  Modal,
+  Portal,
+  Button,
+  Text,
+  useTheme,
+  PaperProvider,
+  Card,
+  Snackbar,
+} from "react-native-paper";
+import Breadcrumb from "@/components/BreadcrumbComponent";
+import TablaComponente from "@/components/tablaComponent";
+import InputComponent from "@/components/InputComponent";
+import DropdownComponent from "@/components/DropdownComponent";
+import { router } from "expo-router";
 import {
   createPermission,
   deletePermission,
   updatePermission,
-} from "@/services/adminServices"
-import { getMyPermissions, getPermissionsMyGroup } from "@/services/employeeService";
-import { useFocusEffect } from "@react-navigation/native"
+} from "@/services/adminServices";
+import {
+  getMyPermissions,
+  getPermissionsMyGroup,
+} from "@/services/employeeService";
+import { useFocusEffect } from "@react-navigation/native";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
-import PDFViewComponent from "@/components/PdfViewComponent"
-import { useAuth } from "@/context/userContext"
+import PDFViewComponent from "@/components/PdfViewComponent";
+import { useAuth } from "@/context/userContext";
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -27,18 +39,18 @@ const columns = [
   { key: "estado", title: "Estado", sortable: true },
   { key: "createdAt", title: "Creado", sortable: true },
   { key: "updatedAt", title: "Modificado", sortable: true },
-]
+];
 
 export default function CalendarComponent() {
-  const { user } = useAuth()
+  const { user } = useAuth();
   const [logueado, setLogueado] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingPermissionId, setEditingPermissionId] = useState(null);
-  const [selectedDate, setSelectedDate] = useState("")
-  const [showForm, setShowForm] = useState(false)
-  const [data, setData] = useState([])
-  const [markedDates, setMarkedDates] = useState({})
-  const [snackbarVisible, setSnackbarVisible] = useState(false)
+  const [selectedDate, setSelectedDate] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [data, setData] = useState([]);
+  const [markedDates, setMarkedDates] = useState({});
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const [formData, setFormData] = useState({
@@ -46,65 +58,76 @@ export default function CalendarComponent() {
     tipoPermiso: "",
     fechaInicio: "",
     fechaFin: "",
-  })
+  });
 
-  const theme = useTheme()
+  const theme = useTheme();
 
   const processPermissionsForCalendar = useCallback((permissions) => {
-    const marks = {}
+    const marks = {};
 
     permissions.forEach((permission) => {
-      const startDate = new Date(permission.fechaInicio)
-      const endDate = new Date(permission.fechaFin)
+      const startDate = new Date(permission.fechaInicio);
+      const endDate = new Date(permission.fechaFin);
 
-      let dotColor = "#0066FF" // default
-      if (permission.tipoPermiso === "Vacaciones") dotColor = "#00C853"
-      if (permission.tipoPermiso === "Medico") dotColor = "#FF4081"
-      if (permission.tipoPermiso === "Personal") dotColor = "#FF9100"
+      let dotColor = "#0066FF"; // default
+      if (permission.tipoPermiso === "Vacaciones") dotColor = "#00C853";
+      if (permission.tipoPermiso === "Medico") dotColor = "#FF4081";
+      if (permission.tipoPermiso === "Personal") dotColor = "#FF9100";
 
-      for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
-        const dateString = date.toISOString().split("T")[0]
+      for (
+        let date = startDate;
+        date <= endDate;
+        date.setDate(date.getDate() + 1)
+      ) {
+        const dateString = date.toISOString().split("T")[0];
 
         if (!marks[dateString]) {
-          marks[dateString] = { dots: [] }
+          marks[dateString] = { dots: [] };
         }
 
         marks[dateString].dots.push({
           key: permission.id,
           color: dotColor,
-        })
+        });
       }
-    })
-    return marks
-  }, [])
+    });
+    return marks;
+  }, []);
 
-  useFocusEffect(useCallback(() => {
-    const fetchData = async () => {
-      try {
-        const userData = await user();
-        setLogueado(userData);
-        setFormData({ ...formData, solicitanteId: userData.id });
-        let response
-        if (userData.cargo === "TeamLider" || userData.cargo === "DirectorContable" || userData.cargo === "Directorsset" || userData.cargo === "DirectorTalento") {
-          response = await getPermissionsMyGroup(userData.id)
-        } else {
-          response = await getMyPermissions(userData.id)
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const userData = await user();
+          setLogueado(userData);
+          setFormData({ ...formData, solicitanteId: userData.id });
+          let response;
+          if (
+            userData.cargo === "TeamLider" ||
+            userData.cargo === "DirectorContable" ||
+            userData.cargo === "Directorsset" ||
+            userData.cargo === "DirectorTalento"
+          ) {
+            response = await getPermissionsMyGroup(userData.id);
+          } else {
+            response = await getMyPermissions(userData.id);
+          }
+          setData(response);
+          const marks = processPermissionsForCalendar(response);
+          setMarkedDates(marks);
+        } catch (error) {
+          console.error("Error al obtener los datos:", error);
         }
-        setData(response)
-        const marks = processPermissionsForCalendar(response)
-        setMarkedDates(marks)
-      } catch (error) {
-        console.error("Error al obtener los datos:", error)
-      }
-    }
-    fetchData();
-  }, []),);
+      };
+      fetchData();
+    }, [])
+  );
 
   const handleDayPress = (day) => {
-    setFormData({ ...formData, fechaInicio: day.dateString })
-    setSelectedDate(day.dateString)
-    setShowForm(true)
-  }
+    setFormData({ ...formData, fechaInicio: day.dateString });
+    setSelectedDate(day.dateString);
+    setShowForm(true);
+  };
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -122,7 +145,9 @@ export default function CalendarComponent() {
       if (emptyFields.length > 0) {
         setShowForm(false);
 
-        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
+        throw new Error(
+          `Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`
+        );
       }
 
       let newData;
@@ -153,57 +178,69 @@ export default function CalendarComponent() {
       setData(newData);
       setSnackbarMessage({
         text: isEditing ? "Permiso actualizado" : "Permiso creado",
-        type: "success"
+        type: "success",
       });
       resetForm();
     } catch (error) {
       resetForm();
       setSnackbarMessage({
-        text: error.response?.data.message || error.response?.data.errors?.[0]?.msg || error.message,
-        type: "error"
+        text:
+          error.response?.data.message ||
+          error.response?.data.errors?.[0]?.msg ||
+          error.message,
+        type: "error",
       });
-
     } finally {
       setSnackbarVisible(true);
     }
   }, [formData, isEditing, editingPermissionId, data]);
 
-
   const resetForm = () => {
-    setShowForm(false)
+    setShowForm(false);
     setIsEditing(false);
-    setFormData({ solicitanteId: logueado.id, tipoPermiso: "", fechaInicio: "", fechaFin: "" })
-    setSelectedDate("")
-  }
+    setFormData({
+      solicitanteId: logueado.id,
+      tipoPermiso: "",
+      fechaInicio: "",
+      fechaFin: "",
+    });
+    setSelectedDate("");
+  };
 
   const handleEdit = useCallback((item) => {
     setFormData({
       solicitanteId: item.solicitanteId,
-      aprobadorId: logueado.cargo === "TeamLider" || logueado.cargo === "DirectorContable" || logueado.cargo === "Directorsset" || logueado.cargo === "DirectorTalento" ? logueado.id : item.aprobadorId,
+      aprobadorId:
+        logueado.cargo === "TeamLider" ||
+        logueado.cargo === "DirectorContable" ||
+        logueado.cargo === "Directorsset" ||
+        logueado.cargo === "DirectorTalento"
+          ? logueado.id
+          : item.aprobadorId,
       tipoPermiso: item.tipoPermiso,
       fechaInicio: item.fechaInicio,
       fechaFin: item.fechaFin,
-      estado: item.estado
-    })
-    setEditingPermissionId(item.id)
-    setIsEditing(true)
-    setShowForm(true)
+      estado: item.estado,
+    });
+    setEditingPermissionId(item.id);
+    setIsEditing(true);
+    setShowForm(true);
   }, []);
   const handleDataUpdate = (updatedData) => {
-    setData(updatedData)
-    const updatedMarks = processPermissionsForCalendar(updatedData)
-    setMarkedDates(updatedMarks)
-  }
+    setData(updatedData);
+    const updatedMarks = processPermissionsForCalendar(updatedData);
+    setMarkedDates(updatedMarks);
+  };
   const optionsTipoPermiso = [
     { label: "Vacaciones", value: "Vacaciones" },
     { label: "Medico", value: "Medico" },
     { label: "Personal", value: "Personal" },
-  ]
+  ];
   const optionsState = [
     { label: "Pendiente", value: "Pendiente" },
     { label: "Aprobado", value: "Aprobado" },
     { label: "Rechazado", value: "Rechazado" },
-  ]
+  ];
 
   return (
     <PaperProvider theme={theme}>
@@ -221,8 +258,16 @@ export default function CalendarComponent() {
             ]}
           />
           <View style={styles.headerActions}>
-            <PDFViewComponent data={data} columns={columns} iconStyle={styles.icon} />
-            <ExcelPreviewButton data={data} columns={columns} iconStyle={styles.icon} />
+            <PDFViewComponent
+              data={data}
+              columns={columns}
+              iconStyle={styles.icon}
+            />
+            <ExcelPreviewButton
+              data={data}
+              columns={columns}
+              iconStyle={styles.icon}
+            />
           </View>
         </View>
         <Card style={styles.tableCard}>
@@ -299,10 +344,16 @@ export default function CalendarComponent() {
           style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
           action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
         >
-          <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
+          <Text style={{ color: theme.colors.surface }}>
+            {snackbarMessage.text}
+          </Text>
         </Snackbar>
         <Portal>
-          <Modal visible={showForm} onDismiss={() => setShowForm(false)} contentContainerStyle={styles.modalContainer}>
+          <Modal
+            visible={showForm}
+            onDismiss={() => setShowForm(false)}
+            contentContainerStyle={styles.modalContainer}
+          >
             <ScrollView>
               <View style={styles.modalContent}>
                 <View style={styles.headerCalendar}>
@@ -317,8 +368,7 @@ export default function CalendarComponent() {
                   <DropdownComponent
                     options={optionsTipoPermiso}
                     onSelect={(value) => {
-                      if (!isEditing || formData.estado === "Pendiente"
-                      ) {
+                      if (!isEditing || formData.estado === "Pendiente") {
                         setFormData({ ...formData, tipoPermiso: value });
                       }
                     }}
@@ -337,55 +387,80 @@ export default function CalendarComponent() {
                           <InputComponent
                             type="date"
                             value={formData.fechaInicio}
-                            onChangeText={(text) => setFormData({ ...formData, fechaInicio: text })}
+                            onChangeText={(text) =>
+                              setFormData({ ...formData, fechaInicio: text })
+                            }
                             label="Fecha Inicio"
                             placeholder="Introduce la fecha de inicio"
                             validationRules={{ required: true }}
                             errorMessage="Por favor, introduce una fecha válida"
                             style={styles.input}
-                            editable={formData.estado === "Aprobado" || formData.estado === "Rechazado" ? false : true}
+                            editable={
+                              formData.estado === "Aprobado" ||
+                              formData.estado === "Rechazado"
+                                ? false
+                                : true
+                            }
                           />
                         </View>
                       </>
-                    ) : (<Text variant="bodyLarge" style={styles.selectedDate}>
-                      {formData.fechaInicio}
-                    </Text>)
-                    }
+                    ) : (
+                      <Text variant="bodyLarge" style={styles.selectedDate}>
+                        {formData.fechaInicio}
+                      </Text>
+                    )}
                     <Text style={{ fontWeight: "500" }}>Fecha Fin</Text>
                     <View style={styles.timeContainer}>
                       <InputComponent
                         type="date"
                         value={formData.fechaFin}
-                        onChangeText={(text) => setFormData({ ...formData, fechaFin: text })}
+                        onChangeText={(text) =>
+                          setFormData({ ...formData, fechaFin: text })
+                        }
                         label="Fecha Fin"
                         placeholder="Introduce la fecha de fin"
                         validationRules={{ required: true }}
                         errorMessage="Por favor, introduce una fecha válida"
                         style={styles.input}
-                        editable={formData.estado === "Aprobado" || formData.estado === "Rechazado" ? false : true}
+                        editable={
+                          formData.estado === "Aprobado" ||
+                          formData.estado === "Rechazado"
+                            ? false
+                            : true
+                        }
                       />
                     </View>
-                    { logueado && logueado?.cargo === "TeamLider" || logueado?.cargo === "DirectorContable" || logueado?.cargo === "Directorsset" || logueado?.cargo === "DirectorTalento" ? (
+                    {logueado &&
+                    (logueado?.cargo === "TeamLider" ||
+                      logueado?.cargo === "DirectorContable" ||
+                      logueado?.cargo === "Directorsset" ||
+                      logueado?.cargo === "DirectorTalento") ? (
                       <DropdownComponent
                         options={optionsState}
                         onSelect={(value) => {
-                          if (!isEditing || formData.estado === "Pendiente"
-                          ) {
+                          if (!isEditing || formData.estado === "Pendiente") {
                             setFormData({ ...formData, estado: value });
                           }
                         }}
                         value={formData.estado}
                         placeholder="Estado"
                       />
-                    ) : null
-                    }
+                    ) : null}
                   </View>
                 </View>
                 <View style={styles.actions}>
-                  <Button mode="outlined" onPress={resetForm} style={styles.cancelButton}>
+                  <Button
+                    mode="outlined"
+                    onPress={resetForm}
+                    style={styles.cancelButton}
+                  >
                     Cancel
                   </Button>
-                  <Button mode="contained" onPress={handleSubmit} style={styles.submitButton}>
+                  <Button
+                    mode="contained"
+                    onPress={handleSubmit}
+                    style={styles.submitButton}
+                  >
                     Continue
                   </Button>
                 </View>
@@ -395,7 +470,7 @@ export default function CalendarComponent() {
         </Portal>
       </ScrollView>
     </PaperProvider>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -523,4 +598,4 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginRight: 8,
   },
-})
+});
