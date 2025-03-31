@@ -111,6 +111,7 @@ export default function AnalyticsDashboardPro() {
         setAccount(datos.accounts);
         setMotions(datos.movimientos);
         setData(datos);
+        console.log(datos);
       };
       fetchData();
     }, [])
@@ -119,31 +120,27 @@ export default function AnalyticsDashboardPro() {
   console.log(data);
   let p;
   const lineChartData = {
-    labels: salesData.map((item) => item.date.slice(5)),
-    datasets: [
-      {
-        data: salesData.map((item) => item.amount),
-        color: () => "#6bd9fe",
-        strokeWidth: 2,
-      },
-    ],
+    labels: motions.map(m => m.fecha.split('-')[2]), // Extrae solo el día
+    datasets: [{
+      data: motions.map(m => m.monto)
+    }]
   };
 
   const barData = {
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    labels: inventario.map((inventario) => inventario.nombreMaterial), // Usar nombres de materiales como etiquetas
     datasets: [
       {
-        data: [20, 45, 28, 80, 99, 43, 50],
+        data: inventario.map((inventario) => inventario.cantidad), // Usar cantidades como valores de las barras
       },
     ],
   };
 
   const progressData = {
-    labels: ["Sales", "Visits", "Conversions"],
+    labels: ["movimientos", "productos", "Conversions"],
     data: [0.8, 0.6, 0.4],
     colors: ["#48BB78", "#4299E1", "#ED8936"],
   };
- 
+
   const pieChartData = [
     {
       name: "Electronics",
@@ -195,7 +192,7 @@ export default function AnalyticsDashboardPro() {
       strokeDasharray: "",
     },
   };
-
+  let valorPasado;
   const stats = [
     {
       title: "Total Usuarios",
@@ -234,34 +231,67 @@ export default function AnalyticsDashboardPro() {
           return sum + itemTotal;
         }, 0)
       }`,
-      change: `sadasdds`,
+      change: `${
+        inventario && inventario.length > 1
+          ? (
+              ((inventario[inventario.length - 1].cantidad *
+                inventario[inventario.length - 1].precioUnidad -
+                inventario[0].cantidad * inventario[0].precioUnidad) /
+                (inventario[0].cantidad * inventario[0].precioUnidad)) *
+              100
+            ).toFixed(2) + "%"
+          : "0%"
+      }`,
       icon: "cart-outline",
     },
     {
       title: "Total ",
-      value:`${
+      value: `${
         inventario &&
         inventario.reduce((sum, item) => {
           const itemTotal = item.cantidad * item.precioUnidad;
           return sum + itemTotal;
         }, 0)
       }`,
-      change: "+15.3%",
+      change: (() => {
+        const valorActual = inventario.reduce(
+          (sum, item) => sum + item.cantidad * item.precioUnidad,
+          0
+        );
+        const porcentajeCambio =
+          valorPasado === 0
+            ? 0
+            : ((valorActual - valorPasado) / valorPasado) * 100;
+        return `${porcentajeCambio.toFixed(2)}%`;
+      })(),
       icon: "eye-outline",
     },
-    { title: "Saldo", value: `${
-      account && account.reduce((sum, item) => {
-        return sum + (item.saldo || 0)
-      }, 0)
-      }`, change: `${
-    account && account.length > 1 ? (() => {
-      const sortedAccount = [...account].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-      const currentSaldo = sortedAccount[0].saldo;
-      const previousSaldo = sortedAccount[1].saldo;
-      const changePercentage = previousSaldo === 0 ? 0 : ((currentSaldo - previousSaldo) / previousSaldo) * 100;
-      return `${changePercentage.toFixed(1)}%`;
-    })() : "0.0%"
-  }`, icon: "chart-line" },
+    {
+      title: "Saldo",
+      value: `${
+        account &&
+        account.reduce((sum, item) => {
+          return sum + (item.saldo || 0);
+        }, 0)
+      }`,
+      change: `${
+        account && account.length > 1
+          ? (() => {
+              const sortedAccount = [...account].sort(
+                (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+              );
+              const currentSaldo = sortedAccount[0].saldo;
+              const previousSaldo = sortedAccount[1].saldo;
+              const changePercentage =
+                previousSaldo === 0
+                  ? 0
+                  : ((currentSaldo - previousSaldo) / previousSaldo) * 100;
+              return `${changePercentage.toFixed(1)}%`;
+            })()
+          : "0.0%"
+      }`,
+      icon: "chart-line",
+    },
   ];
 
   const onRefresh = useCallback(() => {
@@ -280,59 +310,59 @@ export default function AnalyticsDashboardPro() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "sales":
+      case "movimientos":
         return (
           <DataTable>
             <DataTable.Header>
               <DataTable.Title textStyle={styles.cellText}>
-                Date
+                Fecha
               </DataTable.Title>
               <DataTable.Title textStyle={styles.cellText} numeric>
-                Amount
+                Monto
               </DataTable.Title>
             </DataTable.Header>
-            {salesData.map((item, index) => (
+            {motions.map((item, index) => (
               <DataTable.Row key={index}>
                 <DataTable.Cell textStyle={styles.cellText}>
-                  {item.date}
+                  {item.fecha}
                 </DataTable.Cell>
                 <DataTable.Cell textStyle={styles.cellText} numeric>
-                  ${item.amount}
+                  ${item.monto}
                 </DataTable.Cell>
               </DataTable.Row>
             ))}
           </DataTable>
         );
-      case "products":
+      case "productos":
         return (
           <DataTable>
             <DataTable.Header>
               <DataTable.Title textStyle={styles.cellText}>
-                Product
+                Producto
               </DataTable.Title>
               <DataTable.Title textStyle={styles.cellText} numeric>
-                Sales
+                Descripcion
               </DataTable.Title>
               <DataTable.Title textStyle={styles.cellText} numeric>
-                Revenue
+                Precio
               </DataTable.Title>
               <DataTable.Title textStyle={styles.cellText} numeric>
                 Stock
               </DataTable.Title>
             </DataTable.Header>
-            {productData.map((item) => (
+            {inventario.map((item) => (
               <DataTable.Row key={item.id}>
                 <DataTable.Cell textStyle={styles.cellText}>
-                  {item.name}
+                  {item.nombreMaterial}
                 </DataTable.Cell>
                 <DataTable.Cell textStyle={styles.cellText} numeric>
-                  {item.sales}
+                  {item.descripcion}
                 </DataTable.Cell>
                 <DataTable.Cell textStyle={styles.cellText} numeric>
-                  ${item.revenue}
+                  ${item.precioUnidad}
                 </DataTable.Cell>
                 <DataTable.Cell textStyle={styles.cellText} numeric>
-                  {item.stock}
+                  {item.cantidad}
                 </DataTable.Cell>
               </DataTable.Row>
             ))}
@@ -544,7 +574,7 @@ export default function AnalyticsDashboardPro() {
           <Animated.View entering={FadeInUp.delay(600)} style={styles.card}>
             <Text style={styles.cardTitle}>Detailed Analytics</Text>
             <View style={styles.tabContainer}>
-              {["sales", "products", "customers"].map((tab) => (
+              {["movimientos", "productos", "customers"].map((tab) => (
                 <TouchableOpacity
                   key={tab}
                   onPress={() => setActiveTab(tab)}
