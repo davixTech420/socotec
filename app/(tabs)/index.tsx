@@ -196,7 +196,7 @@ const UIKitLanding = () => {
           <Card.Actions style={styles.ctaActions}>
             <Button 
               mode="contained" 
-              onPress={() => router.navigate("/(admin)/Dashboard")}
+              onPress={() => router.navigate("/singIn")}
               icon="rocket-launch"
             >
               Iniciar Prueba Gratuita

@@ -29,25 +29,6 @@ import { getDashboard } from "@/services/adminServices";
 
 const AnimatedSurface = Animated.createAnimatedComponent(Surface);
 
-// Datos simulados
-const salesData = [
-  { date: "2023-01-01", amount: 1200 },
-  { date: "2023-01-02", amount: 1800 },
-  { date: "2023-01-03", amount: 2400 },
-  { date: "2023-01-04", amount: 1600 },
-  { date: "2023-01-05", amount: 2200 },
-  { date: "2023-01-06", amount: 2800 },
-  { date: "2023-01-07", amount: 3200 },
-];
-
-const productData = [
-  { id: 1, name: "Laptop Pro", sales: 120, revenue: 144000, stock: 50 },
-  { id: 2, name: "Smartphone X", sales: 200, revenue: 100000, stock: 30 },
-  { id: 3, name: "Wireless Earbuds", sales: 300, revenue: 30000, stock: 100 },
-  { id: 4, name: "Smart Watch", sales: 150, revenue: 45000, stock: 75 },
-  { id: 5, name: "Tablet Mini", sales: 80, revenue: 32000, stock: 25 },
-];
-
 const customerData = [
   {
     id: 1,
@@ -86,6 +67,24 @@ const customerData = [
   },
 ];
 
+const salesData = [
+  { date: "2023-01-01", amount: 1200 },
+  { date: "2023-01-02", amount: 1800 },
+  { date: "2023-01-03", amount: 2400 },
+  { date: "2023-01-04", amount: 1600 },
+  { date: "2023-01-05", amount: 2200 },
+  { date: "2023-01-06", amount: 2800 },
+  { date: "2023-01-07", amount: 3200 },
+];
+
+const productData = [
+  { id: 1, name: "Laptop Pro", sales: 120, revenue: 144000, stock: 50 },
+  { id: 2, name: "Smartphone X", sales: 200, revenue: 100000, stock: 30 },
+  { id: 3, name: "Wireless Earbuds", sales: 300, revenue: 30000, stock: 100 },
+  { id: 4, name: "Smart Watch", sales: 150, revenue: 45000, stock: 75 },
+  { id: 5, name: "Tablet Mini", sales: 80, revenue: 32000, stock: 25 },
+];
+
 export default function AnalyticsDashboardPro() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState("monthly");
@@ -102,6 +101,8 @@ export default function AnalyticsDashboardPro() {
   const [account, setAccount] = useState([]);
   const [motions, setMotions] = useState([]);
 
+  let p;
+  let u;
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
@@ -111,26 +112,27 @@ export default function AnalyticsDashboardPro() {
         setAccount(datos.accounts);
         setMotions(datos.movimientos);
         setData(datos);
-        console.log(datos);
       };
       fetchData();
     }, [])
   );
 
-  console.log(data);
-  let p;
   const lineChartData = {
-    labels: motions.map(m => m.fecha.split('-')[2]), // Extrae solo el día
-    datasets: [{
-      data: motions.map(m => m.monto)
-    }]
+    labels: salesData.map((item) => item.date.slice(5)),
+    datasets: [
+      {
+        data: salesData.map((item) => item.amount),
+        color: () => "#6bd9fe",
+        strokeWidth: 2,
+      },
+    ],
   };
 
   const barData = {
-    labels: inventario.map((inventario) => inventario.nombreMaterial), // Usar nombres de materiales como etiquetas
+    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     datasets: [
       {
-        data: inventario.map((inventario) => inventario.cantidad), // Usar cantidades como valores de las barras
+        data: [20, 45, 28, 80, 99, 43, 50],
       },
     ],
   };
@@ -245,7 +247,7 @@ export default function AnalyticsDashboardPro() {
       icon: "cart-outline",
     },
     {
-      title: "Total ",
+      title: "Total",
       value: `${
         inventario &&
         inventario.reduce((sum, item) => {
@@ -296,7 +298,7 @@ export default function AnalyticsDashboardPro() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // Simular una actualización de datos
+
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
@@ -439,7 +441,6 @@ export default function AnalyticsDashboardPro() {
             />
           </View>
 
-          {/* Header Stats */}
           <View style={styles.statsGrid}>
             {stats.map((stat, index) => (
               <AnimatedSurface
@@ -475,7 +476,6 @@ export default function AnalyticsDashboardPro() {
             ))}
           </View>
 
-          {/* Chart Period Selector */}
           <View style={styles.periodSelector}>
             {["daily", "weekly", "monthly", "yearly"].map((period) => (
               <TouchableOpacity
@@ -498,7 +498,6 @@ export default function AnalyticsDashboardPro() {
             ))}
           </View>
 
-          {/* Line Chart */}
           <Animated.View entering={FadeInUp.delay(200)} style={styles.card}>
             <Text style={styles.cardTitle}>Revenue Overview</Text>
             <LineChart
@@ -519,7 +518,6 @@ export default function AnalyticsDashboardPro() {
             />
           </Animated.View>
 
-          {/* Bar Chart */}
           <Animated.View entering={FadeInUp.delay(300)} style={styles.card}>
             <Text style={styles.cardTitle}>Weekly Performance</Text>
             <BarChart
@@ -540,7 +538,6 @@ export default function AnalyticsDashboardPro() {
             />
           </Animated.View>
 
-          {/* Progress Chart */}
           <Animated.View entering={FadeInUp.delay(400)} style={styles.card}>
             <Text style={styles.cardTitle}>Key Metrics</Text>
             <ProgressChart
@@ -555,7 +552,6 @@ export default function AnalyticsDashboardPro() {
             />
           </Animated.View>
 
-          {/* Pie Chart */}
           <Animated.View entering={FadeInUp.delay(500)} style={styles.card}>
             <Text style={styles.cardTitle}>Sales Distribution</Text>
             <PieChart
@@ -570,7 +566,6 @@ export default function AnalyticsDashboardPro() {
             />
           </Animated.View>
 
-          {/* Detailed Analytics Tabs */}
           <Animated.View entering={FadeInUp.delay(600)} style={styles.card}>
             <Text style={styles.cardTitle}>Detailed Analytics</Text>
             <View style={styles.tabContainer}>
