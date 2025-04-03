@@ -154,7 +154,7 @@ const Portfolio = () => {
         console.log(formData);
         
         const newUser = await createPortfolio(form);
-        if (!newUser) throw new Error("Error al crear el proyecto");
+        /* if (!newUser) throw new Error("Error al crear el proyecto"); */
         newData = [...data, newUser.proyect];
       }
   
@@ -166,7 +166,6 @@ const Portfolio = () => {
   
       resetForm();
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
       setSnackbarMessage({ text: error.message, type: "error" });
     } finally {
       setLoading(false);
