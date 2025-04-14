@@ -22,6 +22,7 @@ import Account from "./Account";
 import Motions from "./Motions";
 import Portfolio from "./Portfolio";
 import Task from "./Task";
+import Ticket from "./Ticket";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import ProfileScreen from "./MyAccount";
 import { router } from "expo-router"
@@ -265,6 +266,21 @@ export default function App() {
             {(props) => (
               <AnimatedScreen style={animatedStyle}>
                 <Task {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
+
+          <Drawer.Screen
+            name="Ticket"
+            options={{
+              title: "Tickets",
+              drawerIcon: ({ color }) => <MaterialIcons name="task" size={24} color={color} />,
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Ticket {...props} />
               </AnimatedScreen>
             )}
           </Drawer.Screen>
