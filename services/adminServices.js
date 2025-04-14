@@ -38,6 +38,32 @@ export const getDashboard = async () => {
   return makeRequest("get", "/dashboard");
 };
 
+
+/**
+ * 
+ * end point tickets de it
+ */
+
+export const getTickets = async () => {
+  return makeRequest("get","/ticket");
+}
+export const createTicket = async (data) => {
+  return makeRequest("post","/ticket",data);
+}
+
+export const updateTicket = async (id) => {
+  return makeRequest("put", `/ticket/${id}`,data);
+}
+
+export const deleteTicket = async (id) => {
+  return makeRequest("delete",`/ticket/${id}`)
+}
+
+/**
+ * 
+ */
+
+
 /**
  * endpoints para las tareas
  */
