@@ -58,7 +58,6 @@ function CustomDrawerContent(props) {
   }
   return (
     <SafeAreaView style={[styles.drawerContent, { backgroundColor: theme.colors.surface }]}>
-      <ScrollView>
         <View style={styles.userInfoSection}>
           <Avatar.Image source={require("../../assets/images/favicon.png")} size={80} style={{ backgroundColor: "transparent" }} />
           <Text style={[styles.title, { color: "#00ACE8" }]}>{userData?.nombre || "Usuario"}</Text>
@@ -66,6 +65,7 @@ function CustomDrawerContent(props) {
             {userData?.email || "usuario@socotec.com"}
           </Text>
         </View>
+        <ScrollView>
         <View style={styles.drawerSection}>
           {props.state.routes.map((route, index) => {
             const { title, drawerIcon } = props.descriptors[route.key].options
@@ -275,7 +275,7 @@ export default function App() {
             name="Ticket"
             options={{
               title: "Tickets",
-              drawerIcon: ({ color }) => <MaterialIcons name="task" size={24} color={color} />,
+              drawerIcon: ({ color }) => <FontAwesome5 name="ticket-alt" size={24} color={color} />,
             }}
           >
             {(props) => (

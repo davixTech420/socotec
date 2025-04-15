@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -110,7 +110,9 @@ const Ticket = () => {
       } else {
         const newUser = await createTicket(formData);
         if (!newUser) throw new Error("Error al crear el ticket");
-        newData = [...data, newUser.Ticket];
+        console.log("ticket creado",newUser.ticket);
+        
+        newData = [...data, newUser.ticket];
       }
       setData(newData);
       setSnackbarMessage({

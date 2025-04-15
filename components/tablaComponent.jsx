@@ -1,5 +1,12 @@
-import React, { useState, useCallback, useMemo } from "react"
-import { StyleSheet, View, Platform, ScrollView, useWindowDimensions, Image } from "react-native"
+import React, { useState, useCallback, useMemo } from "react";
+import {
+  StyleSheet,
+  View,
+  Platform,
+  ScrollView,
+  useWindowDimensions,
+  Image,
+} from "react-native";
 import {
   DataTable,
   Text,
@@ -14,9 +21,9 @@ import {
   Button,
   Snackbar,
   Chip,
-} from "react-native-paper"
-import Animated, { FadeInUp, Layout } from "react-native-reanimated"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+} from "react-native-paper";
+import Animated, { FadeInUp, Layout } from "react-native-reanimated";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SrcImagen } from "@/services/publicServices";
 
 
@@ -37,7 +44,7 @@ const TablaComponente = ({
   itemsPerPageOptions = [5, 10, 20],
   defaultItemsPerPage = 5,
 }) => {
-  const theme = useTheme()
+  const theme = useTheme();
   const extendedTheme = {
     ...theme,
     colors: {
@@ -46,153 +53,162 @@ const TablaComponente = ({
       error: theme.colors.error || "#F44336",
       warning: theme.colors.warning || "#FFB300",
     },
-  }
-  const { width } = useWindowDimensions()
-  const [page, setPage] = useState(0)
-  const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage)
-  const [sortBy, setSortBy] = useState(null)
-  const [sortOrder, setSortOrder] = useState("ascending")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filters, setFilters] = useState({})
-  const [filterMenuVisible, setFilterMenuVisible] = useState(false)
-  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false)
-  const [toggleActiveConfirmVisible, setToggleActiveConfirmVisible] = useState(false)
-  const [toggleInactiveConfirmVisible, setToggleInactiveConfirmVisible] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState(null)
-  const [itemToToggle, setItemToToggle] = useState(null)
-  const [snackbarVisible, setSnackbarVisible] = useState(false)
-  const [snackbarMessage, setSnackbarMessage] = useState({ text: "", type: "success" })
+  };
+  const { width } = useWindowDimensions();
+  const [page, setPage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
+  const [sortBy, setSortBy] = useState(null);
+  const [sortOrder, setSortOrder] = useState("ascending");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({});
+  const [filterMenuVisible, setFilterMenuVisible] = useState(false);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [toggleActiveConfirmVisible, setToggleActiveConfirmVisible] =
+    useState(false);
+  const [toggleInactiveConfirmVisible, setToggleInactiveConfirmVisible] =
+    useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [itemToToggle, setItemToToggle] = useState(null);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState({
+    text: "",
+    type: "success",
+  });
 
-
-  const isSmallScreen = width < 768
-  const isMediumScreen = width >= 768 && width < 1024
+  const isSmallScreen = width < 768;
+  const isMediumScreen = width >= 768 && width < 1024;
 
   const filteredAndSortedData = useMemo(() => {
     const result = data?.filter((item) =>
-      Object.entries(item).some(([key, value]) => String(value).toLowerCase().includes(searchQuery.toLowerCase())),
-    )
+      Object.entries(item).some(([key, value]) =>
+        String(value).toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
     if (sortBy) {
       result.sort((a, b) => {
-        if (a[sortBy] < b[sortBy]) return sortOrder === "ascending" ? -1 : 1
-        if (a[sortBy] > b[sortBy]) return sortOrder === "ascending" ? 1 : -1
-        return 0
-      })
+        if (a[sortBy] < b[sortBy]) return sortOrder === "ascending" ? -1 : 1;
+        if (a[sortBy] > b[sortBy]) return sortOrder === "ascending" ? 1 : -1;
+        return 0;
+      });
     }
-    return result
-  }, [data, searchQuery, sortBy, sortOrder])
+    return result;
+  }, [data, searchQuery, sortBy, sortOrder]);
 
   const paginatedData = useMemo(() => {
-    const startIndex = page * itemsPerPage
-    return filteredAndSortedData?.slice(startIndex, startIndex + itemsPerPage)
-  }, [filteredAndSortedData, page, itemsPerPage])
+    const startIndex = page * itemsPerPage;
+    return filteredAndSortedData?.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredAndSortedData, page, itemsPerPage]);
 
   const handleSort = useCallback(
     (key) => {
-      const isAsc = sortBy === key && sortOrder === "ascending"
-      setSortOrder(isAsc ? "descending" : "ascending")
-      setSortBy(key)
+      const isAsc = sortBy === key && sortOrder === "ascending";
+      setSortOrder(isAsc ? "descending" : "ascending");
+      setSortBy(key);
       if (onSort) {
-        onSort(key, isAsc ? "descending" : "ascending")
+        onSort(key, isAsc ? "descending" : "ascending");
       }
     },
-    [sortBy, sortOrder, onSort],
-  )
+    [sortBy, sortOrder, onSort]
+  );
 
   const handleSearch = useCallback(
     (query) => {
-      setSearchQuery(query)
-      setPage(0)
+      setSearchQuery(query);
+      setPage(0);
       if (onSearch) {
-        onSearch(query)
+        onSearch(query);
       }
     },
-    [onSearch],
-  )
+    [onSearch]
+  );
 
   const handleFilter = useCallback(
     (key, value) => {
-      const newFilters = { ...filters, [key]: value }
-      setFilters(newFilters)
-      setPage(0)
+      const newFilters = { ...filters, [key]: value };
+      setFilters(newFilters);
+      setPage(0);
       if (onFilter) {
-        onFilter(newFilters)
+        onFilter(newFilters);
       }
     },
-    [filters, onFilter],
-  )
+    [filters, onFilter]
+  );
 
   const handleDeleteConfirm = useCallback(() => {
     if (itemToDelete && onDelete) {
       onDelete(itemToDelete)
         .then(() => {
-          const updatedData = data.filter((item) => item !== itemToDelete)
-          onDataUpdate(updatedData)
+          const updatedData = data.filter((item) => item !== itemToDelete);
+          onDataUpdate(updatedData);
           setSnackbarMessage({
             text: "Registro eliminado exitosamente",
             type: "success",
-          })
-          setSnackbarVisible(true)
-
+          });
+          setSnackbarVisible(true);
         })
         .catch((error) => {
           setSnackbarMessage({
             text: `Error al eliminar el registro: ${error.response.data.message}`,
             type: "error",
-          })
-          setSnackbarVisible(true)
-        })
+          });
+          setSnackbarVisible(true);
+        });
     }
-    setDeleteConfirmVisible(false)
-    setItemToDelete(null)
-  }, [itemToDelete, onDelete, data, onDataUpdate])
+    setDeleteConfirmVisible(false);
+    setItemToDelete(null);
+  }, [itemToDelete, onDelete, data, onDataUpdate]);
 
   const handleToggleActiveConfirm = useCallback(() => {
     if (itemToToggle && onToggleActive) {
       onToggleActive(itemToToggle)
         .then(() => {
-          const updatedData = data.map((item) => (item === itemToToggle ? { ...item, estado: true } : item))
-          onDataUpdate(updatedData)
+          const updatedData = data.map((item) =>
+            item === itemToToggle ? { ...item, estado: true } : item
+          );
+          onDataUpdate(updatedData);
           setSnackbarMessage({
             text: "Registro activado exitosamente",
             type: "success",
-          })
-          setSnackbarVisible(true)
+          });
+          setSnackbarVisible(true);
         })
         .catch((error) => {
           setSnackbarMessage({
             text: `Error al activar el registro: ${error.message}`,
             type: "error",
-          })
-          setSnackbarVisible(true)
-        })
+          });
+          setSnackbarVisible(true);
+        });
     }
-    setToggleActiveConfirmVisible(false)
-    setItemToToggle(null)
-  }, [itemToToggle, onToggleActive, data, onDataUpdate])
+    setToggleActiveConfirmVisible(false);
+    setItemToToggle(null);
+  }, [itemToToggle, onToggleActive, data, onDataUpdate]);
 
   const handleToggleInactiveConfirm = useCallback(() => {
     if (itemToToggle && onToggleInactive) {
       onToggleInactive(itemToToggle)
         .then(() => {
-          const updatedData = data.map((item) => (item === itemToToggle ? { ...item, estado: false } : item))
-          onDataUpdate(updatedData)
+          const updatedData = data.map((item) =>
+            item === itemToToggle ? { ...item, estado: false } : item
+          );
+          onDataUpdate(updatedData);
           setSnackbarMessage({
             text: "Registro inactivado exitosamente",
             type: "success",
-          })
-          setSnackbarVisible(true)
+          });
+          setSnackbarVisible(true);
         })
         .catch((error) => {
           setSnackbarMessage({
             text: `Error al inactivar el registro: ${error.response.data.message}`,
             type: "error",
-          })
-          setSnackbarVisible(true)
-        })
+          });
+          setSnackbarVisible(true);
+        });
     }
-    setToggleInactiveConfirmVisible(false)
-    setItemToToggle(null)
-  }, [itemToToggle, onToggleInactive, data, onDataUpdate])
+    setToggleInactiveConfirmVisible(false);
+    setItemToToggle(null);
+  }, [itemToToggle, onToggleInactive, data, onDataUpdate]);
 
   const handleCreate = useCallback(() => {
     if (onCreate) {
@@ -201,32 +217,33 @@ const TablaComponente = ({
           setSnackbarMessage({
             text: "Registro creado exitosamente",
             type: "success",
-          })
-          setSnackbarVisible(true)
+          });
+          setSnackbarVisible(true);
         })
         .catch((error) => {
           setSnackbarMessage({
             text: `Error al crear el registro: ${error.message}`,
             type: "error",
-          })
-          setSnackbarVisible(true)
-        })
+          });
+          setSnackbarVisible(true);
+        });
     }
-  }, [onCreate])
-
+  }, [onCreate]);
 
   const handleEdit = useCallback(
     async (item) => {
       if (onEdit) {
         try {
-          await onEdit(item).then(() => {
-            setSnackbarMessage({
-              text: "Registro actualizado exitosamente",
-              type: "success",
+          await onEdit(item)
+            .then(() => {
+              setSnackbarMessage({
+                text: "Registro actualizado exitosamente",
+                type: "success",
+              });
+            })
+            .catch((error) => {
+              return;
             });
-          }).catch((error) => {
-            return;
-          });
         } catch (error) {
           return;
         }
@@ -236,70 +253,85 @@ const TablaComponente = ({
     [onEdit]
   );
 
-
   const renderCell = useCallback(
     (column, item) => {
       if (column.key === "estado") {
-        const isActive = item[column.key]
+        const isActive = item[column.key];
 
         return (
           <Chip
             style={{
-              backgroundColor: isActive == true || isActive == "Aprobado" ? extendedTheme.colors.success : isActive == "Pendiente" ? extendedTheme.colors.warning : extendedTheme.colors.error,
+              backgroundColor:
+                isActive == true ||
+                isActive == "Aprobado" ||
+                isActive == "Resuelto"
+                  ? extendedTheme.colors.success
+                  : isActive == "Pendiente"
+                  ? extendedTheme.colors.warning
+                  : extendedTheme.colors.error,
               color: extendedTheme.colors.surface,
             }}
           >
-            {
-              isActive === true ? "Activo" :
-                isActive === false ? "Inactivo" :
-                  isActive === "Pendiente" ? "Pendiente" :
-                    isActive === "Aprobado" ? "Aprobado" :
-                      isActive === "Rechazado" ? "Rechazado" :
-                        "Estado desconocido"
-            }
+            {isActive === true
+              ? "Activo"
+              : isActive === false
+              ? "Inactivo"
+              : isActive === "Pendiente"
+              ? "Pendiente"
+              : isActive === "Aprobado"
+              ? "Aprobado"
+              : isActive === "Rechazado"
+              ? "Rechazado"
+              : isActive === "En Proceso"
+              ? "En Proceso"
+              : isActive === "Resuelto"
+              ? "Resuelto"
+              : "Estado desconocido"}
           </Chip>
-        )
+        );
       }
       if (column.key === "imagenes") {
         return (
           <>
             {/*   <ImageCarousel images={item?.imagenes} /> */}
-            <Image source={{ uri: SrcImagen(item.imagenes[0].uri) }} style={{ width: 100, height: 100 }} />
+            <Image
+              source={{ uri: SrcImagen(item.imagenes[0].uri) }}
+              style={{ width: 100, height: 100 }}
+            />
           </>
-        )
+        );
       }
 
       if (item[column.key] === null) {
-        return <Text style={styles.cellText}>Sin datos</Text>
-
+        return <Text style={styles.cellText}>Sin datos</Text>;
       }
       if (column.render) {
-        return column.render(item[column.key], item)
+        return column.render(item[column.key], item);
       }
-      return String(item[column.key])
+      return String(item[column.key]);
     },
-    [extendedTheme.colors],
-  )
+    [extendedTheme.colors]
+  );
 
   const getColumnStyle = useCallback(
     (column) => {
       if (isSmallScreen) {
-        return { minWidth: column.width || 100, maxWidth: column.width || 150 }
+        return { minWidth: column.width || 100, maxWidth: column.width || 150 };
       }
       if (isMediumScreen) {
-        return { minWidth: column.width || 120, maxWidth: column.width || 200 }
+        return { minWidth: column.width || 120, maxWidth: column.width || 200 };
       }
-      return { flex: 1, minWidth: column.width || 150 }
+      return { flex: 1, minWidth: column.width || 150 };
     },
-    [isSmallScreen, isMediumScreen],
-  )
+    [isSmallScreen, isMediumScreen]
+  );
 
   if (!data || data.length === 0) {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.noDataText}>No hay datos disponibles</Text>
       </View>
-    )
+    );
   }
 
   return (
@@ -307,7 +339,10 @@ const TablaComponente = ({
       <View style={styles.outerContainer}>
         <Animated.View
           entering={FadeInUp}
-          style={[styles.container, { backgroundColor: extendedTheme.colors.background }]}
+          style={[
+            styles.container,
+            { backgroundColor: extendedTheme.colors.background },
+          ]}
         >
           <View style={styles.actions}>
             <Searchbar
@@ -333,8 +368,8 @@ const TablaComponente = ({
                 <Menu.Item
                   key={String(column.key)}
                   onPress={() => {
-                    handleFilter(String(column.key), true)
-                    setFilterMenuVisible(false)
+                    handleFilter(String(column.key), true);
+                    setFilterMenuVisible(false);
                   }}
                   title={column.title}
                 />
@@ -349,8 +384,12 @@ const TablaComponente = ({
                     {columns.map((column) => (
                       <DataTable.Title
                         key={String(column.key)}
-                        sortDirection={sortBy === column.key ? sortOrder : "none"}
-                        onPress={() => column.sortable && handleSort(column.key)}
+                        sortDirection={
+                          sortBy === column.key ? sortOrder : "none"
+                        }
+                        onPress={() =>
+                          column.sortable && handleSort(column.key)
+                        }
                         style={[styles.headerCell, getColumnStyle(column)]}
                       >
                         <View style={styles.columnHeader}>
@@ -371,13 +410,22 @@ const TablaComponente = ({
                         </View>
                       </DataTable.Title>
                     ))}
-                    <DataTable.Title style={[styles.headerCell, getColumnStyle({ width: 120 })]}>
+                    <DataTable.Title
+                      style={[
+                        styles.headerCell,
+                        getColumnStyle({ width: 120 }),
+                      ]}
+                    >
                       <Text style={styles.headerText}>Acciones</Text>
                     </DataTable.Title>
                   </DataTable.Header>
 
                   {isLoading ? (
-                    <ActivityIndicator style={styles.loading} color={extendedTheme.colors.primary} size="large" />
+                    <ActivityIndicator
+                      style={styles.loading}
+                      color={extendedTheme.colors.primary}
+                      size="large"
+                    />
                   ) : (
                     paginatedData.map((item, index) => (
                       <Animated.View
@@ -387,21 +435,29 @@ const TablaComponente = ({
                       >
                         <DataTable.Row style={styles.row}>
                           {columns.map((column) => (
-                            <DataTable.Cell key={String(column.key)} style={[styles.cell, getColumnStyle(column)]}>
-
-                              <Text style={styles.cellText}>{renderCell(column, item)}</Text>
-
+                            <DataTable.Cell
+                              key={String(column.key)}
+                              style={[styles.cell, getColumnStyle(column)]}
+                            >
+                              <Text style={styles.cellText}>
+                                {renderCell(column, item)}
+                              </Text>
                             </DataTable.Cell>
                           ))}
-                          <DataTable.Cell style={[styles.cell, getColumnStyle({ width: 120 })]}>
+                          <DataTable.Cell
+                            style={[
+                              styles.cell,
+                              getColumnStyle({ width: 120 }),
+                            ]}
+                          >
                             <View style={styles.actionButtons}>
                               <IconButton
                                 icon="delete-outline"
                                 size={20}
                                 iconColor="red"
                                 onPress={() => {
-                                  setItemToDelete(item)
-                                  setDeleteConfirmVisible(true)
+                                  setItemToDelete(item);
+                                  setDeleteConfirmVisible(true);
                                 }}
                               />
                               <IconButton
@@ -413,25 +469,25 @@ const TablaComponente = ({
 
                               {item.estado === true || item.estado === false ? (
                                 <>
-                                <IconButton
-                                icon={item.estado ? "toggle-switch" : "toggle-switch-off"}
-                                size={20}
-                                iconColor={item.estado ? "#00ACE8" : "#666"}
-                                onPress={() => {
-                                  setItemToToggle(item)
-                                  if (item.estado) {
-                                    setToggleInactiveConfirmVisible(true)
-                                  } else {
-                                    setToggleActiveConfirmVisible(true)
-                                  }
-                                }}
-                              />
+                                  <IconButton
+                                    icon={
+                                      item.estado
+                                        ? "toggle-switch"
+                                        : "toggle-switch-off"
+                                    }
+                                    size={20}
+                                    iconColor={item.estado ? "#00ACE8" : "#666"}
+                                    onPress={() => {
+                                      setItemToToggle(item);
+                                      if (item.estado) {
+                                        setToggleInactiveConfirmVisible(true);
+                                      } else {
+                                        setToggleActiveConfirmVisible(true);
+                                      }
+                                    }}
+                                  />
                                 </>
-                              ) : null }
-
-                              
-
-
+                              ) : null}
                             </View>
                           </DataTable.Cell>
                         </DataTable.Row>
@@ -446,9 +502,13 @@ const TablaComponente = ({
 
           <DataTable.Pagination
             page={page}
-            numberOfPages={Math.ceil(filteredAndSortedData.length / itemsPerPage)}
+            numberOfPages={Math.ceil(
+              filteredAndSortedData.length / itemsPerPage
+            )}
             onPageChange={setPage}
-            label={`${page + 1} de ${Math.ceil(filteredAndSortedData.length / itemsPerPage)}`}
+            label={`${page + 1} de ${Math.ceil(
+              filteredAndSortedData.length / itemsPerPage
+            )}`}
             showFastPaginationControls
             numberOfItemsPerPageList={itemsPerPageOptions}
             numberOfItemsPerPage={itemsPerPage}
@@ -458,35 +518,50 @@ const TablaComponente = ({
         </Animated.View>
 
         <Portal>
-          <Dialog visible={deleteConfirmVisible} onDismiss={() => setDeleteConfirmVisible(false)}>
+          <Dialog
+            visible={deleteConfirmVisible}
+            onDismiss={() => setDeleteConfirmVisible(false)}
+          >
             <Dialog.Title>Confirmar eliminación</Dialog.Title>
             <Dialog.Content>
               <Text>¿Está seguro que desea eliminar este registro?</Text>
             </Dialog.Content>
             <Dialog.Actions>
-              <Button onPress={() => setDeleteConfirmVisible(false)}>Cancelar</Button>
+              <Button onPress={() => setDeleteConfirmVisible(false)}>
+                Cancelar
+              </Button>
               <Button onPress={handleDeleteConfirm}>Eliminar</Button>
             </Dialog.Actions>
           </Dialog>
 
-          <Dialog visible={toggleActiveConfirmVisible} onDismiss={() => setToggleActiveConfirmVisible(false)}>
+          <Dialog
+            visible={toggleActiveConfirmVisible}
+            onDismiss={() => setToggleActiveConfirmVisible(false)}
+          >
             <Dialog.Title>Confirmar activación</Dialog.Title>
             <Dialog.Content>
               <Text>¿Está seguro que desea activar este registro?</Text>
             </Dialog.Content>
             <Dialog.Actions>
-              <Button onPress={() => setToggleActiveConfirmVisible(false)}>Cancelar</Button>
+              <Button onPress={() => setToggleActiveConfirmVisible(false)}>
+                Cancelar
+              </Button>
               <Button onPress={handleToggleActiveConfirm}>Activar</Button>
             </Dialog.Actions>
           </Dialog>
 
-          <Dialog visible={toggleInactiveConfirmVisible} onDismiss={() => setToggleInactiveConfirmVisible(false)}>
+          <Dialog
+            visible={toggleInactiveConfirmVisible}
+            onDismiss={() => setToggleInactiveConfirmVisible(false)}
+          >
             <Dialog.Title>Confirmar inactivación</Dialog.Title>
             <Dialog.Content>
               <Text>¿Está seguro que desea inactivar este registro?</Text>
             </Dialog.Content>
             <Dialog.Actions>
-              <Button onPress={() => setToggleInactiveConfirmVisible(false)}>Cancelar</Button>
+              <Button onPress={() => setToggleInactiveConfirmVisible(false)}>
+                Cancelar
+              </Button>
               <Button onPress={handleToggleInactiveConfirm}>Inactivar</Button>
             </Dialog.Actions>
           </Dialog>
@@ -498,21 +573,23 @@ const TablaComponente = ({
           duration={3000}
           style={{
             backgroundColor:
-              snackbarMessage.type === "success" ? extendedTheme.colors.success : extendedTheme.colors.error,
+              snackbarMessage.type === "success"
+                ? extendedTheme.colors.success
+                : extendedTheme.colors.error,
           }}
           action={{
             label: "Cerrar",
             onPress: () => setSnackbarVisible(false),
           }}
         >
-          <Text style={{ color: extendedTheme.colors.surface }}>{snackbarMessage.text}</Text>
+          <Text style={{ color: extendedTheme.colors.surface }}>
+            {snackbarMessage.text}
+          </Text>
         </Snackbar>
       </View>
-
-
     </>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   outerContainer: {
@@ -615,6 +692,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
   },
-})
+});
 
-export default TablaComponente
+export default TablaComponente;
