@@ -18,7 +18,7 @@ import {
   IconButton,
   Appbar,
 } from "react-native-paper";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons,MaterialIcons,FontAwesome6 } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -34,6 +34,8 @@ import Proyect from "./Proyect";
 import Inventario from "./inventario";
 import AccountE from "./AccountE";
 import MotionsE from "./MotionsE";
+import MyTickets from "./MyTickets";
+import GeneratorReport from "./GeneratorRepor";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import { router } from "expo-router";
 
@@ -358,11 +360,7 @@ export default function App() {
             options={{
               title: "Mi Grupo De Trabajo",
               drawerIcon: ({ color }) => (
-                <MaterialCommunityIcons
-                  name="calendar"
-                  size={24}
-                  color={color}
-                />
+                <FontAwesome6 name="users-line" size={24} color={color} />
               ),
             }}
           >
@@ -395,6 +393,26 @@ export default function App() {
             </Drawer.Screen>
           ) : null}
 
+          {logueado?.cargo === "DirectorTalento" || logueado?.cargo === "Talento" ? (
+            <>
+             <Drawer.Screen
+                name="GeneratorRepor"
+                options={{
+                  title: "Generar Archivos",
+                  drawerIcon: ({ color }) => (
+                    <MaterialIcons name="inventory" size={24} color={color} />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <AnimatedScreen style={animatedStyle}>
+                    <GeneratorReport {...props} />
+                  </AnimatedScreen>
+                )}
+              </Drawer.Screen>
+            </>
+          ) :null }
+
           {logueado?.cargo === "DirectorContable" ||
           logueado?.cargo === "Contador" ? (
             <>
@@ -403,11 +421,7 @@ export default function App() {
                 options={{
                   title: "Inventario",
                   drawerIcon: ({ color }) => (
-                    <MaterialCommunityIcons
-                      name="calendar"
-                      size={24}
-                      color={color}
-                    />
+                    <MaterialIcons name="inventory" size={24} color={color} />
                   ),
                 }}
               >
@@ -423,11 +437,7 @@ export default function App() {
                 options={{
                   title: "Cuentas",
                   drawerIcon: ({ color }) => (
-                    <MaterialCommunityIcons
-                      name="calendar"
-                      size={24}
-                      color={color}
-                    />
+                    <MaterialIcons name="account-balance" size={24} color={color} />
                   ),
                 }}
               >
@@ -443,11 +453,7 @@ export default function App() {
                 options={{
                   title: "Movimientos",
                   drawerIcon: ({ color }) => (
-                    <MaterialCommunityIcons
-                      name="calendar"
-                      size={24}
-                      color={color}
-                    />
+                    <FontAwesome6 name="money-bill-transfer" size={24} color={color} />
                   ),
                 }}
               >
@@ -460,16 +466,30 @@ export default function App() {
             </>
           ) : null}
 
+
+<Drawer.Screen
+            name="MyTickets"
+            options={{
+              title: "Mis Tickets",
+              drawerIcon: ({ color }) => (
+                <FontAwesome6 name="ticket" size={24} color={color} />
+              ),
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <MyTickets {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
+
           <Drawer.Screen
             name="MyAccount"
             options={{
               title: "Mi Cuenta",
               drawerIcon: ({ color }) => (
-                <MaterialCommunityIcons
-                  name="calendar"
-                  size={24}
-                  color={color}
-                />
+                <MaterialIcons name="account-box" size={24} color={color} />
               ),
             }}
           >

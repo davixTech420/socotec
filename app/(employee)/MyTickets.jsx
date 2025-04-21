@@ -23,21 +23,19 @@ import { router } from "expo-router";
 import AddComponent from "../../components/AddComponent";
 import { AlertaScroll } from "@/components/alerta";
 import InputComponent from "@/components/InputComponent";
+import { activeInventory, inactiveInventory } from "@/services/adminServices";
 import {
+  getMyTickets,
   createTicket,
-  getTickets,
   deleteTicket,
-  activeInventory,
-  inactiveInventory,
   updateTicket,
-} from "@/services/adminServices";
+} from "@/services/employeeService";
 import { useAuth } from "@/context/userContext";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFViewComponent from "@/components/PdfViewComponent";
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
-  { key: "userId", title: "Usuario", sortable: true },
   { key: "sitio", title: "Sitio", sortable: true, width: 80 },
   { key: "remoto", title: "Remoto", sortable: true, width: 100 },
   { key: "descripcion", title: "Descripcion", sortable: true },
@@ -46,7 +44,7 @@ const columns = [
   { key: "updatedAt", title: "Modificado", sortable: true },
 ];
 
-const Ticket = () => {
+const MyTickets = () => {
   const [data, setData] = useState([]);
   const [editingInventoryId, setEditingInventoryId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -61,22 +59,32 @@ const Ticket = () => {
     { label: "Oficina Principal", value: "Oficina Principal" },
     { label: "Laboratorio", value: "Laboratorio" },
   ];
-  const optionState = [
-    { label: "En Proceso", value: "En Proceso" },
-    { label: "Resuelto", value: "Resuelto" },
-  ];
 
   const [openForm, setOpenForm] = useState(false);
   //estados de los estilos
   const theme = useTheme();
   const { width } = useWindowDimensions();
   const { user } = useAuth();
+
   useFocusEffect(
     useCallback(() => {
-      getTickets().then(setData).catch(console.error);
-      user()
-        .then(setProfileData)
-        .catch((error) => console.log("Error user data:", error));
+      let isActive = true;
+      const fetchData = async () => {
+        try {
+          const userData = await user(); // Espera los datos del usuario
+          if (!isActive) return;
+          setProfileData(userData);
+          const tickets = await getMyTickets(userData.id); // Usa directamente userData.id
+          if (!isActive) return;
+          setData(tickets);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      };
+      fetchData();
+      return () => {
+        isActive = false;
+      };
     }, [])
   );
 
@@ -85,7 +93,6 @@ const Ticket = () => {
     sitio: "",
     remoto: "",
     descripcion: "",
-    estado: "",
   });
   console.log(formData);
   const handleSubmit = useCallback(async () => {
@@ -144,7 +151,6 @@ const Ticket = () => {
       sitio: "",
       remoto: "",
       descripcion: "",
-      estado: "",
     });
   };
 
@@ -175,7 +181,6 @@ const Ticket = () => {
       sitio: item.sitio,
       remoto: item.remoto,
       descripcion: item.descripcion,
-      estado: item.estado,
     });
     setEditingInventoryId(item.id);
     setIsEditing(true);
@@ -239,17 +244,6 @@ const Ticket = () => {
                 />
               </Card.Content>
             </Card>
-            {/*  <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
-              <Card.Content>
-                <Text style={styles.cardTitle}>Valor del Inventario</Text>
-                <Text style={styles.cardValue}>${totalValue.toFixed(2)}</Text>
-                <ProgressBar
-                  progress={valueProgress}
-                  color="#00ACE8"
-                  style={styles.progressBar}
-                />
-              </Card.Content>
-            </Card> */}
           </View>
           <Card style={styles.tableCard}>
             <Card.Content>
@@ -306,7 +300,7 @@ const Ticket = () => {
                 onSelect={(value) => {
                  
                     setFormData({ ...formData, sitio: value });
-
+                  
                 }}
                 value={formData.sitio}
                 placeholder="Sitio"
@@ -335,15 +329,6 @@ const Ticket = () => {
                   errorMessage={`Por favor, introduce un ${field} válido`}
                 />
               ))}
-
-              <DropdownComponent
-                options={optionState}
-                onSelect={(value) => {
-                  setFormData({ ...formData, estado: value });
-                }}
-                value={formData.estado}
-                placeholder="Estado"
-              />
             </View>
           }
           actions={[
@@ -441,4 +426,4 @@ const styles = StyleSheet.create({
     }),
   },
 });
-export default Ticket;
+export default MyTickets;

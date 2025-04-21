@@ -266,7 +266,7 @@ const TablaComponente = ({
                 isActive == "Aprobado" ||
                 isActive == "Resuelto"
                   ? extendedTheme.colors.success
-                  : isActive == "Pendiente"
+                  : isActive == "Pendiente" || isActive == "En Proceso"
                   ? extendedTheme.colors.warning
                   : extendedTheme.colors.error,
               color: extendedTheme.colors.surface,
