@@ -18,7 +18,13 @@ import {
   IconButton,
   Appbar,
 } from "react-native-paper";
-import { MaterialCommunityIcons,MaterialIcons,FontAwesome6 } from "@expo/vector-icons";
+import {
+  MaterialCommunityIcons,
+  MaterialIcons,
+  FontAwesome6,
+  FontAwesome5,
+  AntDesign
+} from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -36,6 +42,8 @@ import AccountE from "./AccountE";
 import MotionsE from "./MotionsE";
 import MyTickets from "./MyTickets";
 import GeneratorReport from "./GeneratorRepor";
+import Hiring from "./Hiring";
+import AssignmentPPE from "./AssignmentPPE";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import { router } from "expo-router";
 
@@ -393,9 +401,30 @@ export default function App() {
             </Drawer.Screen>
           ) : null}
 
-          {logueado?.cargo === "DirectorTalento" || logueado?.cargo === "Talento" ? (
+          {logueado?.cargo === "DirectorTalento" ||
+          logueado?.cargo === "Talento" ? (
             <>
-             <Drawer.Screen
+              <Drawer.Screen
+                name="Hiring"
+                options={{
+                  title: "Candidatos",
+                  drawerIcon: ({ color }) => (
+                    <FontAwesome5
+                      name="user-graduate"
+                      size={24}
+                      color={color}
+                    />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <AnimatedScreen style={animatedStyle}>
+                    <Hiring {...props} />
+                  </AnimatedScreen>
+                )}
+              </Drawer.Screen>
+
+              <Drawer.Screen
                 name="GeneratorRepor"
                 options={{
                   title: "Generar Archivos",
@@ -411,7 +440,7 @@ export default function App() {
                 )}
               </Drawer.Screen>
             </>
-          ) :null }
+          ) : null}
 
           {logueado?.cargo === "DirectorContable" ||
           logueado?.cargo === "Contador" ? (
@@ -437,7 +466,11 @@ export default function App() {
                 options={{
                   title: "Cuentas",
                   drawerIcon: ({ color }) => (
-                    <MaterialIcons name="account-balance" size={24} color={color} />
+                    <MaterialIcons
+                      name="account-balance"
+                      size={24}
+                      color={color}
+                    />
                   ),
                 }}
               >
@@ -453,7 +486,11 @@ export default function App() {
                 options={{
                   title: "Movimientos",
                   drawerIcon: ({ color }) => (
-                    <FontAwesome6 name="money-bill-transfer" size={24} color={color} />
+                    <FontAwesome6
+                      name="money-bill-transfer"
+                      size={24}
+                      color={color}
+                    />
                   ),
                 }}
               >
@@ -467,7 +504,50 @@ export default function App() {
           ) : null}
 
 
-<Drawer.Screen
+
+          {logueado?.cargo === "Directorsset" || logueado?.cargo === "Sset" ? (
+            <>
+            <Drawer.Screen
+                name="Inventario"
+                options={{
+                  title: "Inventario",
+                  drawerIcon: ({ color }) => (
+                    <MaterialIcons name="inventory" size={24} color={color} />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <AnimatedScreen style={animatedStyle}>
+                    <Inventario {...props} />
+                  </AnimatedScreen>
+                )}
+              </Drawer.Screen>
+
+
+              <Drawer.Screen
+                name="AssignmentPPE"
+                options={{
+                  title: "Proteccion Personal",
+                  drawerIcon: ({ color }) => (
+                    <AntDesign name="skin" size={24} color={color} />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <AnimatedScreen style={animatedStyle}>
+                    <AssignmentPPE {...props} />
+                  </AnimatedScreen>
+                )}
+              </Drawer.Screen>
+            </>
+          ):null}
+
+
+
+
+
+
+          <Drawer.Screen
             name="MyTickets"
             options={{
               title: "Mis Tickets",
@@ -482,7 +562,6 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
-
 
           <Drawer.Screen
             name="MyAccount"

@@ -39,6 +39,21 @@ export const getDashboard = async () => {
 };
 
 
+
+export const getHiring = async () => {
+  return makeRequest("get","/hiring");
+}
+export const createHiring = async (data) => {
+  return makeRequest("post","/hiring",data);
+}
+
+export const updateHiring = async (id,data) => {
+  return makeRequest("put", `/hiring/${id}`,data);
+}
+
+export const deleteHiring = async (id) => {
+  return makeRequest("delete", `/hiring/${id}`);
+}
 /**
  * 
  * end point tickets de it

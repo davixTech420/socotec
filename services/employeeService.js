@@ -35,6 +35,29 @@ const makeRequest = async (method, url, data = null) => {
 };
 
 
+//routes ppe
+export const getAssignment = async () => {
+  return makeRequest("get","/assignment");
+}
+
+
+//hiring
+export const getHiring = async () => {
+  return makeRequest("get","/hiring");
+}
+export const createHiring = async (data) => {
+  return makeRequest("post","/hiring",data);
+}
+export const updateHiring = async (id,data) => {
+  return makeRequest("put",`/hiring/${id}`,data);
+}
+export const deleteHiring = async (id) => {
+  return makeRequest("delete",`/hiring/${id}`);
+}
+
+
+
+//tickets de it
 export const getMyTickets = async (id) => {
   return makeRequest('get', `/myTickets/${id}`);
 }

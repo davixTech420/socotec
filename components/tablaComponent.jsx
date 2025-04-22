@@ -264,9 +264,9 @@ const TablaComponente = ({
               backgroundColor:
                 isActive == true ||
                 isActive == "Aprobado" ||
-                isActive == "Resuelto"
+                isActive == "Resuelto" || isActive == "Contrato Firmado" || isActive == "Oferta Enviada"
                   ? extendedTheme.colors.success
-                  : isActive == "Pendiente" || isActive == "En Proceso"
+                  : isActive == "Pendiente" || isActive == "En Proceso" || isActive == "Postulado" || isActive == "Entrevista 1" || isActive == "Entrevista 2" || isActive == "Prueba Tecnica"
                   ? extendedTheme.colors.warning
                   : extendedTheme.colors.error,
               color: extendedTheme.colors.surface,
@@ -286,6 +286,20 @@ const TablaComponente = ({
               ? "En Proceso"
               : isActive === "Resuelto"
               ? "Resuelto"
+              : isActive === "Postulado" 
+              ? "Postulado"
+              :isActive === "CV Aprobado"
+              ? "CV Aprobado"
+              :isActive === "Entrevista 1"
+              ? "Entrevista 1"
+              :isActive === "Entrevista 2"
+              ? "Entrevista 2"
+              : isActive === "Prueba Tecnica"
+              ? "Prueba Tecnica"
+              : isActive === "Oferta Enviada"
+              ? "Oferta Enviada"
+              :isActive === "Contrato Firmado"
+              ? "Contrato Firmado"
               : "Estado desconocido"}
           </Chip>
         );

@@ -213,7 +213,6 @@ const Inventario = () => {
         >
           <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
         </Snackbar>
-
         <AlertaScroll onOpen={openForm} onClose={resetForm} title={isEditing ? "Editar inventario" : "Nuevo inventario"} content={
           <View style={{
             flexDirection: isSmallScreen ? "column" : 'row',
@@ -235,7 +234,6 @@ const Inventario = () => {
                           : field === "precioUnidad"
                             ? "precio"
                             : "text"
-
                 }
                 value={formData[field]}
                 onChangeText={(text) => setFormData((prev) => ({ ...prev, [field]: text }))}
