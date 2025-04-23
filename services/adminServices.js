@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://192.168.130.147:${port}/api/admin`;
+const baseUrl = `http://192.168.211.230:${port}/api/admin`;
 
 const makeRequest = async (method, url, data = null) => {
   try {
@@ -38,7 +38,24 @@ export const getDashboard = async () => {
   return makeRequest("get", "/dashboard");
 };
 
+//routes the ppe protect
+export const getAssignment = async () => {
+  return makeRequest("get","/assignment");
+}
+export const createAssignment = async (data) => {
+  return makeRequest("post","/assignment",data);
+}
 
+export const updateAssignment = async (id,data) => {
+  return makeRequest("put",`/assignment/${id}`,data);
+}
+export const deleteAssignment = async (id) => {
+  return makeRequest("delete",`/assignment/${id}`);
+}
+
+
+
+// rutas de candidatos
 
 export const getHiring = async () => {
   return makeRequest("get","/hiring");

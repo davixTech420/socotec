@@ -264,9 +264,9 @@ const TablaComponente = ({
               backgroundColor:
                 isActive == true ||
                 isActive == "Aprobado" ||
-                isActive == "Resuelto" || isActive == "Contrato Firmado" || isActive == "Oferta Enviada"
+                isActive == "Resuelto" || isActive == "Contrato Firmado" || isActive == "Oferta Enviada" || isActive == "Confirmado"
                   ? extendedTheme.colors.success
-                  : isActive == "Pendiente" || isActive == "En Proceso" || isActive == "Postulado" || isActive == "Entrevista 1" || isActive == "Entrevista 2" || isActive == "Prueba Tecnica"
+                  : isActive == "Pendiente" || isActive == "En Proceso" || isActive == "Postulado" || isActive == "Entrevista 1" || isActive == "Entrevista 2" || isActive == "Prueba Tecnica" ||  isActive == "Asignado"
                   ? extendedTheme.colors.warning
                   : extendedTheme.colors.error,
               color: extendedTheme.colors.surface,
@@ -300,6 +300,12 @@ const TablaComponente = ({
               ? "Oferta Enviada"
               :isActive === "Contrato Firmado"
               ? "Contrato Firmado"
+              :isActive === "Asignado"
+              ? "Asignado"
+              :isActive === "Confirmado"
+              ? "Confirmado"
+              :isActive ==="Devuelto"
+              ? "Devuelto"
               : "Estado desconocido"}
           </Chip>
         );

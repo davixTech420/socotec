@@ -207,6 +207,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     borderWidth: 1,
     webkitAppearance: "none",
+    marginTop:5
   }
 })
 

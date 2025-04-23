@@ -22,6 +22,7 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
   FontAwesome5,
+  AntDesign
 } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
@@ -44,6 +45,7 @@ import Portfolio from "./Portfolio";
 import Task from "./Task";
 import Ticket from "./Ticket";
 import Hirings from "./Hirings";
+import Assignment from "./Assignment";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import ProfileScreen from "./MyAccount";
 import { router } from "expo-router";
@@ -344,6 +346,27 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
+
+
+
+          <Drawer.Screen
+            name="Assignment"
+            options={{
+              title: "Proteccion Personal",
+              drawerIcon: ({ color }) => (
+                <AntDesign name="skin" size={24} color={color} />
+              ),
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Assignment {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
+
+
 
           <Drawer.Screen
             name="Task"
