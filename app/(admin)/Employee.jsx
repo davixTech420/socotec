@@ -37,6 +37,7 @@ export default function Employee() {
     const { width } = useWindowDimensions()
     const options = [
         { label: "Auxiliar", value: "Auxiliar" },
+        { label: "Laboratorista", value: "Laboratorista" },
         { label: "Ingeniero", value: "Ingeniero" },
         { label: "Arquitecto", value: "Arquitecto" },
         { label: "TeamLider", value: "TeamLider" },

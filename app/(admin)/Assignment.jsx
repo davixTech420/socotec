@@ -21,11 +21,11 @@ import { AlertaScroll } from "@/components/alerta";
 import InputComponent from "@/components/InputComponent";
 import {
   getAssignment,
+  getCampoUsers,
   createAssignment,
   updateAssignment,
   deleteAssignment,
   getActiveInventory,
-  getActiveUsers,
 } from "@/services/employeeService";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
@@ -33,6 +33,7 @@ import { useAuth } from "@/context/userContext";
 import DropdownComponent from "@/components/DropdownComponent";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFPreviewButton from "@/components/PdfViewComponent";
+import { getUsersCampo } from "@/services/adminServices";
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -82,7 +83,7 @@ export default function Hiring() {
     useCallback(() => {
       getAssignment().then(setData).catch(console.error);
       getActiveInventory().then(setInventario).catch(console.error);
-      getActiveUsers().then(setUsuarios).catch(console.error);
+      getCampoUsers().then(setUsuarios).catch(console.error);
       user().then(setProfileData).catch(error => console.log('Error user data:', error));
     }, [])
   );

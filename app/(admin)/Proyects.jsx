@@ -8,7 +8,7 @@ import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
 import { createProyect, getProyect, deleteProyect, activeProyect, inactiveProyect, updateProyect, getGroupNotProyect, getGroupProyect, deleteGroupProyect } from "@/services/adminServices";
-import { CommonActions, useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect } from '@react-navigation/native';
 import ExcelPreviewButton from "@/components/ExcelViewComponent"
 import PDFViewComponent from '@/components/PdfViewComponent';
 
@@ -143,7 +143,7 @@ const Proyects = () => {
     }
   }, []);
 
-  const handleEdit = useCallback(async (item) => {
+  const handleEdit = useCallback((item) => {
     setFormData({
       nombre: item.nombre,
       descripcion: item.descripcion,
@@ -153,9 +153,8 @@ const Proyects = () => {
       fechaEntrega: item.fechaEntrega,
     })
     setEditingProyectId(item.id)
-    const groupProyect = await getGroupProyect(item.groupId);
-    setSelectedGroup(groupProyect);
-    console.log(groupProyect);
+    getGroupProyect(item.groupId).then(setSelectedGroup).catch(console.error);
+    
     setIsEditing(true)
     setOpenForm(true)
   }, []);

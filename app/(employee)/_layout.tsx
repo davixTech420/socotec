@@ -542,6 +542,26 @@ export default function App() {
             </>
           ):null}
 
+          {logueado?.cargo === "Laboratorista" ? (
+            <>
+            <Drawer.Screen
+                name="AssignmentPPE"
+                options={{
+                  title: "Proteccion Personal",
+                  drawerIcon: ({ color }) => (
+                    <AntDesign name="skin" size={24} color={color} />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <AnimatedScreen style={animatedStyle}>
+                    <AssignmentPPE {...props} />
+                  </AnimatedScreen>
+                )}
+              </Drawer.Screen>
+            </>
+          ) : null}
+
 
 
 

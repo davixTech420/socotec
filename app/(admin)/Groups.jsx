@@ -95,17 +95,10 @@ let newData
       if (isEditing) {
         await updateGroup(editingGroupId, dataToSubmit)
         newData = data.map((item) => (item.id === editingGroupId ? { ...item, ...dataToSubmit } : item))
-        /* setData((prevData) =>
-          prevData.map((item) => (item.id === editingGroupId ? { ...item, ...dataToSubmit } : item)),
-        ) */
       } else {
         const newGroup = await createGroup(dataToSubmit)
         if (!newGroup) throw new Error("Error al crear el grupo")
           newData = [...data, newGroup.group]
-
-
-
-        /* setData((prevData) => [...prevData, newGroup.group]) */
       }
       setData(newData)
       setSnackbarMessage({
@@ -149,18 +142,23 @@ let newData
     }
   }, [])
 
-  const handleEdit = useCallback(async (item) => {
-      setFormData({
-        nombre: item.nombre,
-        descripcion: item.descripcion,
+  const handleEdit = useCallback((item) => {
+    setFormData({
+      nombre: item.nombre,
+      descripcion: item.descripcion,
+    });
+    setEditingGroupId(item.id);
+    setIsEditing(true);
+    setOpenForm(true);
+    getUsersGroup(item.id)
+      .then(usersGroup => {
+        setSelectedUsers(usersGroup.map((item) => item.User));
       })
-      setEditingGroupId(item.id)
-      const usersGroup = await getUsersGroup(item.id)
-      setSelectedUsers(usersGroup.map((item) => item.User))
-      setIsEditing(true)
-      setOpenForm(true)
-  }, [])
-
+      .catch(error => {
+        console.error("Error al obtener usuarios del grupo:", error);
+        setSelectedUsers([]);
+      });
+  }, []);
   
 
   const toggleUserSelection = useCallback(async (user) => {

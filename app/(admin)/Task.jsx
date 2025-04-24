@@ -18,7 +18,9 @@ const columns = [
   { key: 'asignadoId', title: 'Asignado', sortable: true },
   { key: 'titulo', title: 'Titulo', sortable: true, width: 80 },
   { key: 'descripcion', title: 'Descripcion', sortable: true, width: 100 },
-  { key: 'estado', title: 'estado', sortable: true }
+  { key: 'estado', title: 'estado', sortable: true },
+  { key: 'createdAt', title: 'Creado', sortable: true },
+  { key: 'updatedAt', title: 'Modificado', sortable: true },
 ];
 
 const Task = () => {

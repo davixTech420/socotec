@@ -73,6 +73,8 @@ export default function Hirings() {
     { label: "Auxiliar", value: "Auxiliar" },
     { label: "Ingeniero", value: "Ingeniero" },
     { label: "Arquitecto", value: "Arquitecto" },
+    { label: "Laboratorista", value: "Laboratorista" },
+    { label: "Campo", value: "Campo" },
     { label: "TeamLider", value: "TeamLider" },
     { label: "Deliniante", value: "Deliniante" },
     { label: "Talento Humano", value: "Talento" },
@@ -86,7 +88,7 @@ export default function Hirings() {
     { label: "Fijo", value: "Fijo" },
     { label: "Indefinido", value: "Indefinido" },
     { label: "Prestacion Servicios", value: "Prestacion Servicios" },
-    { label: "Practicante", value: "Practicante" },
+    { label: "Practicante", value: "Practicante"},
   ];
   const optionState = [
     { label: "Postulado", value: "Postulado" },
@@ -113,6 +115,7 @@ export default function Hirings() {
             "telefono",
             "cargo",
             "estado",
+            "tipoContrato",
             "salario",
             "cita",
             "nota",
@@ -123,8 +126,8 @@ export default function Hirings() {
             "telefono",
             "cargo",
             "estado",
+            "tipoContrato",
             "salario",
-            "cita",
             "nota",
           ];
       const emptyFields = requiredFields.filter(
@@ -305,7 +308,7 @@ export default function Hirings() {
                   field === "nombre"
                     ? "nombre"
                     : field === "email"
-                    ? "email"
+                    ? "emailCan"
                     : field === "telefono"
                     ? "number"
                     : field === "salario"

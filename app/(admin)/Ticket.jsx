@@ -71,25 +71,33 @@ const Ticket = () => {
   const theme = useTheme();
   const { width } = useWindowDimensions();
   const { user } = useAuth();
-  useFocusEffect(
-    useCallback(() => {
-      getTickets().then(setData).catch(console.error);
-      user()
-        .then(setProfileData)
-        .catch((error) => console.log("Error user data:", error));
-    }, [])
-  );
 
   const [formData, setFormData] = useState({
-    userId: profileData?.id || "",
+    userId:null,
     sitio: "",
     remoto: "",
     descripcion: "",
     estado: "",
   });
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        try {
+          const userData = await user();
+          setProfileData(userData);
+          setFormData(prevFormData => ({
+            ...prevFormData,
+            userId: userData?.id,
+          }));
+          setData(await getTickets());
+        } catch (e) { console.error(e); }
+      })();
+    }, [])
+  );
   console.log(formData);
   const handleSubmit = useCallback(async () => {
     try {
+      
       const requiredFields = isEditing
         ? ["sitio", "remoto", "descripcion"]
         : ["sitio", "remoto", "descripcion"];
@@ -107,6 +115,7 @@ const Ticket = () => {
 
       let newData;
       if (isEditing) {
+        console.log("actulizacion",formData); 
         await updateTicket(editingInventoryId, formData);
         newData = data.map((item) =>
           item.id === editingInventoryId ? { ...item, ...formData } : item
@@ -114,8 +123,6 @@ const Ticket = () => {
       } else {
         const newUser = await createTicket(formData);
         if (!newUser) throw new Error("Error al crear el ticket");
-        console.log("ticket creado", newUser.ticket);
-
         newData = [...data, newUser.ticket];
       }
       setData(newData);
@@ -134,6 +141,9 @@ const Ticket = () => {
       setSnackbarVisible(true);
     }
   }, [formData, isEditing, editingInventoryId, data]);
+
+
+  
 
   const resetForm = () => {
     setOpenForm(false);
@@ -239,7 +249,7 @@ const Ticket = () => {
                 />
               </Card.Content>
             </Card>
-            {/*  <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
+             {/* <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
               <Card.Content>
                 <Text style={styles.cardTitle}>Valor del Inventario</Text>
                 <Text style={styles.cardValue}>${totalValue.toFixed(2)}</Text>

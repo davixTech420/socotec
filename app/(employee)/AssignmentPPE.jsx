@@ -21,6 +21,7 @@ import { AlertaScroll } from "@/components/alerta";
 import InputComponent from "@/components/InputComponent";
 import {
   getAssignment,
+  getMyAssignment,
   createAssignment,
   updateAssignment,
   deleteAssignment,
@@ -52,8 +53,8 @@ export default function Hiring() {
   const [inventario, setInventario] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [openForm, setOpenForm] = useState(false);
-  const { user } = useAuth()
-  const [profileData,setProfileData] = useState({});
+  const { user } = useAuth();
+  const [profileData, setProfileData] = useState({});
   const [formData, setFormData] = useState({
     inventoryId: "",
     userId: "",
@@ -78,12 +79,37 @@ export default function Hiring() {
     { label: "Confirmado", value: "Confirmado" },
     { label: "Devuelto", value: "Devuelto" },
   ];
+
   useFocusEffect(
     useCallback(() => {
-      getAssignment().then(setData).catch(console.error);
-      getActiveInventory().then(setInventario).catch(console.error);
-      getActiveUsers().then(setUsuarios).catch(console.error);
-      user().then(setProfileData).catch(error => console.log('Error user data:', error));
+      const loadData = async () => {
+        try {
+          // 1. Primero cargamos los datos del usuario (lo más crítico)
+          const userData = await user();
+          setProfileData(userData);
+
+          // 2. Cargamos en paralelo lo que no depende del usuario
+          const [inventario, usuarios] = await Promise.all([
+            getActiveInventory(),
+            getActiveUsers(),
+          ]);
+          setInventario(inventario);
+          setUsuarios(usuarios);
+
+          // 3. Según el cargo del usuario, cargamos los assignments
+          if (userData?.cargo === "Laboratorista") {
+            const assignments = await getMyAssignment(userData.id);
+            setData(assignments);
+          } else {
+            const allAssignments = await getAssignment();
+            setData(allAssignments);
+          }
+        } catch (error) {
+          console.error("Error loading data:", error);
+        }
+      };
+
+      loadData();
     }, [])
   );
 
@@ -101,10 +127,10 @@ export default function Hiring() {
   const handleSubmit = useCallback(async () => {
     try {
       const requiredFields = isEditing
-        ? ["inventoryId", "userId",  "estado"]
-        : ["inventoryId", "userId",  "estado"];
+        ? ["inventoryId", "userId", "estado"]
+        : ["inventoryId", "userId", "estado"];
       const emptyFields = requiredFields.filter(
-        (field) => !formData[field] &&  formData[field].trim() === ""
+        (field) => !formData[field] && formData[field].trim() === ""
       );
 
       if (emptyFields.length > 0) {
@@ -152,7 +178,7 @@ export default function Hiring() {
     setFormData({
       inventoryId: "",
       userId: "",
-      asignadorId:profileData?.id || "",
+      asignadorId: profileData?.id || "",
       fechaConfirmacion: "",
       fechaRetorno: "",
       fotoppe: "",
@@ -277,8 +303,6 @@ export default function Hiring() {
               placeholder="Usuario"
               value={formData.userId}
             />
-
-            
             {[
               "fechaConfirmacion",
               "fechaRetorno",
@@ -300,7 +324,10 @@ export default function Hiring() {
                 label={field.charAt(0).toUpperCase() + field.slice(1)}
                 placeholder={`Introduce el ${field}`}
                 validationRules={{
-                  required: field !== "role" && field !== "fechaConfirmacion" && field !== "fechaRetorno",
+                  required:
+                    field !== "role" &&
+                    field !== "fechaConfirmacion" &&
+                    field !== "fechaRetorno",
                   ...(field === "email" && { email: true }),
                 }}
                 errorMessage={`Por favor, introduce un ${field} válido`}

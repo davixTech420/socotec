@@ -71,10 +71,10 @@ const MyTickets = () => {
       let isActive = true;
       const fetchData = async () => {
         try {
-          const userData = await user(); // Espera los datos del usuario
+          const userData = await user();
+          setProfileData(userData); // Espera los datos del usuario
           if (!isActive) return;
-          setProfileData(userData);
-          const tickets = await getMyTickets(userData.id); // Usa directamente userData.id
+          const tickets = await getMyTickets(userData.id);
           if (!isActive) return;
           setData(tickets);
         } catch (error) {
@@ -298,9 +298,7 @@ const MyTickets = () => {
               <DropdownComponent
                 options={optionSitio}
                 onSelect={(value) => {
-                 
-                    setFormData({ ...formData, sitio: value });
-                  
+                  setFormData({ ...formData, sitio: value });
                 }}
                 value={formData.sitio}
                 placeholder="Sitio"

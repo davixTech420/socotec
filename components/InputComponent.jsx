@@ -135,6 +135,12 @@ function InputComponent({
       inputProps.left = <TextInput.Icon icon={() => <Ionicons name="mail" size={24} />} />
       validationRules.pattern = validationRules.pattern || /^[a-zA-Z0-9._%+-]+@socotec\.com$/
       break
+      case "emailCan":
+      inputProps.keyboardType = "email-address"
+      inputProps.autoCapitalize = "none"
+      inputProps.left = <TextInput.Icon icon={() => <Ionicons name="mail" size={24} />} />
+      validationRules.pattern = validationRules.pattern || /^[a-zA-Z0-9._%+-]/
+      break
     case "password":
       inputProps.secureTextEntry = true
       inputProps.left = <TextInput.Icon icon={() => <Ionicons name="lock-closed" size={24} />} />

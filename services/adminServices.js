@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://192.168.211.230:${port}/api/admin`;
+const baseUrl = `http://192.168.130.147:${port}/api/admin`;
 
 const makeRequest = async (method, url, data = null) => {
   try {
@@ -214,6 +214,12 @@ export const createEmployee = async (employee) => {
  */
 
 //crear usuario api
+
+export const getUsersCampo = async () =>{
+  return makeRequest("get","/usersCampo");
+}
+
+
 export const createUser = async (user) => {
   try {
     const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
