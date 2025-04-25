@@ -310,12 +310,12 @@ const TablaComponente = ({
           </Chip>
         );
       }
-      if (column.key === "imagenes") {
+      if (column.key === "imagenes" || column.key == "fotoppe") {
         return (
           <>
             {/*   <ImageCarousel images={item?.imagenes} /> */}
             <Image
-              source={{ uri: SrcImagen(item.imagenes[0].uri) }}
+              source={{ uri: SrcImagen(column.key == "imagenes" ? item.imagenes[0].uri : item.fotoppe?.uri )}}
               style={{ width: 100, height: 100 }}
             />
           </>

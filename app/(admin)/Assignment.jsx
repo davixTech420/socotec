@@ -20,20 +20,18 @@ import AddComponent from "@/components/AddComponent";
 import { AlertaScroll } from "@/components/alerta";
 import InputComponent from "@/components/InputComponent";
 import {
-  getAssignment,
   getCampoUsers,
-  createAssignment,
-  updateAssignment,
-  deleteAssignment,
+ 
   getActiveInventory,
 } from "@/services/employeeService";
+import { getAssignment,createAssignment,updateAssignment,deleteAssignment } from "@/services/adminServices";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
 import { useAuth } from "@/context/userContext";
 import DropdownComponent from "@/components/DropdownComponent";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFPreviewButton from "@/components/PdfViewComponent";
-import { getUsersCampo } from "@/services/adminServices";
+
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -41,8 +39,9 @@ const columns = [
   { key: "userId", title: "Asignado", sortable: true, width: 80 },
   { key: "asignadorId", title: "Asignador", sortable: true, width: 100 },
   { key: "fechaConfirmacion", title: "Fecha Recibido", sortable: true },
+  { key: "fotoppe", title: "Foto Recibido", sortable: true },
   { key: "fechaRetorno", title: "Fecha Retorno", sortable: true },
-  { key: "fotoppe", title: "Foto", sortable: true },
+  { key: "fotoRetorno", title: "Foto Retorno", sortable: true },
   { key: "estado", title: "Estado", sortable: true },
   { key: "createdAt", title: "Creado", sortable: true },
   { key: "updatedAt", title: "Modificado", sortable: true },
