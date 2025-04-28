@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://192.168.90.230:${port}/api/employee`;
+const baseUrl = `http://192.168.130.147:${port}/api/employee`;
 
 const makeRequest = async (method, url, data = null) => {
   try {
@@ -66,7 +66,7 @@ export const createAssignment = async (data) => {
 
 export const updateAssignment = async (id,data) => {
   try {
-      const token = await AsyncStorage.getItem    ("userToken");
+      const token = await AsyncStorage.getItem("userToken");
       const response = await axios.put(`${baseUrl}/assignment/${id}`,data, {
           headers: {
               Authorization: `Bearer ${token}`,

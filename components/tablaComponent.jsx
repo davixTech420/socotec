@@ -315,7 +315,7 @@ const TablaComponente = ({
           <>
             {/*   <ImageCarousel images={item?.imagenes} /> */}
             <Image
-              source={{ uri: SrcImagen(column.key == "imagenes" ? item.imagenes[0].uri : item.fotoppe?.uri )}}
+              source={{ uri: SrcImagen(column.key == "imagenes" ? item.imagenes[0].uri : item.fotoppe )}}
               style={{ width: 100, height: 100 }}
             />
           </>
