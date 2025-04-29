@@ -163,6 +163,7 @@ const Portfolio = () => {
   
       resetForm();
     } catch (error) {
+      console.error(error);
       setSnackbarMessage({ text: error, type: "error" });
     } finally {
       setLoading(false);
@@ -170,7 +171,6 @@ const Portfolio = () => {
     }
   }, [formData, isEditing, editingInventoryId, data, validateRequiredFields]);
 
-  
   
 
   const resetForm = () => {
@@ -221,7 +221,6 @@ const Portfolio = () => {
             isFromAPI: true, // Mark as coming from API
           }))
         : []
-
       setFormData({
         nombre: item.nombre || "",
         cliente: item.cliente || "",
@@ -281,7 +280,6 @@ const Portfolio = () => {
       setSnackbarVisible(true)
     }
   }
-
 
 
   const removeImage = (index) => {
@@ -741,4 +739,3 @@ const styles = StyleSheet.create({
 })
 
 export default Portfolio
-
