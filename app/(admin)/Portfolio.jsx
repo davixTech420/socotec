@@ -24,13 +24,12 @@ import {
   deletePortfolio,
   activePortfolio,
   inactivePortfolio,
-
   updatePortfolio,
 } from "@/services/adminServices"
 import ExcelPreviewButton from "@/components/ExcelViewComponent"
 import PDFViewComponent from "@/components/PdfViewComponent"
 import * as ImagePicker from "expo-image-picker"
-import * as FileSystem from 'expo-file-system';
+
 import { SrcImagen } from "@/services/publicServices"
 
 const columns = [
@@ -151,10 +150,8 @@ const Portfolio = () => {
         await updatePortfolio(editingInventoryId, form);
         newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item));
       } else {
-        console.log(formData);
-        
         const newUser = await createPortfolio(form);
-        /* if (!newUser) throw new Error("Error al crear el proyecto"); */
+        if (!newUser) throw new Error("Error al crear el proyecto");
         newData = [...data, newUser.proyect];
       }
   
@@ -166,92 +163,13 @@ const Portfolio = () => {
   
       resetForm();
     } catch (error) {
-      setSnackbarMessage({ text: error.message, type: "error" });
+      setSnackbarMessage({ text: error, type: "error" });
     } finally {
       setLoading(false);
       setSnackbarVisible(true);
     }
   }, [formData, isEditing, editingInventoryId, data, validateRequiredFields]);
 
-
-  /* const handleSubmit = useCallback(async () => {
-    try {
-        setLoading(true);
-        // Campos obligatorios
-        const requiredFields = ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie", "detalle"];
-        const emptyFields = validateRequiredFields(formData, requiredFields);
-
-        if (emptyFields.length > 0) {
-            throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
-        }
-        const form = new FormData();
-        // Agregar imágenes
-        if (formData.imagenes && formData.imagenes.length > 0) {
-            for (const image of formData.imagenes) {
-                if (image.isFromAPI) {
-                    // Imagen que ya existe en la API, solo enviamos la URI
-                    form.append("existingImages[]", image.uri);
-                } else {
-                    if (Platform.OS === "web") {
-                        try {
-                            const response = await fetch(image.uri);
-                            const blob = await response.blob();
-                            form.append("imagenes", new File([blob], image.name || `photo_${Date.now()}.jpg`, { type: image.type || "image/jpeg" }));
-                        } catch (error) {
-                            form.append("imagenes", image.uri);
-                        }
-                        // En la web, convertir la imagen en un blob y luego crear un archivo
-                    } else {
-                        try {
-                            const base64 = await FileSystem.readAsStringAsync(image.uri, FileSystem.EncodingType.Base64 );
-                            form.append("imagenes", `${base64}`);
-                        } catch (error) {
-                            console.error("Error al leer el archivo:", error);
-                            throw new Error(`Error al leer el archivo: ${error.message}`);
-                        }
-                    }
-                }
-            }
-        }
-        // Agregar otros datos del formulario
-        for (const key in formData) {
-            if (key !== "imagenes") {
-                form.append(key, formData[key]);
-            }
-        }
-
-        // Verificar el contenido de FormData antes de enviarlo
-        for (let [key, value] of form.entries()) {
-            console.log(`${key}:`, value);
-        }
-
-        let newData;
-        if (isEditing) {
-            await updatePortfolio(editingInventoryId, form);
-            newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item));
-        } else {
-            console.log(formData);
-
-            const newUser = await createPortfolio(form);
-            if (!newUser) throw new Error("Error al crear el proyecto");
-            newData = [...data, newUser.proyect];
-        }
-
-        setData(newData);
-        setSnackbarMessage({
-            text: `Portafolio ${isEditing ? "actualizado" : "creado"} exitosamente`,
-            type: "success",
-        });
-
-        resetForm();
-    } catch (error) {
-        console.error("Error in handleSubmit:", error);
-        setSnackbarMessage({ text: error.message, type: "error" });
-    } finally {
-        setLoading(false);
-        setSnackbarVisible(true);
-    }
-}, [formData, isEditing, editingInventoryId, data, validateRequiredFields]); */
   
   
 
