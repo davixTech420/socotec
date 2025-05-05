@@ -51,8 +51,21 @@ import ProfileScreen from "./MyAccount";
 import { router } from "expo-router";
 
 const Drawer = createDrawerNavigator();
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const DRAWER_WIDTH = SCREEN_WIDTH * (Platform.OS == "web" ? 0.2 : 0.7);
+ const { width: SCREEN_WIDTH } = Dimensions.get("window");
+/* const DRAWER_WIDTH = SCREEN_WIDTH * (Platform.OS == "web" ? 0.2 : 0.7); */
+const isMobileWeb = () => {
+  if (Platform.OS === "web") {
+    // Consideramos "celular" si el ancho es menor a 768px (típico breakpoint)
+    return SCREEN_WIDTH < 768;
+  }
+  return false;
+};
+
+// Lógica combinada
+const DRAWER_WIDTH = 
+  Platform.OS === "web" 
+    ? (isMobileWeb() ? SCREEN_WIDTH * 0.5 : SCREEN_WIDTH * 0.2)
+    : SCREEN_WIDTH * 0.7;
 function AnimatedScreen({ children, style, staticButton }) {
   return (
     <Animated.View style={[styles.screen, style]}>

@@ -29,7 +29,6 @@ import {
 import ExcelPreviewButton from "@/components/ExcelViewComponent"
 import PDFViewComponent from "@/components/PdfViewComponent"
 import * as ImagePicker from "expo-image-picker"
-
 import { SrcImagen } from "@/services/publicServices"
 
 const columns = [
@@ -100,8 +99,7 @@ const Portfolio = () => {
       setLoading(true);
       // Campos obligatorios
       const requiredFields = ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie", "detalle"];
-      const emptyFields = validateRequiredFields(formData, requiredFields);
-  
+      const emptyFields = validateRequiredFields(formData, requiredFields);  
       if (emptyFields.length > 0) {
         throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
       }
@@ -124,11 +122,11 @@ const Portfolio = () => {
               }
               // En la web, convertir la imagen en un blob y luego crear un archivo
             } else { 
-              form.append("imagenes", {
+               form.append("imagenes", {
                 uri :image.uri,
                 type: image.type || "image/jpeg",
                 name: image.name || `photo_${Date.now()}.jpg`,
-              });
+              }); 
             }
           }
         }
@@ -280,6 +278,7 @@ const Portfolio = () => {
       setSnackbarVisible(true)
     }
   }
+   
 
 
   const removeImage = (index) => {
@@ -737,9 +736,9 @@ const styles = StyleSheet.create({
     minWidth: 120,
   },
 })
-
 export default Portfolio */
-"use client"
+
+
 
 import { useCallback, useState } from "react"
 import { View, StyleSheet, ScrollView, useWindowDimensions, Platform, Image, TouchableOpacity } from "react-native"
@@ -772,8 +771,6 @@ import {
 import ExcelPreviewButton from "@/components/ExcelViewComponent"
 import PDFViewComponent from "@/components/PdfViewComponent"
 import * as ImagePicker from "expo-image-picker"
-import * as FileSystem from 'expo-file-system';
-
 import { SrcImagen } from "@/services/publicServices"
 
 const columns = [
@@ -837,178 +834,107 @@ const Portfolio = () => {
     return emptyFields
   }, [])
 
- 
-
-  
-  /* const handleSubmit = useCallback(async () => {
-    try {
-      setLoading(true);
-  
-      // Validar campos requeridos
-      const requiredFields = ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie", "detalle"];
-      const emptyFields = validateRequiredFields(formData, requiredFields);
-      if (emptyFields.length > 0) {
-        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
-      }
-  
-      const form = new FormData();
-  
-      // Agregar imágenes correctamente
-      if (formData.imagenes && formData.imagenes.length > 0) {
-        for (const image of formData.imagenes) {
-          if (image.isFromAPI) {
-            form.append("existingImages[]", image.uri);
-          } else {
-            const fileName = image.name || `photo_${Date.now()}.jpg`;
-            const mimeType = image.type || "image/jpeg";
-  
-            if (Platform.OS === "web") {
-              // En la web se puede usar fetch y File
-              try {
-                const response = await fetch(image.uri);
-                const blob = await response.blob();
-                const file = new File([blob], fileName, { type: mimeType });
-                form.append("imagenes", file);
-              } catch (error) {
-                console.error("Error al convertir imagen en web:", error);
-                throw new Error("No se pudo procesar una de las imágenes en la web.");
-              }
-            } else {
-              // En móviles (React Native) construimos un objeto compatible
-              form.append("imagenes", {
-                uri: image.uri,
-                type: mimeType,
-                name: fileName,
-              });
-            }
-          }
-        }
-      }
-
-  
-      // Agregar otros datos del formulario
-      for (const key in formData) {
-        if (key !== "imagenes") {
-          form.append(key, formData[key]);
-        }
-      }
-  
-      // Debug (opcional)
-      for (const [key, value] of form.entries()) {
-        console.log(`${key}:`, value);
-      }
-  
-      let newData;
-      if (isEditing) {
-        await updatePortfolio(editingInventoryId, form);
-        newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item));
-      } else {
-        const newUser = await createPortfolio(form);
-        if (!newUser) throw new Error("Error al crear el proyecto");
-        newData = [...data, newUser.proyect];
-      }
-  
-      setData(newData);
-      setSnackbarMessage({
-        text: `Portafolio ${isEditing ? "actualizado" : "creado"} exitosamente`,
-        type: "success",
-      });
-  
-      resetForm();
-    } catch (error) {
-      console.error("Error en handleSubmit:", error);
-      setSnackbarMessage({
-        text: error.message || "Error al procesar la solicitud",
-        type: "error",
-      });
-    } finally {
-      setLoading(false);
-      setSnackbarVisible(true);
-    }
-  }, [formData, isEditing, editingInventoryId, data, validateRequiredFields]); */
-  
-
   const handleSubmit = useCallback(async () => {
     try {
-      setLoading(true);
-  
-      // Validar campos requeridos
-      const requiredFields = ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie", "detalle"];
-      const emptyFields = validateRequiredFields(formData, requiredFields);
+      setLoading(true)
+      // Campos obligatorios
+      const requiredFields = ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie", "detalle"]
+      const emptyFields = validateRequiredFields(formData, requiredFields)
+
       if (emptyFields.length > 0) {
-        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
+        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`)
       }
-  
-      const form = new FormData();
-  
-      // Agregar imágenes correctamente
+
+      // Crear FormData para enviar al backend
+      const form = new FormData()
+
+      // Agregar todos los campos de texto al FormData
+      Object.keys(formData).forEach((key) => {
+        if (key !== "imagenes" && formData[key]) {
+          form.append(key, formData[key])
+        }
+      })
+
+      // Manejar imágenes según la plataforma
       if (formData.imagenes && formData.imagenes.length > 0) {
-        for (const image of formData.imagenes) {
-          if (image.isFromAPI) {
-            form.append("existingImages[]", image.uri);
-          } else if (image.uri) {
-            try {
-              const fileInfo = await FileSystem.getInfoAsync(image.uri);
-              if (!fileInfo.exists) {
-                throw new Error(`El archivo no existe: ${image.uri}`);
+        if (Platform.OS === "web") {
+          // En web, procesar las imágenes como archivos
+          for (const image of formData.imagenes) {
+            if (image.isFromAPI) {
+              // Imagen que ya existe en la API
+              form.append("existingImages[]", image.uri)
+            } else {
+              try {
+                // Convertir la imagen a blob para web
+                const response = await fetch(image.uri)
+                const blob = await response.blob()
+                form.append(
+                  "imagenes",
+                  new File([blob], image.name || `photo_${Date.now()}.jpg`, { type: image.type || "image/jpeg" }),
+                )
+              } catch (error) {
+                console.error("Error processing web image:", error)
+                // Fallback si hay error
+                form.append("imagenes", image.uri)
               }
-  
-              const base64 = await FileSystem.readAsStringAsync(image.uri, { encoding: FileSystem.EncodingType.Base64 });
-              const fileName = image.name || `photo_${Date.now()}.jpg`;
-              const mimeType = image.type || "image/jpeg";
-  
-              // Crear un Blob a partir de la cadena Base64
-              const blob = await fetch(`data:${mimeType};base64,${base64}`).then(res => res.blob());
-  
-              form.append("imagenes", blob, fileName);
-            } catch (error) {
-              console.error("Error al procesar imagen en móvil:", error);
-              throw new Error("No se pudo procesar una de las imágenes en el móvil.");
+            }
+          }
+        } else {
+          // En móvil, usar el formato específico que espera el backend
+          for (const image of formData.imagenes) {
+            if (image.isFromAPI) {
+              // Imagen que ya existe en la API
+              form.append("existingImages[]", image.uri)
+            } else {
+              // En móvil, usar el formato de archivo que espera el backend
+              // IMPORTANTE: Este es el formato que el backend espera para móviles
+              const fileAttachment = {
+                uri: image.uri,
+                type: image.type || "image/jpeg",
+                name: image.name || `photo_${Date.now()}.jpg`,
+              }
+
+              // Asegurarse de que se envía como "fileAttachment" como espera el backend
+              form.append("imagenes",fileAttachment)
             }
           }
         }
       }
-  
-      // Agregar otros datos del formulario
-      for (const key in formData) {
-        if (key !== "imagenes") {
-          form.append(key, formData[key]);
-        }
-      }
-  
-      // Debug (opcional)
+
+      // Log para depuración
+      console.log("FormData entries:")
       for (const [key, value] of form.entries()) {
-        console.log(`${key}:`, value);
+        console.log(`${key}:`, value)
       }
-  
-      let newData;
+
+      let newData
       if (isEditing) {
-        await updatePortfolio(editingInventoryId, form);
-        newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item));
+        await updatePortfolio(editingInventoryId, form)
+        newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item))
       } else {
-        const newUser = await createPortfolio(form);
-        if (!newUser) throw new Error("Error al crear el proyecto");
-        newData = [...data, newUser.proyect];
+        const newUser = await createPortfolio(form)
+        if (!newUser) throw new Error("Error al crear el proyecto")
+        newData = [...data, newUser.proyect]
       }
-  
-      setData(newData);
+
+      setData(newData)
       setSnackbarMessage({
         text: `Portafolio ${isEditing ? "actualizado" : "creado"} exitosamente`,
         type: "success",
-      });
-  
-      resetForm();
+      })
+
+      resetForm()
     } catch (error) {
-      console.error("Error en handleSubmit:", error);
+      console.error("Error en handleSubmit:", error)
       setSnackbarMessage({
-        text: error.message || "Error al procesar la solicitud",
+        text: error.message || "Error al procesar el formulario",
         type: "error",
-      });
+      })
     } finally {
-      setLoading(false);
-      setSnackbarVisible(true);
+      setLoading(false)
+      setSnackbarVisible(true)
     }
-  }, [formData, isEditing, editingInventoryId, data, validateRequiredFields]);
+  }, [formData, isEditing, editingInventoryId, data, validateRequiredFields])
 
   const resetForm = () => {
     setOpenForm(false)
@@ -1073,10 +999,7 @@ const Portfolio = () => {
       setOpenForm(true)
     } catch (error) {
       console.error("Error in handleEdit:", error)
-      setSnackbarMessage({
-        text: typeof error === "string" ? error : error.message || "Error al editar el proyecto",
-        type: "error",
-      })
+      setSnackbarMessage({ text: "Error al editar el proyecto", type: "error" })
       setSnackbarVisible(true)
     }
   }, [])
@@ -1116,10 +1039,7 @@ const Portfolio = () => {
       }
     } catch (error) {
       console.error("Error seleccionando imágenes:", error)
-      setSnackbarMessage({
-        text: typeof error === "string" ? error : error.message || "Error al seleccionar imágenes",
-        type: "error",
-      })
+      setSnackbarMessage({ text: "Error al seleccionar imágenes", type: "error" })
       setSnackbarVisible(true)
     }
   }
@@ -1210,10 +1130,7 @@ const Portfolio = () => {
                     setSnackbarMessage({ text: "Proyecto eliminado exitosamente", type: "success" })
                   } catch (error) {
                     console.error("Error deleting portfolio:", error)
-                    setSnackbarMessage({
-                      text: typeof error === "string" ? error : error.message || "Error al eliminar el proyecto",
-                      type: "error",
-                    })
+                    setSnackbarMessage({ text: "Error al eliminar el proyecto", type: "error" })
                   } finally {
                     setLoading(false)
                     setSnackbarVisible(true)
@@ -1356,16 +1273,11 @@ const Portfolio = () => {
             </View>
           }
           actions={[
-            <Button
-              key="cancel" // Added key prop here
-              onPress={resetForm}
-              mode="outlined"
-              style={styles.formButton}
-              disabled={loading}
-            >
+            <Button key="cancel" onPress={resetForm} mode="outlined" style={styles.formButton} disabled={loading}>
               Cancelar
             </Button>,
             <Button
+              key="submit"
               onPress={handleSubmit}
               mode="contained"
               style={styles.formButton}
