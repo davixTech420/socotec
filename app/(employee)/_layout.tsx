@@ -23,7 +23,7 @@ import {
   MaterialIcons,
   FontAwesome6,
   FontAwesome5,
-  AntDesign
+  AntDesign,
 } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
@@ -49,7 +49,18 @@ import { router } from "expo-router";
 
 const Drawer = createDrawerNavigator();
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const DRAWER_WIDTH = SCREEN_WIDTH * (Platform.OS == "web" ? 0.2 : 0.7);
+const isMobileWeb = () => {
+  if (Platform.OS === "web") {
+    return SCREEN_WIDTH < 768;
+  }
+  return false;
+};
+
+// Lógica combinada
+const DRAWER_WIDTH = 
+  Platform.OS === "web" 
+    ? (isMobileWeb() ? SCREEN_WIDTH * 0.5 : SCREEN_WIDTH * 0.2)
+    : SCREEN_WIDTH * 0.7;
 
 function AnimatedScreen({ children, style, staticButton }) {
   return (
@@ -94,7 +105,7 @@ function CustomDrawerContent(props) {
     <SafeAreaView
       style={[styles.drawerContent, { backgroundColor: theme.colors.surface }]}
     >
-      <ScrollView>
+      
         <View style={styles.userInfoSection}>
           <Avatar.Image
             source={require("../../assets/images/favicon.png")}
@@ -108,6 +119,7 @@ function CustomDrawerContent(props) {
             {userData?.email || "usuario@socotec.com"}
           </Text>
         </View>
+        <ScrollView>
         <View style={styles.drawerSection}>
           {props.state.routes.map((route, index) => {
             const { title, drawerIcon } = props.descriptors[route.key].options;
@@ -429,13 +441,29 @@ export default function App() {
                 options={{
                   title: "Generar Archivos",
                   drawerIcon: ({ color }) => (
-                    <MaterialIcons name="inventory" size={24} color={color} />
+                    <AntDesign name="filetext1" size={24} color={color} />
                   ),
                 }}
               >
                 {(props) => (
                   <AnimatedScreen style={animatedStyle}>
                     <GeneratorReport {...props} />
+                  </AnimatedScreen>
+                )}
+              </Drawer.Screen>
+
+              <Drawer.Screen
+                name="Inventario"
+                options={{
+                  title: "Inventario",
+                  drawerIcon: ({ color }) => (
+                    <MaterialIcons name="inventory" size={24} color={color} />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <AnimatedScreen style={animatedStyle}>
+                    <Inventario {...props} />
                   </AnimatedScreen>
                 )}
               </Drawer.Screen>
@@ -503,11 +531,9 @@ export default function App() {
             </>
           ) : null}
 
-
-
           {logueado?.cargo === "Directorsset" || logueado?.cargo === "Sset" ? (
             <>
-            <Drawer.Screen
+              <Drawer.Screen
                 name="Inventario"
                 options={{
                   title: "Inventario",
@@ -522,7 +548,6 @@ export default function App() {
                   </AnimatedScreen>
                 )}
               </Drawer.Screen>
-
 
               <Drawer.Screen
                 name="AssignmentPPE"
@@ -540,11 +565,11 @@ export default function App() {
                 )}
               </Drawer.Screen>
             </>
-          ):null}
+          ) : null}
 
           {logueado?.cargo === "Laboratorista" ? (
             <>
-            <Drawer.Screen
+              <Drawer.Screen
                 name="AssignmentPPE"
                 options={{
                   title: "Proteccion Personal",
@@ -561,11 +586,6 @@ export default function App() {
               </Drawer.Screen>
             </>
           ) : null}
-
-
-
-
-
 
           <Drawer.Screen
             name="MyTickets"

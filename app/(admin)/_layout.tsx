@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -22,7 +22,7 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
   FontAwesome5,
-  AntDesign
+  AntDesign,
 } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
@@ -51,27 +51,34 @@ import ProfileScreen from "./MyAccount";
 import { router } from "expo-router";
 
 const Drawer = createDrawerNavigator();
- const { width: SCREEN_WIDTH } = Dimensions.get("window");
-/* const DRAWER_WIDTH = SCREEN_WIDTH * (Platform.OS == "web" ? 0.2 : 0.7); */
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
 const isMobileWeb = () => {
   if (Platform.OS === "web") {
-    // Consideramos "celular" si el ancho es menor a 768px (típico breakpoint)
     return SCREEN_WIDTH < 768;
   }
   return false;
 };
 
 // Lógica combinada
-const DRAWER_WIDTH = 
-  Platform.OS === "web" 
-    ? (isMobileWeb() ? SCREEN_WIDTH * 0.5 : SCREEN_WIDTH * 0.2)
+const DRAWER_WIDTH =
+  Platform.OS === "web"
+    ? isMobileWeb()
+      ? SCREEN_WIDTH * 0.5
+      : SCREEN_WIDTH * 0.2
     : SCREEN_WIDTH * 0.7;
 function AnimatedScreen({ children, style, staticButton }) {
   return (
     <Animated.View style={[styles.screen, style]}>
-      <ScrollView contentContainerStyle={styles.screenContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.screenContent}
+      >
         {children}
       </ScrollView>
+      {staticButton && (
+        <View style={styles.staticButtonContainer}>{staticButton}</View>
+      )}
     </Animated.View>
   );
 }
@@ -269,20 +276,7 @@ export default function App() {
             }}
           >
             {(props) => (
-              <AnimatedScreen
-                style={animatedStyle}
-                staticButton={
-                  <Button
-                    mode="contained"
-                    onPress={() => {
-                      // Add your action here
-                    }}
-                    style={styles.floatingButton}
-                  >
-                    Action
-                  </Button>
-                }
-              >
+              <AnimatedScreen style={animatedStyle}>
                 <Dashboard {...props} />
               </AnimatedScreen>
             )}
@@ -360,8 +354,6 @@ export default function App() {
             )}
           </Drawer.Screen>
 
-
-
           <Drawer.Screen
             name="Assignment"
             options={{
@@ -377,9 +369,6 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
-
-
-
 
           <Drawer.Screen
             name="Task"
@@ -597,6 +586,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    height: Platform.OS === "web" ? "100vh" : "100%",
+    overflow: Platform.OS === "web" ? "hidden" : "visible",
   },
   drawerContent: {
     flex: 1,
@@ -631,18 +622,22 @@ const styles = StyleSheet.create({
   },
   screen: {
     flex: 1,
+    height: Platform.OS === "web" ? "100vh" : "100%",
+    overflow: "hidden",
   },
   scrollView: {
-    flexGrow: 1,
+    flex: 1,
+    height: Platform.OS === "web" ? "100vh" : "100%",
   },
   screenContent: {
-    flex: 1,
-    position: "relative",
+    flexGrow: 1,
+    minHeight: Platform.OS === "web" ? "100%" : "auto",
   },
   staticButtonContainer: {
     position: "absolute",
     bottom: 20,
     right: 20,
+    zIndex: 1000,
   },
   floatingButton: {
     position: "absolute",

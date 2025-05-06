@@ -8,7 +8,7 @@ import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createInventory, getInventory, deleteInventory, activeInventory, inactiveInventory, updateInventory } from "@/services/adminServices";
+import { createInventory, getInventory, deleteInventory, activeInventory, inactiveInventory, updateInventory } from "@/services/employeeService";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFViewComponent from '@/components/PdfViewComponent';
 

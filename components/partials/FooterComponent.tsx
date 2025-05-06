@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   },
   copyright: {
     fontSize: 12,
-    color: '#999',
+    color: 'black',
   },
 });
 

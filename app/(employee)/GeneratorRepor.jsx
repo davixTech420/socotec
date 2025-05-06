@@ -1,5 +1,6 @@
+"use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import {
   View,
   Text,
@@ -10,12 +11,20 @@ import {
   TextInput,
   Platform,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, interpolate } from "react-native-reanimated"
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+  interpolate,
+  Extrapolate,
+} from "react-native-reanimated"
 
 // Obtenemos las dimensiones de la pantalla
-const { width, height } = Dimensions.get("window")
+const windowDimensions = Dimensions.get("window")
 
 // Tipos de contratos colombianos
 const contractTypes = {
@@ -198,7 +207,9 @@ export default function GeneratorReport() {
   const [showOptions, setShowOptions] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [previewContent, setPreviewContent] = useState(null)
-  const [pdfUrl, setpdfUrl] = useState("")
+  const [dimensions, setDimensions] = useState({
+    window: windowDimensions,
+  })
 
   // Referencia para el ScrollView
   const scrollViewRef = useRef(null)
@@ -206,58 +217,38 @@ export default function GeneratorReport() {
   // Determinar si estamos en modo web o móvil
   const isWeb = Platform.OS === "web"
 
-  // Calcular dimensiones responsivas
-  const getCardDimensions = () => {
-    // En web, usamos un enfoque más responsivo
-    if (isWeb) {
-      if (width > 1200) {
-        return { width: Math.min(width * 0.35, 500), height: Math.min(width * 0.45, 650) }
-      } else if (width > 768) {
-        return { width: Math.min(width * 0.45, 450), height: Math.min(width * 0.6, 600) }
-      } else {
-        return { width: Math.min(width * 0.9, 400), height: Math.min(width * 0.9, 500) }
-      }
-    }
-    // En móvil, ajustamos según la orientación
-    else {
-      if (width > height) {
-        // Landscape
-        return { width: width * 0.45, height: height * 0.8 }
-      } else {
-        // Portrait
-        return { width: width * 0.9, height: height * 0.45 }
-      }
-    }
-  }
+  // Actualizar dimensiones cuando cambia el tamaño de la pantalla
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
+      setDimensions({ window })
+    })
+    return () => subscription?.remove()
+  }, [])
 
-  const cardDimensions = getCardDimensions()
+  const { width, height } = dimensions.window
+  const isLandscape = width > height
+  const isLargeScreen = width >= 1024
 
   // Animation values
-  const optionsHeight = useSharedValue(0)
-  const cardRotation = useSharedValue(0)
-  const cardScale = useSharedValue(1)
+  const optionsAnimation = useSharedValue(0)
+  const previewScale = useSharedValue(1)
   const previewOpacity = useSharedValue(1)
+  const contractTypeAnimation = useSharedValue(0)
 
   // Toggle options panel
   const toggleOptions = () => {
     setShowOptions(!showOptions)
-    optionsHeight.value = withTiming(showOptions ? 0 : isWeb && width > 1024 ? 500 : 600, {
-      duration: 300,
-      easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-    })
-
-    // Animate card when opening options
-    cardRotation.value = withTiming(showOptions ? 0 : -2, {
+    optionsAnimation.value = withTiming(showOptions ? 0 : 1, {
       duration: 400,
       easing: Easing.bezier(0.25, 0.1, 0.25, 1),
     })
 
-    cardScale.value = withTiming(showOptions ? 1 : 0.98, {
+    previewScale.value = withTiming(showOptions ? 1 : isLargeScreen ? 1 : 0.98, {
       duration: 400,
       easing: Easing.bezier(0.25, 0.1, 0.25, 1),
     })
 
-    previewOpacity.value = withTiming(showOptions ? 1 : 0.95, {
+    previewOpacity.value = withTiming(showOptions ? 1 : 0.9, {
       duration: 300,
     })
   }
@@ -265,17 +256,41 @@ export default function GeneratorReport() {
   // Animated styles
   const optionsAnimatedStyle = useAnimatedStyle(() => {
     return {
-      height: optionsHeight.value,
-      opacity: interpolate(optionsHeight.value, [0, 50], [0, 1]),
+      opacity: optionsAnimation.value,
+      transform: [
+        {
+          translateY: interpolate(optionsAnimation.value, [0, 1], [50, 0], Extrapolate.CLAMP),
+        },
+      ],
+      display: optionsAnimation.value === 0 ? "none" : "flex",
     }
   })
 
-  const cardAnimatedStyle = useAnimatedStyle(() => {
+  const previewAnimatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ rotateZ: `${cardRotation.value}deg` }, { scale: cardScale.value }],
+      transform: [{ scale: previewScale.value }],
       opacity: previewOpacity.value,
     }
   })
+
+  const contractTypeAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: interpolate(contractTypeAnimation.value, [0, 1], [20, 0], Extrapolate.CLAMP),
+        },
+      ],
+      opacity: contractTypeAnimation.value,
+    }
+  })
+
+  // Animar la aparición de los tipos de contrato
+  useEffect(() => {
+    contractTypeAnimation.value = withTiming(1, {
+      duration: 600,
+      easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+    })
+  }, [])
 
   // Manejar cambio de datos del formulario
   const handleFormDataChange = (key, value) => {
@@ -727,29 +742,48 @@ export default function GeneratorReport() {
   const renderFormFields = () => {
     const fields = contractTypes[contractType]?.fields || []
 
-    return fields.map((field) => (
-      <View key={field.key} style={styles.customField}>
+    return fields.map((field, index) => (
+      <Animated.View
+        key={field.key}
+        style={[
+          styles.customField,
+          {
+            transform: [
+              {
+                translateY: interpolate(contractTypeAnimation.value, [0, 1], [20, 0], Extrapolate.CLAMP),
+              },
+            ],
+            opacity: interpolate(contractTypeAnimation.value, [0, 1], [0, 1], Extrapolate.CLAMP),
+          },
+        ]}
+        entering={withTiming({
+          duration: 300 + index * 50,
+          easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+        })}
+      >
         <Text style={styles.customFieldLabel}>
           {field.label}
           {field.required ? " *" : ""}:
         </Text>
 
         {field.type === "select" ? (
-          <View style={styles.selectContainer}>
-            {field.options.map((option) => (
-              <TouchableOpacity
-                key={option}
-                style={[styles.selectOption, formData[field.key] === option && styles.selectOptionActive]}
-                onPress={() => handleFormDataChange(field.key, option)}
-              >
-                <Text
-                  style={[styles.selectOptionText, formData[field.key] === option && styles.selectOptionTextActive]}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectScrollView}>
+            <View style={styles.selectContainer}>
+              {field.options.map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[styles.selectOption, formData[field.key] === option && styles.selectOptionActive]}
+                  onPress={() => handleFormDataChange(field.key, option)}
                 >
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+                  <Text
+                    style={[styles.selectOptionText, formData[field.key] === option && styles.selectOptionTextActive]}
+                  >
+                    {option}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
         ) : field.type === "textarea" ? (
           <TextInput
             style={[styles.customFieldInput, styles.textareaInput]}
@@ -777,7 +811,7 @@ export default function GeneratorReport() {
             keyboardType={field.type === "number" ? "numeric" : "default"}
           />
         )}
-      </View>
+      </Animated.View>
     ))
   }
 
@@ -787,7 +821,7 @@ export default function GeneratorReport() {
       <View style={styles.previewContainer}>
         {isGenerating ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#3a86ff" />
+            <ActivityIndicator size="large" color="#6366f1" />
             <Text style={styles.loadingText}>Generando vista previa...</Text>
           </View>
         ) : previewContent ? (
@@ -799,22 +833,31 @@ export default function GeneratorReport() {
                   height: "100%",
                   overflow: "auto",
                   backgroundColor: "#fff",
-                  padding: "10px",
+                  padding: "20px",
+                  borderRadius: "8px",
                 }}
                 dangerouslySetInnerHTML={{ __html: previewContent }}
               />
             ) : (
-              <ScrollView style={{ flex: 1, padding: 10, backgroundColor: "#fff" }}>
+              <ScrollView style={{ flex: 1, padding: 20, backgroundColor: "#fff" }}>
                 <Text>{previewContent.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ")}</Text>
               </ScrollView>
             )}
           </View>
         ) : (
           <View style={styles.emptyPreview}>
-            <MaterialCommunityIcons name="file-document-outline" size={50} color="#aaa" />
+            <MaterialCommunityIcons name="file-document-outline" size={60} color="#d1d5db" />
             <Text style={styles.emptyPreviewText}>
               Complete el formulario y genere la vista previa para ver el contrato
             </Text>
+            <TouchableOpacity
+              style={styles.emptyPreviewButton}
+              onPress={() => {
+                toggleOptions()
+              }}
+            >
+              <Text style={styles.emptyPreviewButtonText}>Configurar contrato</Text>
+            </TouchableOpacity>
           </View>
         )}
       </View>
@@ -884,175 +927,520 @@ export default function GeneratorReport() {
   }
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          flexDirection: isWeb && width > 1024 ? "row" : "column",
-          padding: isWeb ? 16 : 8,
-        },
-      ]}
-    >
-      <Animated.View
-        style={[
-          styles.cardContainer,
-          cardAnimatedStyle,
-          {
-            width: cardDimensions.width,
-            height: cardDimensions.height,
-            marginRight: isWeb && width > 1024 ? 20 : 0,
-            marginBottom: isWeb && width > 1024 ? 0 : 20,
-          },
-        ]}
-      >
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Vista previa del Contrato</Text>
-            <View style={styles.headerButtons}>
-              <TouchableOpacity onPress={toggleOptions} style={styles.optionsButton}>
-                <MaterialCommunityIcons name={showOptions ? "chevron-up" : "tune-vertical"} size={24} color="#fff" />
-              </TouchableOpacity>
-            </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {/* Layout para pantallas grandes (web) */}
+        {isLargeScreen ? (
+          <View style={styles.webLayout}>
+            {/* Panel izquierdo (vista previa) */}
+            <Animated.View style={[styles.webPreviewPanel, previewAnimatedStyle]}>
+              <View style={styles.previewCard}>
+                <View style={styles.previewHeader}>
+                  <Text style={styles.previewTitle}>Vista previa del Contrato</Text>
+                  <TouchableOpacity onPress={toggleOptions} style={styles.optionsButton} activeOpacity={0.7}>
+                    <MaterialCommunityIcons
+                      name={showOptions ? "chevron-right" : "tune-vertical"}
+                      size={24}
+                      color="#fff"
+                    />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.previewBody}>{renderContractPreview()}</View>
+              </View>
+            </Animated.View>
+
+            {/* Panel derecho (opciones) */}
+            <Animated.View style={[styles.webOptionsPanel, optionsAnimatedStyle]}>
+              <ScrollView style={styles.optionsScrollView} contentContainerStyle={styles.optionsContent}>
+                <Text style={styles.optionsTitle}>Generador de Contratos</Text>
+
+                {/* Selección de tipo de contrato */}
+                <View style={styles.optionRow}>
+                  <Text style={styles.optionLabel}>Tipo de Contrato:</Text>
+                  <Animated.View style={[styles.contractTypeGrid, contractTypeAnimatedStyle]}>
+                    {Object.entries(contractTypes).map(([key, type]) => (
+                      <TouchableOpacity
+                        key={key}
+                        style={[styles.contractTypeCard, contractType === key && styles.contractTypeCardActive]}
+                        onPress={() => {
+                          setContractType(key)
+                          setFormData({})
+                          setCalculations({})
+                          setPreviewContent(null)
+                        }}
+                      >
+                        <MaterialCommunityIcons
+                          name={type.icon}
+                          size={32}
+                          color={contractType === key ? "#fff" : "#4b5563"}
+                        />
+                        <Text style={[styles.contractTypeText, contractType === key && styles.contractTypeTextActive]}>
+                          {type.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </Animated.View>
+                </View>
+
+                {/* Descripción del contrato */}
+                <View style={styles.descriptionContainer}>
+                  <Text style={styles.descriptionText}>{contractTypes[contractType]?.description}</Text>
+                </View>
+
+                {/* Campos del formulario */}
+                <View style={styles.formContainer}>
+                  <Text style={styles.formTitle}>Datos del Contrato:</Text>
+                  {renderFormFields()}
+                </View>
+
+                {/* Cálculos */}
+                {renderCalculations()}
+
+                {/* Botones de acción */}
+                <View style={styles.actionButtonsContainer}>
+                  <TouchableOpacity
+                    style={[styles.generateButton, isGenerating && styles.disabledButton]}
+                    onPress={generatePreview}
+                    disabled={isGenerating}
+                    activeOpacity={0.8}
+                  >
+                    <MaterialCommunityIcons name="file-document-outline" size={20} color="#fff" />
+                    <Text style={styles.generateButtonText}>Generar Vista Previa</Text>
+                  </TouchableOpacity>
+
+                  {previewContent && isWeb && (
+                    <TouchableOpacity style={styles.downloadButton} onPress={downloadAsHTML} activeOpacity={0.8}>
+                      <MaterialCommunityIcons name="download" size={20} color="#fff" />
+                      <Text style={styles.generateButtonText}>Descargar HTML</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </ScrollView>
+            </Animated.View>
           </View>
-
-          {/* Contract Preview */}
-          {renderContractPreview()}
-        </View>
-      </Animated.View>
-
-      {/* Options Panel */}
-      <Animated.View
-        style={[
-          styles.optionsPanel,
-          optionsAnimatedStyle,
-          {
-            width: isWeb && width > 1024 ? cardDimensions.width * 1.2 : cardDimensions.width,
-            maxWidth: isWeb && width > 1024 ? 600 : "100%",
-          },
-        ]}
-      >
-        <ScrollView
-          contentContainerStyle={styles.optionsContent}
-          ref={scrollViewRef}
-          showsVerticalScrollIndicator={true}
-        >
-          <Text style={styles.optionsTitle}>Generador de Contratos</Text>
-
-          {/* Contract Type Selection */}
-          <View style={styles.optionRow}>
-            <Text style={styles.optionLabel}>Tipo de Contrato:</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.contractTypeContainer}
+        ) : (
+          // Layout para pantallas pequeñas (móvil)
+          <View style={styles.mobileLayout}>
+            {/* Vista previa */}
+            <Animated.View
+              style={[styles.mobilePreviewSection, previewAnimatedStyle, { height: showOptions ? "40%" : "100%" }]}
             >
-              {Object.entries(contractTypes).map(([key, type]) => (
-                <TouchableOpacity
-                  key={key}
-                  style={[styles.contractTypeButton, contractType === key && styles.contractTypeButtonActive]}
-                  onPress={() => {
-                    setContractType(key)
-                    setFormData({})
-                    setCalculations({})
-                    setPreviewContent(null)
-                  }}
-                >
-                  <MaterialCommunityIcons name={type.icon} size={24} color={contractType === key ? "#fff" : "#333"} />
-                  <Text style={[styles.contractTypeText, contractType === key && styles.contractTypeTextActive]}>
-                    {type.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
+              <View style={styles.previewCard}>
+                <View style={styles.previewHeader}>
+                  <Text style={styles.previewTitle}>Vista previa del Contrato</Text>
+                  <TouchableOpacity onPress={toggleOptions} style={styles.optionsButton} activeOpacity={0.7}>
+                    <MaterialCommunityIcons
+                      name={showOptions ? "chevron-up" : "tune-vertical"}
+                      size={24}
+                      color="#fff"
+                    />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.previewBody}>{renderContractPreview()}</View>
+              </View>
+            </Animated.View>
 
-          {/* Contract Description */}
-          <View style={styles.descriptionContainer}>
-            <Text style={styles.descriptionText}>{contractTypes[contractType]?.description}</Text>
-          </View>
-
-          {/* Form Fields */}
-          <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Datos del Contrato:</Text>
-            {renderFormFields()}
-          </View>
-
-          {/* Calculations */}
-          {renderCalculations()}
-
-          {/* Generate and Download Buttons */}
-          <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity
-              style={[styles.generateButton, isGenerating && styles.disabledButton]}
-              onPress={generatePreview}
-              disabled={isGenerating}
+            {/* Panel de opciones */}
+            <Animated.View
+              style={[styles.mobileOptionsSection, optionsAnimatedStyle, { height: showOptions ? "60%" : 0 }]}
             >
-              <MaterialCommunityIcons name="file-document-outline" size={20} color="#fff" />
-              <Text style={styles.generateButtonText}>Generar Vista Previa</Text>
-            </TouchableOpacity>
+              <ScrollView style={styles.optionsScrollView} contentContainerStyle={styles.optionsContent}>
+                <Text style={styles.optionsTitle}>Generador de Contratos</Text>
 
-            {previewContent && isWeb && (
-              <TouchableOpacity style={styles.downloadButton} onPress={downloadAsHTML}>
-                <MaterialCommunityIcons name="download" size={20} color="#fff" />
-                <Text style={styles.generateButtonText}>Descargar HTML</Text>
-              </TouchableOpacity>
-            )}
+                {/* Selección de tipo de contrato */}
+                <View style={styles.optionRow}>
+                  <Text style={styles.optionLabel}>Tipo de Contrato:</Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.contractTypeContainer}
+                  >
+                    {Object.entries(contractTypes).map(([key, type]) => (
+                      <TouchableOpacity
+                        key={key}
+                        style={[styles.contractTypeButton, contractType === key && styles.contractTypeButtonActive]}
+                        onPress={() => {
+                          setContractType(key)
+                          setFormData({})
+                          setCalculations({})
+                          setPreviewContent(null)
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <MaterialCommunityIcons
+                          name={type.icon}
+                          size={24}
+                          color={contractType === key ? "#fff" : "#4b5563"}
+                        />
+                        <Text style={[styles.contractTypeText, contractType === key && styles.contractTypeTextActive]}>
+                          {type.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+
+                {/* Descripción del contrato */}
+                <View style={styles.descriptionContainer}>
+                  <Text style={styles.descriptionText}>{contractTypes[contractType]?.description}</Text>
+                </View>
+
+                {/* Campos del formulario */}
+                <View style={styles.formContainer}>
+                  <Text style={styles.formTitle}>Datos del Contrato:</Text>
+                  {renderFormFields()}
+                </View>
+
+                {/* Cálculos */}
+                {renderCalculations()}
+
+                {/* Botones de acción */}
+                <View style={styles.actionButtonsContainer}>
+                  <TouchableOpacity
+                    style={[styles.generateButton, isGenerating && styles.disabledButton]}
+                    onPress={generatePreview}
+                    disabled={isGenerating}
+                    activeOpacity={0.8}
+                  >
+                    <MaterialCommunityIcons name="file-document-outline" size={20} color="#fff" />
+                    <Text style={styles.generateButtonText}>Generar Vista Previa</Text>
+                  </TouchableOpacity>
+
+                  {previewContent && isWeb && (
+                    <TouchableOpacity style={styles.downloadButton} onPress={downloadAsHTML} activeOpacity={0.8}>
+                      <MaterialCommunityIcons name="download" size={20} color="#fff" />
+                      <Text style={styles.generateButtonText}>Descargar HTML</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </ScrollView>
+            </Animated.View>
           </View>
-        </ScrollView>
-      </Animated.View>
-    </View>
+        )}
+      </View>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f9fafb",
+  },
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
   },
-  cardContainer: {
-    borderRadius: 16,
-    overflow: "hidden",
+  webLayout: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  webPreviewPanel: {
+    flex: 3,
+    padding: 16,
+  },
+  webOptionsPanel: {
+    flex: 2,
+    backgroundColor: "#fff",
+    borderLeftWidth: 1,
+    borderLeftColor: "#e5e7eb",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 10,
+    shadowOffset: { width: -2, height: 0 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 5,
   },
-  card: {
+  mobileLayout: {
+    flex: 1,
+    position: "relative",
+  },
+  mobilePreviewSection: {
+    padding: 8,
+    backgroundColor: "#f9fafb",
+  },
+  mobileOptionsSection: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  previewCard: {
     flex: 1,
     backgroundColor: "#fff",
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
   },
-  cardHeader: {
+  previewHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#3a86ff",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: "#6366f1",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
-  cardTitle: {
+  previewTitle: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
   },
-  headerButtons: {
+  optionsButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  },
+  previewBody: {
+    flex: 1,
+  },
+  optionsScrollView: {
+    flex: 1,
+  },
+  optionsContent: {
+    padding: 24,
+    paddingBottom: 40,
+  },
+  optionsTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    marginBottom: 24,
+    color: "#111827",
+  },
+  optionRow: {
+    marginBottom: 24,
+  },
+  optionLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+    color: "#374151",
+  },
+  contractTypeContainer: {
+    flexDirection: "row",
+    paddingVertical: 8,
+  },
+  contractTypeGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  contractTypeButton: {
     flexDirection: "row",
     alignItems: "center",
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: "#f3f4f6",
+    marginRight: 12,
+    minWidth: 180,
   },
-  optionsButton: {
-    padding: 4,
+  contractTypeButtonActive: {
+    backgroundColor: "#6366f1",
   },
-  fullscreenButton: {
-    padding: 4,
+  contractTypeCard: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: "#f3f4f6",
+    width: "48%",
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  contractTypeCardActive: {
+    backgroundColor: "#6366f1",
+  },
+  contractTypeText: {
+    fontSize: 14,
+    color: "#4b5563",
+    marginLeft: 8,
+    fontWeight: "500",
+  },
+  contractTypeTextActive: {
+    color: "#fff",
+  },
+  descriptionContainer: {
+    backgroundColor: "#f3f4f6",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+    borderLeftWidth: 4,
+    borderLeftColor: "#6366f1",
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: "#4b5563",
+    lineHeight: 20,
+  },
+  formContainer: {
+    marginBottom: 24,
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  formTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 16,
+    color: "#111827",
+  },
+  customField: {
+    marginBottom: 16,
+  },
+  customFieldLabel: {
+    fontSize: 14,
+    marginBottom: 6,
+    color: "#4b5563",
+    fontWeight: "500",
+  },
+  customFieldInput: {
+    backgroundColor: "#f9fafb",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  textareaInput: {
+    minHeight: 100,
+    textAlignVertical: "top",
+  },
+  selectScrollView: {
+    maxWidth: "100%",
+  },
+  selectContainer: {
+    flexDirection: "row",
+    flexWrap: "nowrap",
+  },
+  selectOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: "#f3f4f6",
     marginRight: 8,
+    marginBottom: 8,
+  },
+  selectOptionActive: {
+    backgroundColor: "#6366f1",
+  },
+  selectOptionText: {
+    fontSize: 14,
+    color: "#4b5563",
+    fontWeight: "500",
+  },
+  selectOptionTextActive: {
+    color: "#fff",
+  },
+  calculationsContainer: {
+    marginBottom: 24,
+    padding: 20,
+    backgroundColor: "#f0f7ff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#dbeafe",
+  },
+  calculationsTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 16,
+    color: "#1e40af",
+  },
+  calculationSubtitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 12,
+    marginBottom: 6,
+    color: "#3b82f6",
+  },
+  calculationItem: {
+    fontSize: 14,
+    color: "#4b5563",
+    marginBottom: 4,
+    paddingLeft: 12,
+  },
+  calculationTotal: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginTop: 12,
+    color: "#1e40af",
+  },
+  calculationNote: {
+    fontSize: 12,
+    fontStyle: "italic",
+    marginTop: 12,
+    color: "#6b7280",
+  },
+  actionButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  generateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#6366f1",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    flex: 1,
+    shadowColor: "#6366f1",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  downloadButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#10b981",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    flex: 1,
+    shadowColor: "#10b981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
+  generateButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 8,
   },
   previewContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#f9fafb",
   },
   pdfContainer: {
     width: "100%",
@@ -1067,9 +1455,20 @@ const styles = StyleSheet.create({
   },
   emptyPreviewText: {
     textAlign: "center",
-    marginTop: 10,
-    color: "#666",
-    fontSize: 14,
+    marginTop: 16,
+    marginBottom: 24,
+    color: "#6b7280",
+    fontSize: 16,
+  },
+  emptyPreviewButton: {
+    backgroundColor: "#6366f1",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  emptyPreviewButtonText: {
+    color: "#fff",
+    fontWeight: "600",
   },
   loadingContainer: {
     flex: 1,
@@ -1077,228 +1476,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loadingText: {
-    marginTop: 10,
-    color: "#3a86ff",
+    marginTop: 16,
+    color: "#6366f1",
     fontSize: 16,
-  },
-  pdfPlaceholder: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  pdfPlaceholderText: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-  },
-  pdfPlaceholderSubtext: {
-    marginTop: 5,
-    fontSize: 12,
-    color: "#666",
-    textAlign: "center",
-  },
-  optionsPanel: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding:16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    
-  },
-  optionsContent: {
-    padding: 16,
-  },
-  optionsTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 16,
-    color: "#333",
-  },
-  optionRow: {
-    marginBottom: 16,
-  },
-  optionLabel: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: "#555",
-  },
-  contractTypeContainer: {
-    flexDirection: "row",
-    paddingVertical: 8,
-  },
-  contractTypeButton: {
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: "#f0f0f0",
-    marginRight: 12,
-    minWidth: 120,
-  },
-  contractTypeButtonActive: {
-    backgroundColor: "#3a86ff",
-  },
-  contractTypeText: {
-    fontSize: 12,
-    color: "#333",
-    marginTop: 8,
-    textAlign: "center",
-  },
-  contractTypeTextActive: {
-    color: "#fff",
-  },
-  descriptionContainer: {
-    backgroundColor: "#f9f9f9",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-    borderLeftWidth: 3,
-    borderLeftColor: "#3a86ff",
-  },
-  descriptionText: {
-    fontSize: 14,
-    color: "#555",
-    lineHeight: 20,
-  },
-  formContainer: {
-    marginBottom: 16,
-    padding: 12,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
-  formTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 12,
-    color: "#333",
-  },
-  customField: {
-    marginBottom: 12,
-  },
-  customFieldLabel: {
-    fontSize: 14,
-    marginBottom: 4,
-    color: "#555",
-  },
-  customFieldInput: {
-    backgroundColor: "#fff",
-    borderRadius: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 14,
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  textareaInput: {
-    minHeight: 80,
-    textAlignVertical: "top",
-    marginBottom: 80,
-  },
-  selectContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  selectOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 4,
-    backgroundColor: "#f0f0f0",
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  selectOptionActive: {
-    backgroundColor: "#3a86ff",
-  },
-  selectOptionText: {
-    fontSize: 14,
-    color: "#333",
-  },
-  selectOptionTextActive: {
-    color: "#fff",
-  },
-  calculationsContainer: {
-    marginBottom: 16,
-    padding: 12,
-    backgroundColor: "#f0f7ff",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#d0e1f9",
-  },
-  calculationsTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 12,
-    color: "#333",
-  },
-  calculationSubtitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginTop: 8,
-    marginBottom: 4,
-    color: "#444",
-  },
-  calculationItem: {
-    fontSize: 13,
-    color: "#555",
-    marginBottom: 2,
-    paddingLeft: 8,
-  },
-  calculationTotal: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginTop: 8,
-    color: "#3a86ff",
-  },
-  calculationNote: {
-    fontSize: 12,
-    fontStyle: "italic",
-    marginTop: 8,
-    color: "#666",
-  },
-  actionButtonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-  generateButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#3a86ff",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    flex: 1,
-    marginRight: 8,
-  },
-  downloadButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#4CAF50",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    flex: 1,
-    marginLeft: 8,
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  generateButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    marginLeft: 8,
+    fontWeight: "500",
   },
 })

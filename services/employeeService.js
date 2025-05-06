@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://192.168.180.31:${port}/api/employee`;
+const baseUrl = `http://192.168.130.147:${port}/api/employee`;
 
 const makeRequest = async (method, url, data = null) => {
   try {
@@ -49,7 +49,30 @@ export const getCampoUsers = async () => {
 export const getActiveInventory = async () => {
   return makeRequest("get","/inventory");
 }
+export const getInventory = async () => {
+  return makeRequest("get","/inventoryAll");
+}
 
+export const createInventory = async (data) => {
+  return makeRequest("post","/inventory",data);
+}
+
+export const updateInventory = async (id,data) => {
+  return makeRequest("put",`/inventory/${id}`,data);
+}
+
+export const deleteInventory = async (id) => {
+  return makeRequest("delete",`/inventory/${id}`);
+}
+
+
+export const inactiveInventory = async (id) => {
+  return makeRequest("put",`/inventory/${id}/inactive`);
+}
+
+export const activeInventory = async (id) => {
+  return makeRequest("put",`/inventory/${id}/active`);
+}
 
 //routes ppe
 export const getAssignment = async () => {
@@ -139,6 +162,19 @@ export const getMyPermissions = async (id) => {
         throw error;
     }
 }
+
+export const createPermission = (data) =>{
+  return makeRequest("post","/permissions",data);
+}
+
+
+export const deletePermission = async (id) => {
+  return makeRequest('delete', `/permissions/${id}`);
+ }
+ 
+ export const updatePermission = async (id,data) => {
+  return makeRequest('put', `/permissions/${id}`,data);
+ }
 
 export const getPermissionsMyGroup = async (id) => {
  return makeRequest('get', `/permissionsByGroup/${id}`);

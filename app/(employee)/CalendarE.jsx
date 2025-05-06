@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { View, StyleSheet, ScrollView, Platform } from "react-native";
 import { Calendar } from "react-native-calendars";
 import {
@@ -17,13 +17,11 @@ import InputComponent from "@/components/InputComponent";
 import DropdownComponent from "@/components/DropdownComponent";
 import { router } from "expo-router";
 import {
+  getMyPermissions,
+  getPermissionsMyGroup,
   createPermission,
   deletePermission,
   updatePermission,
-} from "@/services/adminServices";
-import {
-  getMyPermissions,
-  getPermissionsMyGroup,
 } from "@/services/employeeService";
 import { useFocusEffect } from "@react-navigation/native";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
@@ -51,17 +49,22 @@ export default function CalendarComponent() {
   const [data, setData] = useState([]);
   const [markedDates, setMarkedDates] = useState({});
   const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarMessage, setSnackbarMessage] = useState({
+    text: "",
+    type: "success",
+  });
 
   const [formData, setFormData] = useState({
-    solicitanteId: "" || logueado?.id,
+    solicitanteId: "",
     tipoPermiso: "",
     fechaInicio: "",
     fechaFin: "",
+    estado: "Pendiente",
   });
 
   const theme = useTheme();
 
+  // Procesar permisos para el calendario
   const processPermissionsForCalendar = useCallback((permissions) => {
     const marks = {};
 
@@ -94,13 +97,18 @@ export default function CalendarComponent() {
     return marks;
   }, []);
 
+  // Cargar datos al enfocar la pantalla
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
         try {
           const userData = await user();
           setLogueado(userData);
-          setFormData({ ...formData, solicitanteId: userData.id });
+
+          // Actualizar el ID del solicitante en el formulario
+          setFormData((prev) => ({ ...prev, solicitanteId: userData.id }));
+
+          // Obtener permisos según el cargo
           let response;
           if (
             userData.cargo === "TeamLider" ||
@@ -112,135 +120,161 @@ export default function CalendarComponent() {
           } else {
             response = await getMyPermissions(userData.id);
           }
+
           setData(response);
           const marks = processPermissionsForCalendar(response);
           setMarkedDates(marks);
         } catch (error) {
           console.error("Error al obtener los datos:", error);
+          showSnackbar("Error al cargar los datos", "error");
         }
       };
+
       fetchData();
     }, [])
   );
 
+  // Función para mostrar snackbar
+  const showSnackbar = (message, type = "success") => {
+    setSnackbarMessage({ text: message, type });
+    setSnackbarVisible(true);
+  };
+
+  // Manejar clic en día del calendario
   const handleDayPress = (day) => {
-    setFormData({ ...formData, fechaInicio: day.dateString });
     setSelectedDate(day.dateString);
+    setFormData((prev) => ({ ...prev, fechaInicio: day.dateString }));
     setShowForm(true);
   };
 
-  const handleSubmit = useCallback(async () => {
+  // Manejar envío del formulario
+  const handleSubmit = async () => {
     try {
-      // Definir los campos requeridos según si estamos editando o creando
-      const requiredFields = isEditing
-        ? ["solicitanteId", "tipoPermiso", "fechaInicio", "fechaFin"]
-        : ["solicitanteId", "tipoPermiso", "fechaInicio", "fechaFin"];
+      // Validar campos requeridos
+      const requiredFields = [
+        "solicitanteId",
+        "tipoPermiso",
+        "fechaInicio",
+        "fechaFin",
+      ];
 
-      // Verificar campos vacíos o inválidos
       const emptyFields = requiredFields.filter((field) => {
         const value = formData[field];
         return !value || (typeof value === "string" && value.trim() === "");
       });
 
       if (emptyFields.length > 0) {
-        setShowForm(false);
-
         throw new Error(
           `Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`
         );
       }
 
-      let newData;
-
       if (isEditing) {
         // Actualizar permiso existente
         await updatePermission(editingPermissionId, formData);
-        newData = data.map((item) =>
-          item.id === editingPermissionId ? { ...item, ...formData } : item
-        );
-        // Actualizar datos y marcas del calendario
-        const updatedData = await getMyPermissions(logueado.id);
-        setData(updatedData);
-        const updatedMarks = await processPermissionsForCalendar(updatedData);
-        setMarkedDates(updatedMarks);
+        showSnackbar("Permiso actualizado correctamente");
       } else {
         // Crear nuevo permiso
-        const response = await createPermission(formData);
-        setShowForm(false);
-        // Actualizar datos y marcas del calendario
-        const updatedData = await getMyPermissions(logueado.id);
-        setData(updatedData);
-        const updatedMarks = await processPermissionsForCalendar(updatedData);
-        setMarkedDates(updatedMarks);
-        newData = [...data, response];
+        await createPermission(formData);
+        showSnackbar("Permiso creado correctamente");
       }
 
-      setData(newData);
-      setSnackbarMessage({
-        text: isEditing ? "Permiso actualizado" : "Permiso creado",
-        type: "success",
-      });
+      // Actualizar datos y marcas del calendario
+      const updatedData = await (logueado.cargo === "TeamLider" ||
+      logueado.cargo === "DirectorContable" ||
+      logueado.cargo === "Directorsset" ||
+      logueado.cargo === "DirectorTalento"
+        ? getPermissionsMyGroup(logueado.id)
+        : getMyPermissions(logueado.id));
+
+      setData(updatedData);
+      const updatedMarks = processPermissionsForCalendar(updatedData);
+      setMarkedDates(updatedMarks);
+
+      // Cerrar formulario y resetear
       resetForm();
     } catch (error) {
-      resetForm();
-      setSnackbarMessage({
-        text:
-          error.response?.data.message ||
+      console.error("Error al enviar el formulario:", error);
+      showSnackbar(
+        error.response?.data.message ||
           error.response?.data.errors?.[0]?.msg ||
           error.message,
-        type: "error",
-      });
-    } finally {
-      setSnackbarVisible(true);
+        "error"
+      );
     }
-  }, [formData, isEditing, editingPermissionId, data]);
+  };
 
+  // Resetear formulario
   const resetForm = () => {
     setShowForm(false);
     setIsEditing(false);
+    setEditingPermissionId(null);
+    setSelectedDate("");
     setFormData({
-      solicitanteId: logueado.id,
+      solicitanteId: logueado?.id || "",
       tipoPermiso: "",
       fechaInicio: "",
       fechaFin: "",
+      estado: "Pendiente",
     });
-    setSelectedDate("");
   };
 
-  const handleEdit = useCallback((item) => {
+  // Manejar edición de permiso
+  const handleEdit = (item) => {
+    setEditingPermissionId(item.id);
+    setIsEditing(true);
+
+    // Preparar datos del formulario para edición
     setFormData({
       solicitanteId: item.solicitanteId,
       aprobadorId:
-        logueado.cargo === "TeamLider" ||
-        logueado.cargo === "DirectorContable" ||
-        logueado.cargo === "Directorsset" ||
-        logueado.cargo === "DirectorTalento"
+        logueado &&
+        (logueado.cargo === "TeamLider" ||
+          logueado.cargo === "DirectorContable" ||
+          logueado.cargo === "Directorsset" ||
+          logueado.cargo === "DirectorTalento")
           ? logueado.id
           : item.aprobadorId,
       tipoPermiso: item.tipoPermiso,
       fechaInicio: item.fechaInicio,
       fechaFin: item.fechaFin,
-      estado: item.estado,
+      estado: item.estado || "Pendiente",
     });
-    setEditingPermissionId(item.id);
-    setIsEditing(true);
+
+    // Abrir modal
     setShowForm(true);
-  }, []);
+  };
+
+  // Manejar actualización de datos
   const handleDataUpdate = (updatedData) => {
     setData(updatedData);
     const updatedMarks = processPermissionsForCalendar(updatedData);
     setMarkedDates(updatedMarks);
   };
+
+  // Opciones para los dropdowns
   const optionsTipoPermiso = [
     { label: "Vacaciones", value: "Vacaciones" },
     { label: "Medico", value: "Medico" },
     { label: "Personal", value: "Personal" },
   ];
+
   const optionsState = [
     { label: "Pendiente", value: "Pendiente" },
     { label: "Aprobado", value: "Aprobado" },
     { label: "Rechazado", value: "Rechazado" },
   ];
+
+  // Verificar si el usuario puede editar el estado
+  const canEditState =
+    logueado &&
+    (logueado.cargo === "TeamLider" ||
+      logueado.cargo === "DirectorContable" ||
+      logueado.cargo === "Directorsset" ||
+      logueado.cargo === "DirectorTalento");
+
+  // Verificar si los campos son editables
+  const isFieldEditable = !isEditing || formData.estado === "Pendiente";
 
   return (
     <PaperProvider theme={theme}>
@@ -270,6 +304,8 @@ export default function CalendarComponent() {
             />
           </View>
         </View>
+
+        {/* Calendario */}
         <Card style={styles.tableCard}>
           <Card.Content>
             <Calendar
@@ -305,6 +341,8 @@ export default function CalendarComponent() {
                 textDayHeaderFontSize: 16,
               }}
             />
+
+            {/* Leyenda */}
             <View style={styles.legendContainer}>
               <Text style={styles.legendTitle}>Tipos de Permisos:</Text>
               <View style={styles.legendItem}>
@@ -322,6 +360,8 @@ export default function CalendarComponent() {
             </View>
           </Card.Content>
         </Card>
+
+        {/* Tabla de permisos */}
         <Card style={styles.tableCard}>
           <Card.Content>
             <TablaComponente
@@ -331,12 +371,23 @@ export default function CalendarComponent() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-              onDelete={async (item) => await deletePermission(item.id)}
+              onDelete={async (item) => {
+                try {
+                  await deletePermission(item.id);
+                  showSnackbar("Permiso eliminado correctamente");
+                  return true;
+                } catch (error) {
+                  showSnackbar("Error al eliminar el permiso", "error");
+                  return false;
+                }
+              }}
               onDataUpdate={handleDataUpdate}
               onEdit={handleEdit}
             />
           </Card.Content>
         </Card>
+
+        {/* Snackbar para notificaciones */}
         <Snackbar
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
@@ -348,10 +399,12 @@ export default function CalendarComponent() {
             {snackbarMessage.text}
           </Text>
         </Snackbar>
+
+        {/* Modal de formulario */}
         <Portal>
           <Modal
             visible={showForm}
-            onDismiss={() => setShowForm(false)}
+            onDismiss={resetForm}
             contentContainerStyle={styles.modalContainer}
           >
             <ScrollView>
@@ -361,107 +414,102 @@ export default function CalendarComponent() {
                     {isEditing ? "Editar Permiso" : "Crear Permiso"}
                   </Text>
                   <Text variant="bodySmall" style={styles.subtitle}>
-                    Escoge el dia o dias para pedir permisos
+                    {isEditing
+                      ? "Modifica los detalles del permiso"
+                      : "Escoge el día o días para pedir permisos"}
                   </Text>
                 </View>
+
                 <View style={styles.form}>
+                  {/* Tipo de permiso */}
                   <DropdownComponent
                     options={optionsTipoPermiso}
                     onSelect={(value) => {
-                      if (!isEditing || formData.estado === "Pendiente") {
-                        setFormData({ ...formData, tipoPermiso: value });
+                      if (isFieldEditable) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          tipoPermiso: value,
+                        }));
                       }
                     }}
                     value={formData.tipoPermiso}
                     placeholder="Tipo de permiso"
+                    disabled={!isFieldEditable}
                   />
 
                   <View style={styles.dateSection}>
                     <Text variant="bodyMedium" style={styles.dateLabel}>
                       Fechas
                     </Text>
-                    {isEditing ? (
-                      <>
-                        <Text style={{ fontWeight: "500" }}>Fecha Inicio</Text>
-                        <View style={styles.timeContainer}>
-                          <InputComponent
-                            type="date"
-                            value={formData.fechaInicio}
-                            onChangeText={(text) =>
-                              setFormData({ ...formData, fechaInicio: text })
-                            }
-                            label="Fecha Inicio"
-                            placeholder="Introduce la fecha de inicio"
-                            validationRules={{ required: true }}
-                            errorMessage="Por favor, introduce una fecha válida"
-                            style={styles.input}
-                            editable={
-                              formData.estado === "Aprobado" ||
-                              formData.estado === "Rechazado"
-                                ? false
-                                : true
-                            }
-                          />
-                        </View>
-                      </>
-                    ) : (
-                      <Text variant="bodyLarge" style={styles.selectedDate}>
-                        {formData.fechaInicio}
-                      </Text>
-                    )}
+
+                    {/* Fecha de inicio */}
+                    <Text style={{ fontWeight: "500" }}>Fecha Inicio</Text>
+                    <View style={styles.timeContainer}>
+                      <InputComponent
+                        type="date"
+                        value={formData.fechaInicio}
+                        onChangeText={(text) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            fechaInicio: text,
+                          }))
+                        }
+                        label="Fecha Inicio"
+                        placeholder="Introduce la fecha de inicio"
+                        validationRules={{ required: true }}
+                        errorMessage="Por favor, introduce una fecha válida"
+                        style={styles.input}
+                        editable={isFieldEditable}
+                      />
+                    </View>
+
+                    {/* Fecha de fin */}
                     <Text style={{ fontWeight: "500" }}>Fecha Fin</Text>
                     <View style={styles.timeContainer}>
                       <InputComponent
                         type="date"
                         value={formData.fechaFin}
                         onChangeText={(text) =>
-                          setFormData({ ...formData, fechaFin: text })
+                          setFormData((prev) => ({ ...prev, fechaFin: text }))
                         }
                         label="Fecha Fin"
                         placeholder="Introduce la fecha de fin"
                         validationRules={{ required: true }}
                         errorMessage="Por favor, introduce una fecha válida"
                         style={styles.input}
-                        editable={
-                          formData.estado === "Aprobado" ||
-                          formData.estado === "Rechazado"
-                            ? false
-                            : true
-                        }
+                        editable={isFieldEditable}
                       />
                     </View>
-                    {logueado &&
-                    (logueado?.cargo === "TeamLider" ||
-                      logueado?.cargo === "DirectorContable" ||
-                      logueado?.cargo === "Directorsset" ||
-                      logueado?.cargo === "DirectorTalento") ? (
+
+                    {/* Estado (solo para roles específicos) */}
+                    {canEditState && (
                       <DropdownComponent
                         options={optionsState}
                         onSelect={(value) => {
-                          if (!isEditing || formData.estado === "Pendiente") {
-                            setFormData({ ...formData, estado: value });
-                          }
+                          setFormData((prev) => ({ ...prev, estado: value }));
                         }}
                         value={formData.estado}
                         placeholder="Estado"
                       />
-                    ) : null}
+                    )}
                   </View>
                 </View>
+
+                {/* Botones de acción */}
                 <View style={styles.actions}>
                   <Button
                     mode="outlined"
                     onPress={resetForm}
                     style={styles.cancelButton}
                   >
-                    Cancel
+                    Cancelar
                   </Button>
                   <Button
                     mode="contained"
                     onPress={handleSubmit}
                     style={styles.submitButton}
                   >
-                    Continue
+                    {isEditing ? "Actualizar" : "Crear"}
                   </Button>
                 </View>
               </View>
