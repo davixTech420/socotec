@@ -317,10 +317,10 @@ export default function Hiring() {
           </View>
         }
         actions={[
-          <Button key="cancel" onPress={resetForm}>
+          <Button key="cancel" mode="outlined" textColor="black" onPress={resetForm}>
             Cancelar
           </Button>,
-          <Button key="submit" onPress={handleSubmit}>
+          <Button key="submit" mode="contained" style={{backgroundColor:"#00ACE8"}}  onPress={handleSubmit}>
             {isEditing ? "Actualizar" : "Crear"}
           </Button>,
         ]}

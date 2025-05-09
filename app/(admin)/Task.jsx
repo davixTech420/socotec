@@ -255,7 +255,7 @@ const Task = () => {
               />
             ))}
           </View>
-        } actions={[<Button onPress={resetForm}>Cancelar</Button>, <Button onPress={handleSubmit}>{isEditing ? "Actualizar" : "Crear"}</Button>]} />
+        } actions={[<Button mode='outlined' textColor="black"  onPress={resetForm}>Cancelar</Button>, <Button mode="contained" style={{backgroundColor:"#00ACE8"}} onPress={handleSubmit}>{isEditing ? "Actualizar" : "Crear"}</Button>]} />
       </PaperProvider>
       <AddComponent onOpen={() => setOpenForm(true)} />
     </>

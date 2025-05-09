@@ -357,8 +357,8 @@ const Ticket = () => {
             </View>
           }
           actions={[
-            <Button onPress={resetForm}>Cancelar</Button>,
-            <Button onPress={handleSubmit}>
+            <Button mode="outlined" textColor="black" onPress={resetForm}>Cancelar</Button>,
+            <Button onPress={handleSubmit} mode="contained" style={{backgroundColor:"#00ACE8"}}>
               {isEditing ? "Actualizar" : "Crear"}
             </Button>,
           ]}

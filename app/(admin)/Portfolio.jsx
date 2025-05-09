@@ -738,10 +738,16 @@ const styles = StyleSheet.create({
 })
 export default Portfolio */
 
-
-
-import { useCallback, useState } from "react"
-import { View, StyleSheet, ScrollView, useWindowDimensions, Platform, Image, TouchableOpacity } from "react-native"
+import { useCallback, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  useWindowDimensions,
+  Platform,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import {
   PaperProvider,
   Text,
@@ -752,14 +758,14 @@ import {
   Snackbar,
   IconButton,
   ActivityIndicator,
-} from "react-native-paper"
-import { useFocusEffect } from "@react-navigation/native"
-import TablaComponente from "@/components/tablaComponent"
-import Breadcrumb from "@/components/BreadcrumbComponent"
-import { router } from "expo-router"
-import AddComponent from "../../components/AddComponent"
-import { AlertaScroll } from "@/components/alerta"
-import InputComponent from "@/components/InputComponent"
+} from "react-native-paper";
+import { useFocusEffect } from "@react-navigation/native";
+import TablaComponente from "@/components/tablaComponent";
+import Breadcrumb from "@/components/BreadcrumbComponent";
+import { router } from "expo-router";
+import AddComponent from "../../components/AddComponent";
+import { AlertaScroll } from "@/components/alerta";
+import InputComponent from "@/components/InputComponent";
 import {
   createPortfolio,
   getPortfolio,
@@ -767,11 +773,11 @@ import {
   activePortfolio,
   inactivePortfolio,
   updatePortfolio,
-} from "@/services/adminServices"
-import ExcelPreviewButton from "@/components/ExcelViewComponent"
-import PDFViewComponent from "@/components/PdfViewComponent"
-import * as ImagePicker from "expo-image-picker"
-import { SrcImagen } from "@/services/publicServices"
+} from "@/services/adminServices";
+import ExcelPreviewButton from "@/components/ExcelViewComponent";
+import PDFViewComponent from "@/components/PdfViewComponent";
+import * as ImagePicker from "expo-image-picker";
+import { SrcImagen } from "@/services/publicServices";
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -785,14 +791,17 @@ const columns = [
   { key: "estado", title: "Estado", sortable: true },
   { key: "createdAt", title: "Creado", sortable: true },
   { key: "updatedAt", title: "Modificado", sortable: true },
-]
+];
 
 const Portfolio = () => {
-  const [data, setData] = useState([])
-  const [editingInventoryId, setEditingInventoryId] = useState(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [snackbarVisible, setSnackbarVisible] = useState(false)
-  const [snackbarMessage, setSnackbarMessage] = useState({ text: "", type: "success" })
+  const [data, setData] = useState([]);
+  const [editingInventoryId, setEditingInventoryId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState({
+    text: "",
+    type: "success",
+  });
   const [formData, setFormData] = useState({
     nombre: "",
     cliente: "",
@@ -802,58 +811,73 @@ const Portfolio = () => {
     superficie: "",
     imagenes: [],
     detalle: "",
-  })
-  const [openForm, setOpenForm] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [imageLoading, setImageLoading] = useState({})
+  });
+  const [openForm, setOpenForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState({});
 
   // Estados de los estilos
-  const theme = useTheme()
-  const { width } = useWindowDimensions()
-  const isSmallScreen = width < 600
-  const isMobile = Platform.OS !== "web"
+  const theme = useTheme();
+  const { width } = useWindowDimensions();
+  const isSmallScreen = width < 600;
+  const isMobile = Platform.OS !== "web";
 
   useFocusEffect(
     useCallback(() => {
-      setLoading(true)
+      setLoading(true);
       getPortfolio()
         .then(setData)
         .catch((error) => {
-          setSnackbarMessage({ text: "Error al cargar los datos", type: "error" })
-          setSnackbarVisible(true)
+          setSnackbarMessage({
+            text: "Error al cargar los datos",
+            type: "error",
+          });
+          setSnackbarVisible(true);
         })
-        .finally(() => setLoading(false))
-    }, []),
-  )
+        .finally(() => setLoading(false));
+    }, [])
+  );
 
   // Función para validar campos requeridos sin afectar a las imágenes
   const validateRequiredFields = useCallback((data, requiredFields) => {
     const emptyFields = requiredFields.filter(
-      (field) => !data[field] || (typeof data[field] === "string" && data[field].trim() === ""),
-    )
-    return emptyFields
-  }, [])
+      (field) =>
+        !data[field] ||
+        (typeof data[field] === "string" && data[field].trim() === "")
+    );
+    return emptyFields;
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       // Campos obligatorios
-      const requiredFields = ["nombre", "cliente", "ubicacion", "presupuesto", "descripcion", "superficie", "detalle"]
-      const emptyFields = validateRequiredFields(formData, requiredFields)
+      const requiredFields = [
+        "nombre",
+        "cliente",
+        "ubicacion",
+        "presupuesto",
+        "descripcion",
+        "superficie",
+        "detalle",
+      ];
+      const emptyFields = validateRequiredFields(formData, requiredFields);
 
       if (emptyFields.length > 0) {
-        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`)
+        throw new Error(
+          `Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`
+        );
       }
 
       // Crear FormData para enviar al backend
-      const form = new FormData()
+      const form = new FormData();
 
       // Agregar todos los campos de texto al FormData
       Object.keys(formData).forEach((key) => {
         if (key !== "imagenes" && formData[key]) {
-          form.append(key, formData[key])
+          form.append(key, formData[key]);
         }
-      })
+      });
 
       // Manejar imágenes según la plataforma
       if (formData.imagenes && formData.imagenes.length > 0) {
@@ -862,20 +886,22 @@ const Portfolio = () => {
           for (const image of formData.imagenes) {
             if (image.isFromAPI) {
               // Imagen que ya existe en la API
-              form.append("existingImages[]", image.uri)
+              form.append("existingImages[]", image.uri);
             } else {
               try {
                 // Convertir la imagen a blob para web
-                const response = await fetch(image.uri)
-                const blob = await response.blob()
+                const response = await fetch(image.uri);
+                const blob = await response.blob();
                 form.append(
                   "imagenes",
-                  new File([blob], image.name || `photo_${Date.now()}.jpg`, { type: image.type || "image/jpeg" }),
-                )
+                  new File([blob], image.name || `photo_${Date.now()}.jpg`, {
+                    type: image.type || "image/jpeg",
+                  })
+                );
               } catch (error) {
-                console.error("Error processing web image:", error)
+                console.error("Error processing web image:", error);
                 // Fallback si hay error
-                form.append("imagenes", image.uri)
+                form.append("imagenes", image.uri);
               }
             }
           }
@@ -884,7 +910,7 @@ const Portfolio = () => {
           for (const image of formData.imagenes) {
             if (image.isFromAPI) {
               // Imagen que ya existe en la API
-              form.append("existingImages[]", image.uri)
+              form.append("existingImages[]", image.uri);
             } else {
               // En móvil, usar el formato de archivo que espera el backend
               // IMPORTANTE: Este es el formato que el backend espera para móviles
@@ -892,54 +918,56 @@ const Portfolio = () => {
                 uri: image.uri,
                 type: image.type || "image/jpeg",
                 name: image.name || `photo_${Date.now()}.jpg`,
-              }
+              };
 
               // Asegurarse de que se envía como "fileAttachment" como espera el backend
-              form.append("imagenes",fileAttachment)
+              form.append("imagenes", fileAttachment);
             }
           }
         }
       }
 
       // Log para depuración
-      console.log("FormData entries:")
+      console.log("FormData entries:");
       for (const [key, value] of form.entries()) {
-        console.log(`${key}:`, value)
+        console.log(`${key}:`, value);
       }
 
-      let newData
+      let newData;
       if (isEditing) {
-        await updatePortfolio(editingInventoryId, form)
-        newData = data.map((item) => (item.id === editingInventoryId ? { ...item, ...formData } : item))
+        await updatePortfolio(editingInventoryId, form);
+        newData = data.map((item) =>
+          item.id === editingInventoryId ? { ...item, ...formData } : item
+        );
       } else {
-        const newUser = await createPortfolio(form)
-        if (!newUser) throw new Error("Error al crear el proyecto")
-        newData = [...data, newUser.proyect]
+        const newUser = await createPortfolio(form);
+        if (!newUser) throw new Error("Error al crear el proyecto");
+        newData = [...data, newUser.proyect];
       }
 
-      setData(newData)
+      setData(newData);
       setSnackbarMessage({
         text: `Portafolio ${isEditing ? "actualizado" : "creado"} exitosamente`,
         type: "success",
-      })
+      });
 
-      resetForm()
+      resetForm();
     } catch (error) {
-      console.error("Error en handleSubmit:", error)
+      console.error("Error en handleSubmit:", error);
       setSnackbarMessage({
         text: error.message || "Error al procesar el formulario",
         type: "error",
-      })
+      });
     } finally {
-      setLoading(false)
-      setSnackbarVisible(true)
+      setLoading(false);
+      setSnackbarVisible(true);
     }
-  }, [formData, isEditing, editingInventoryId, data, validateRequiredFields])
+  }, [formData, isEditing, editingInventoryId, data, validateRequiredFields]);
 
   const resetForm = () => {
-    setOpenForm(false)
-    setIsEditing(false)
-    setEditingInventoryId(null)
+    setOpenForm(false);
+    setIsEditing(false);
+    setEditingInventoryId(null);
     setFormData({
       nombre: "",
       cliente: "",
@@ -949,29 +977,38 @@ const Portfolio = () => {
       superficie: "",
       imagenes: [],
       detalle: "",
-    })
-  }
+    });
+  };
 
   const handleAction = useCallback(async (action, item) => {
     try {
-      setLoading(true)
-      await action(item.id)
+      setLoading(true);
+      await action(item.id);
       setData((prevData) =>
         prevData.map((dataItem) =>
-          dataItem.id === item.id ? { ...dataItem, estado: action === activePortfolio } : dataItem,
-        ),
-      )
+          dataItem.id === item.id
+            ? { ...dataItem, estado: action === activePortfolio }
+            : dataItem
+        )
+      );
     } catch (error) {
-      console.error(`Error al ${action === activePortfolio ? "activar" : "desactivar"} el proyecto:`, error)
+      console.error(
+        `Error al ${
+          action === activePortfolio ? "activar" : "desactivar"
+        } el proyecto:`,
+        error
+      );
       setSnackbarMessage({
-        text: `Error al ${action === activePortfolio ? "activar" : "desactivar"} el proyecto`,
+        text: `Error al ${
+          action === activePortfolio ? "activar" : "desactivar"
+        } el proyecto`,
         type: "error",
-      })
-      setSnackbarVisible(true)
+      });
+      setSnackbarVisible(true);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
   const handleEdit = useCallback((item) => {
     try {
@@ -980,10 +1017,13 @@ const Portfolio = () => {
         ? item.imagenes.map((img) => ({
             uri: typeof img === "string" ? img : img.uri || "",
             type: "image/jpeg", // Default type if not available
-            name: typeof img === "string" ? img.split("/").pop() || "image.jpg" : img.name || "image.jpg",
+            name:
+              typeof img === "string"
+                ? img.split("/").pop() || "image.jpg"
+                : img.name || "image.jpg",
             isFromAPI: true, // Mark as coming from API
           }))
-        : []
+        : [];
       setFormData({
         nombre: item.nombre || "",
         cliente: item.cliente || "",
@@ -993,25 +1033,29 @@ const Portfolio = () => {
         superficie: item.superficie || "",
         imagenes: formattedImages,
         detalle: item.detalle || "",
-      })
-      setEditingInventoryId(item.id)
-      setIsEditing(true)
-      setOpenForm(true)
+      });
+      setEditingInventoryId(item.id);
+      setIsEditing(true);
+      setOpenForm(true);
     } catch (error) {
-      console.error("Error in handleEdit:", error)
-      setSnackbarMessage({ text: "Error al editar el proyecto", type: "error" })
-      setSnackbarVisible(true)
+      console.error("Error in handleEdit:", error);
+      setSnackbarMessage({
+        text: "Error al editar el proyecto",
+        type: "error",
+      });
+      setSnackbarVisible(true);
     }
-  }, [])
+  }, []);
 
   const pickImages = async () => {
     try {
       // Solo solicitar permisos en dispositivos móviles
       if (Platform.OS !== "web") {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
-          alert("Se necesitan permisos para acceder a la galería.")
-          return
+          alert("Se necesitan permisos para acceder a la galería.");
+          return;
         }
       }
 
@@ -1020,60 +1064,66 @@ const Portfolio = () => {
         allowsMultipleSelection: true,
         quality: 0.8, // Reducir calidad para mejorar rendimiento
         allowsEditing: false,
-      }
+      };
 
-      const result = await ImagePicker.launchImageLibraryAsync(pickerOptions)
+      const result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const newImages = result.assets.map((asset) => ({
           uri: asset.uri,
           type: asset.type || "image/jpeg",
-          name: asset.fileName || asset.uri.split("/").pop() || `image-${Date.now()}.jpg`,
+          name:
+            asset.fileName ||
+            asset.uri.split("/").pop() ||
+            `image-${Date.now()}.jpg`,
           isFromAPI: false,
-        }))
+        }));
 
         setFormData((prevData) => ({
           ...prevData,
           imagenes: [...prevData.imagenes, ...newImages],
-        }))
+        }));
       }
     } catch (error) {
-      console.error("Error seleccionando imágenes:", error)
-      setSnackbarMessage({ text: "Error al seleccionar imágenes", type: "error" })
-      setSnackbarVisible(true)
+      console.error("Error seleccionando imágenes:", error);
+      setSnackbarMessage({
+        text: "Error al seleccionar imágenes",
+        type: "error",
+      });
+      setSnackbarVisible(true);
     }
-  }
+  };
 
   const removeImage = (index) => {
     setFormData((prevData) => {
-      const newImages = [...prevData.imagenes]
-      newImages.splice(index, 1)
-      return { ...prevData, imagenes: newImages }
-    })
-  }
+      const newImages = [...prevData.imagenes];
+      newImages.splice(index, 1);
+      return { ...prevData, imagenes: newImages };
+    });
+  };
 
   // Para evitar problemas de precisión
-  const totalItems = data.length
+  const totalItems = data.length;
   // Calculamos los progress con valores seguros
   const calculateProgress = (value, max) => {
-    const progress = Math.min(Math.max(value / max, 0), 1)
-    return Number.parseFloat(progress.toFixed(2))
-  }
-  const itemsProgress = calculateProgress(totalItems, 1000)
+    const progress = Math.min(Math.max(value / max, 0), 1);
+    return Number.parseFloat(progress.toFixed(2));
+  };
+  const itemsProgress = calculateProgress(totalItems, 1000);
 
   // Función para manejar errores de carga de imágenes
   const handleImageLoadStart = (index) => {
-    setImageLoading((prev) => ({ ...prev, [index]: true }))
-  }
+    setImageLoading((prev) => ({ ...prev, [index]: true }));
+  };
 
   const handleImageLoadEnd = (index) => {
-    setImageLoading((prev) => ({ ...prev, [index]: false }))
-  }
+    setImageLoading((prev) => ({ ...prev, [index]: false }));
+  };
 
   const handleImageError = (index, error) => {
-    console.log(`Error loading image at index ${index}:`, error)
-    setImageLoading((prev) => ({ ...prev, [index]: false }))
-  }
+    console.log(`Error loading image at index ${index}:`, error);
+    setImageLoading((prev) => ({ ...prev, [index]: false }));
+  };
 
   return (
     <>
@@ -1092,16 +1142,33 @@ const Portfolio = () => {
               ]}
             />
             <View style={styles.headerActions}>
-              <PDFViewComponent data={data} columns={columns} iconStyle={styles.icon} />
-              <ExcelPreviewButton columns={columns} data={data} iconStyle={styles.icon} />
+              <PDFViewComponent
+                data={data}
+                columns={columns}
+                iconStyle={styles.icon}
+              />
+              <ExcelPreviewButton
+                columns={columns}
+                data={data}
+                iconStyle={styles.icon}
+              />
             </View>
           </View>
-          <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
+          <View
+            style={[
+              styles.cardContainer,
+              isSmallScreen && styles.cardContainerSmall,
+            ]}
+          >
             <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
               <Card.Content>
                 <Text style={styles.cardTitle}>Total de Proyectos</Text>
                 <Text style={styles.cardValue}>{totalItems}</Text>
-                <ProgressBar progress={itemsProgress} color="#00ACE8" style={styles.progressBar} />
+                <ProgressBar
+                  progress={itemsProgress}
+                  color="#00ACE8"
+                  style={styles.progressBar}
+                />
               </Card.Content>
             </Card>
           </View>
@@ -1123,21 +1190,31 @@ const Portfolio = () => {
                 onSearch={console.log}
                 onFilter={console.log}
                 onDelete={async (item) => {
-                  setLoading(true)
+                  setLoading(true);
                   try {
-                    await deletePortfolio(item.id)
-                    setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-                    setSnackbarMessage({ text: "Proyecto eliminado exitosamente", type: "success" })
+                    await deletePortfolio(item.id);
+                    setData((prevData) =>
+                      prevData.filter((dataItem) => dataItem.id !== item.id)
+                    );
+                    setSnackbarMessage({
+                      text: "Proyecto eliminado exitosamente",
+                      type: "success",
+                    });
                   } catch (error) {
-                    console.error("Error deleting portfolio:", error)
-                    setSnackbarMessage({ text: "Error al eliminar el proyecto", type: "error" })
+                    console.error("Error deleting portfolio:", error);
+                    setSnackbarMessage({
+                      text: "Error al eliminar el proyecto",
+                      type: "error",
+                    });
                   } finally {
-                    setLoading(false)
-                    setSnackbarVisible(true)
+                    setLoading(false);
+                    setSnackbarVisible(true);
                   }
                 }}
                 onToggleActive={(item) => handleAction(activePortfolio, item)}
-                onToggleInactive={(item) => handleAction(inactivePortfolio, item)}
+                onToggleInactive={(item) =>
+                  handleAction(inactivePortfolio, item)
+                }
                 onDataUpdate={setData}
                 onCreate={() => setOpenForm(true)}
                 onEdit={handleEdit}
@@ -1153,67 +1230,61 @@ const Portfolio = () => {
           style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
           action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
         >
-          <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
+          <Text style={{ color: theme.colors.surface }}>
+            {snackbarMessage.text}
+          </Text>
         </Snackbar>
 
         <AlertaScroll
           onOpen={openForm}
           onClose={resetForm}
-          title={isEditing ? "Editar Proyecto de portafolio" : "Nuevo proyecto de portafolio"}
+          title={
+            isEditing
+              ? "Editar Proyecto de portafolio"
+              : "Nuevo proyecto de portafolio"
+          }
           content={
-            <View
-              style={{
-                flexDirection: isSmallScreen ? "column" : "row",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-              }}
-            >
+
+
+            <>
+          
               <View style={isSmallScreen ? styles.fullWidth : { width: "48%" }}>
-                {["nombre", "cliente", "ubicacion", "presupuesto"].map((field) => (
+                {[
+                  "nombre",
+                  "cliente",
+                  "ubicacion",
+                  "presupuesto",
+                  "descripcion",
+                  "superficie",
+                  "detalle",
+                ].map((field) => (
                   <InputComponent
                     key={field}
                     type={
                       field === "nombre"
                         ? "nombre"
                         : field === "cliente"
-                          ? "descripcion"
-                          : field === "ubicacion"
-                            ? "ubicacion"
-                            : field === "presupuesto"
-                              ? "precio"
-                              : "text"
-                    }
-                    value={formData[field]}
-                    onChangeText={(text) => setFormData((prev) => ({ ...prev, [field]: text }))}
-                    label={field.charAt(0).toUpperCase() + field.slice(1)}
-                    placeholder={`Introduce el ${field}`}
-                    validationRules={{ required: true }}
-                    errorMessage={`Por favor, introduce un ${field} válido`}
-                  />
-                ))}
-              </View>
-
-              <View style={isSmallScreen ? styles.fullWidth : { width: "48%" }}>
-                {["descripcion", "superficie", "detalle"].map((field) => (
-                  <InputComponent
-                    key={field}
-                    type={
-                      field === "descripcion"
                         ? "descripcion"
-                        : field === "superficie"
-                          ? "superficie"
-                          : field === "detalle"
-                            ? "descripcion"
-                            : "text"
+                        : field === "ubicacion"
+                        ? "ubicacion"
+                        : field === "presupuesto"
+                        ? "precio"
+                        : field == "descripcion"
+                        ? "descripcion"
+                        : field == "superficie"
+                        ? "superficie"
+                        : field == "detalle"
+                        ? "descripcion"
+                        : "text"
                     }
                     value={formData[field]}
-                    onChangeText={(text) => setFormData((prev) => ({ ...prev, [field]: text }))}
+                    onChangeText={(text) =>
+                      setFormData((prev) => ({ ...prev, [field]: text }))
+                    }
                     label={field.charAt(0).toUpperCase() + field.slice(1)}
                     placeholder={`Introduce el ${field}`}
                     validationRules={{ required: true }}
                     errorMessage={`Por favor, introduce un ${field} válido`}
-                    multiline={field === "descripcion" || field === "detalle"}
-                    numberOfLines={field === "descripcion" || field === "detalle" ? 4 : 1}
                   />
                 ))}
               </View>
@@ -1226,7 +1297,12 @@ const Portfolio = () => {
                     : "No hay imágenes seleccionadas"}
                 </Text>
 
-                <Button mode="contained" onPress={pickImages} style={styles.buttonImages} icon="image-plus">
+                <Button
+                  mode="contained"
+                  onPress={pickImages}
+                  style={styles.buttonImages}
+                  icon="image-plus"
+                >
                   Seleccionar Imágenes
                 </Button>
 
@@ -1239,26 +1315,46 @@ const Portfolio = () => {
                     {formData.imagenes.map((image, index) => (
                       <Card
                         key={index}
-                        style={[styles.cardImages, isSmallScreen ? styles.cardImagesSmall : styles.cardImagesLarge]}
+                        style={[
+                          styles.cardImages,
+                          isSmallScreen
+                            ? styles.cardImagesSmall
+                            : styles.cardImagesLarge,
+                        ]}
                       >
                         <Card.Content style={styles.cardImageContent}>
                           <View style={styles.imageContainer}>
                             {imageLoading[index] && (
                               <View style={styles.imageLoadingOverlay}>
-                                <ActivityIndicator size="small" color={theme.colors.primary} />
+                                <ActivityIndicator
+                                  size="small"
+                                  color={theme.colors.primary}
+                                />
                               </View>
                             )}
                             <Image
                               source={{
-                                uri: image.isFromAPI ? SrcImagen(image.uri) : image.uri,
+                                uri: image.isFromAPI
+                                  ? SrcImagen(image.uri)
+                                  : image.uri,
                               }}
                               style={styles.images}
                               onLoadStart={() => handleImageLoadStart(index)}
                               onLoad={() => handleImageLoadEnd(index)}
-                              onError={(e) => handleImageError(index, e.nativeEvent.error)}
+                              onError={(e) =>
+                                handleImageError(index, e.nativeEvent.error)
+                              }
                             />
-                            <TouchableOpacity style={styles.removeImageButton} onPress={() => removeImage(index)}>
-                              <IconButton icon="close-circle" size={24} iconColor="#fff" style={styles.removeIcon} />
+                            <TouchableOpacity
+                              style={styles.removeImageButton}
+                              onPress={() => removeImage(index)}
+                            >
+                              <IconButton
+                                icon="close-circle"
+                                size={24}
+                                iconColor="#fff"
+                                style={styles.removeIcon}
+                              />
                             </TouchableOpacity>
                           </View>
                           <Text style={styles.imageCaption} numberOfLines={1}>
@@ -1270,17 +1366,25 @@ const Portfolio = () => {
                   </ScrollView>
                 )}
               </View>
-            </View>
+              </>
+        
           }
           actions={[
-            <Button key="cancel" onPress={resetForm} mode="outlined" style={styles.formButton} disabled={loading}>
+            <Button
+              key="cancel"
+              onPress={resetForm}
+              mode="outlined"
+              textColor="black"
+              style={styles.formButton}
+              disabled={loading}
+            >
               Cancelar
             </Button>,
             <Button
               key="submit"
               onPress={handleSubmit}
               mode="contained"
-              style={styles.formButton}
+              style={[styles.formButton, { backgroundColor: "#00ACE8" }]} 
               loading={loading}
               disabled={loading}
             >
@@ -1291,8 +1395,8 @@ const Portfolio = () => {
       </PaperProvider>
       <AddComponent onOpen={() => setOpenForm(true)} />
     </>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -1404,6 +1508,7 @@ const styles = StyleSheet.create({
   },
   buttonImages: {
     marginBottom: 16,
+    backgroundColor:"#00ACE8"
   },
   imageScrollView: {
     maxHeight: 300,
@@ -1493,6 +1598,6 @@ const styles = StyleSheet.create({
   formButton: {
     minWidth: 120,
   },
-})
+});
 
-export default Portfolio
+export default Portfolio;

@@ -32,7 +32,7 @@ export function AlertaScroll(props) {
       <Dialog.ScrollArea>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false} // Oculta la barra de scroll
+          showsVerticalScrollIndicator={false}
         >
           {props.content}
         </ScrollView>
@@ -58,5 +58,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 24,
+    overflowY:"auto",
   },
 });
