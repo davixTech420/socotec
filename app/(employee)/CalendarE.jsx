@@ -500,6 +500,7 @@ export default function CalendarComponent() {
                   <Button
                     mode="outlined"
                     onPress={resetForm}
+                    textColor="black"
                     style={styles.cancelButton}
                   >
                     Cancelar
@@ -608,7 +609,7 @@ const styles = StyleSheet.create({
     borderColor: "#e0e0e0",
   },
   submitButton: {
-    backgroundColor: "#0066FF",
+    backgroundColor: "#00ACE8",
   },
   tableCard: {
     margin: 16,
