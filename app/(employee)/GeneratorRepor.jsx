@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useRef, useEffect } from "react"
 import {
   View,
@@ -192,10 +190,17 @@ const colombianLawCalculations = {
 
   // Cálculo de fechas para contratos
   calcularFechaFin: (fechaInicio, duracionMeses) => {
-    const inicio = new Date(fechaInicio)
-    const fin = new Date(inicio)
-    fin.setMonth(inicio.getMonth() + Number.parseInt(duracionMeses || 0))
-    return fin.toISOString().split("T")[0]
+    if (!fechaInicio) return ""
+    
+    try {
+      const inicio = new Date(fechaInicio)
+      const fin = new Date(inicio)
+      fin.setMonth(inicio.getMonth() + Number.parseInt(duracionMeses || "0", 10))
+      return fin.toISOString().split("T")[0]
+    } catch (error) {
+      console.error("Error al calcular fecha fin:", error)
+      return ""
+    }
   },
 }
 
@@ -222,7 +227,11 @@ export default function GeneratorReport() {
     const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions({ window })
     })
-    return () => subscription?.remove()
+    return () => {
+      if (subscription?.remove) {
+        subscription.remove()
+      }
+    }
   }, [])
 
   const { width, height } = dimensions.window
@@ -308,9 +317,9 @@ export default function GeneratorReport() {
             prestaciones,
             seguridadSocial,
             costoTotal: (
-              Number.parseFloat(value) +
-              Number.parseFloat(prestaciones.total) +
-              Number.parseFloat(seguridadSocial.total)
+              Number.parseFloat(value || "0") +
+              Number.parseFloat(prestaciones.total || "0") +
+              Number.parseFloat(seguridadSocial.total || "0")
             ).toFixed(2),
           }))
         }
@@ -325,7 +334,7 @@ export default function GeneratorReport() {
           setCalculations((prev) => ({
             ...prev,
             retencion,
-            valorNeto: (Number.parseFloat(value) - Number.parseFloat(retencion)).toFixed(2),
+            valorNeto: (Number.parseFloat(value || "0") - Number.parseFloat(retencion || "0")).toFixed(2),
           }))
         }
 
@@ -339,8 +348,13 @@ export default function GeneratorReport() {
           setCalculations((prev) => ({
             ...prev,
             iva,
-            precioTotal: (Number.parseFloat(value) + Number.parseFloat(iva)).toFixed(2),
+            precioTotal: (Number.parseFloat(value || "0") + Number.parseFloat(iva || "0")).toFixed(2),
           }))
+        }
+      } else if (contractType === "arrendamiento") {
+        if ((key === "inicioContrato" || key === "duracionMeses") && newData.inicioContrato && newData.duracionMeses) {
+          const fechaFin = colombianLawCalculations.calcularFechaFin(newData.inicioContrato, newData.duracionMeses)
+          setCalculations((prev) => ({ ...prev, fechaFin }))
         }
       }
 
@@ -725,16 +739,21 @@ export default function GeneratorReport() {
   // Descargar contrato como HTML (para web)
   const downloadAsHTML = () => {
     if (isWeb) {
-      const html = generateContractHTML()
-      const blob = new Blob([html], { type: "text/html" })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `Contrato_${contractType}_${new Date().getTime()}.html`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+      try {
+        const html = generateContractHTML()
+        const blob = new Blob([html], { type: "text/html" })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.href = url
+        link.download = `Contrato_${contractType}_${new Date().getTime()}.html`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      } catch (error) {
+        console.error("Error al descargar HTML:", error)
+        alert("Error al descargar el contrato. Por favor intente de nuevo.")
+      }
     }
   }
 
@@ -756,10 +775,6 @@ export default function GeneratorReport() {
             opacity: interpolate(contractTypeAnimation.value, [0, 1], [0, 1], Extrapolate.CLAMP),
           },
         ]}
-        entering={withTiming({
-          duration: 300 + index * 50,
-          easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-        })}
       >
         <Text style={styles.customFieldLabel}>
           {field.label}
@@ -769,7 +784,7 @@ export default function GeneratorReport() {
         {field.type === "select" ? (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectScrollView}>
             <View style={styles.selectContainer}>
-              {field.options.map((option) => (
+              {field.options && field.options.map((option) => (
                 <TouchableOpacity
                   key={option}
                   style={[styles.selectOption, formData[field.key] === option && styles.selectOptionActive]}
@@ -800,7 +815,7 @@ export default function GeneratorReport() {
             onChangeText={(text) => handleFormDataChange(field.key, text)}
             placeholder="AAAA-MM-DD"
             keyboardType={isWeb ? "text" : "default"}
-            type={isWeb ? "date" : "text"}
+            inputMode="text"
           />
         ) : (
           <TextInput
@@ -840,7 +855,7 @@ export default function GeneratorReport() {
               />
             ) : (
               <ScrollView style={{ flex: 1, padding: 20, backgroundColor: "#fff" }}>
-                <Text>{previewContent.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ")}</Text>
+                <Text>{previewContent ? previewContent.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ") : ""}</Text>
               </ScrollView>
             )}
           </View>
@@ -866,13 +881,13 @@ export default function GeneratorReport() {
 
   // Renderizar los cálculos según el tipo de contrato
   const renderCalculations = () => {
-    if (Object.keys(calculations).length === 0) return null
+    if (!calculations || Object.keys(calculations).length === 0) return null
 
     return (
       <View style={styles.calculationsContainer}>
         <Text style={styles.calculationsTitle}>Cálculos Automáticos:</Text>
 
-        {contractType === "laboralFijo" || contractType === "laboralIndefinido" ? (
+        {(contractType === "laboralFijo" || contractType === "laboralIndefinido") && calculations.prestaciones ? (
           <>
             <Text style={styles.calculationSubtitle}>Prestaciones Sociales Mensuales:</Text>
             <Text style={styles.calculationItem}>Prima de Servicios: ${calculations.prestaciones?.prima || "0"}</Text>
@@ -1030,7 +1045,7 @@ export default function GeneratorReport() {
                   <Text style={styles.previewTitle}>Vista previa del Contrato</Text>
                   <TouchableOpacity onPress={toggleOptions} style={styles.optionsButton} activeOpacity={0.7}>
                     <MaterialCommunityIcons
-                      name={showOptions ? "chevron-up" : "tune-vertical"}
+                      name={showOptions ? "chevron-down" : "tune-vertical"}
                       size={24}
                       color="#fff"
                     />

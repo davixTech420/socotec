@@ -176,6 +176,8 @@ export default function Hiring() {
   }, []);
 
   const isSmallScreen = width < 600;
+  console.log(data);
+  
   return (
     <>
       <ScrollView style={styles.container}>

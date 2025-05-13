@@ -330,8 +330,8 @@ const MyTickets = () => {
             </View>
           }
           actions={[
-            <Button onPress={resetForm}>Cancelar</Button>,
-            <Button onPress={handleSubmit}>
+            <Button onPress={resetForm} mode="outlined" textColor="black">Cancelar</Button>,
+            <Button onPress={handleSubmit} mode="contained" style={{backgroundColor: "#00ACE8"}} >
               {isEditing ? "Actualizar" : "Crear"}
             </Button>,
           ]}

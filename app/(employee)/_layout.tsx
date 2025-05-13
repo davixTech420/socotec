@@ -628,6 +628,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    height: Platform.OS === "web" ? "100vh" : "100%",
+    overflow: Platform.OS === "web" ? "hidden" : "visible",
   },
   drawerContent: {
     flex: 1,
@@ -662,18 +664,22 @@ const styles = StyleSheet.create({
   },
   screen: {
     flex: 1,
+    height: Platform.OS === "web" ? "100vh" : "100%",
+    overflow: "hidden",
   },
   scrollView: {
-    flexGrow: 1,
+    flex: 1,
+    height: Platform.OS === "web" ? "100vh" : "100%",
   },
   screenContent: {
-    flex: 1,
-    position: "relative",
+    flexGrow: 1,
+    minHeight: Platform.OS === "web" ? "100%" : "auto",
   },
   staticButtonContainer: {
     position: "absolute",
     bottom: 20,
     right: 20,
+    zIndex: 1000,
   },
   floatingButton: {
     position: "absolute",

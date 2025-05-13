@@ -83,10 +83,7 @@ export default function CalendarComponent() {
     return marks
   }, [])
 
-
-
   useFocusEffect(useCallback(() => {
-
     const fetchData = async () => {
       try {
         await getUsers().then(setUsers).catch(console.error);
@@ -411,10 +408,10 @@ export default function CalendarComponent() {
                   </View>
                 </View>
                 <View style={styles.actions}>
-                  <Button mode="outlined" onPress={resetForm} style={styles.cancelButton}>
+                  <Button mode="outlined" textColor="black" onPress={resetForm} style={styles.cancelButton}>
                     Cancel
                   </Button>
-                  <Button mode="contained" onPress={handleSubmit} style={styles.submitButton}>
+                  <Button mode="contained"  onPress={handleSubmit} style={styles.submitButton}>
                     Continue
                   </Button>
                 </View>
@@ -514,7 +511,7 @@ const styles = StyleSheet.create({
     borderColor: "#e0e0e0",
   },
   submitButton: {
-    backgroundColor: "#0066FF",
+    backgroundColor: "#00ACE8",
   },
   tableCard: {
     margin: 16,

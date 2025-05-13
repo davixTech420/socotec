@@ -400,16 +400,16 @@ const TaskBoard = () => {
           onDismiss={hideModal}
           contentContainerStyle={styles.modalContainer}
         >
-          <Title style={styles.modalTitle}>Create New Task</Title>
+          <Title style={styles.modalTitle}>Crear Tarea</Title>
           <TextInput
-            label="Task Title"
+            label="Titulo"
             value={newTask.titulo}
             onChangeText={(text) => setNewTask({ ...newTask, titulo: text })}
             style={styles.input}
             mode="outlined"
           />
           <TextInput
-            label="Description"
+            label="Descripcion"
             value={newTask.descripcion}
             onChangeText={(text) =>
               setNewTask({ ...newTask, descripcion: text })
@@ -421,7 +421,12 @@ const TaskBoard = () => {
           />
 
           <View style={styles.modalActions}>
-            <Button onPress={hideModal} style={styles.modalButton}>
+            <Button
+              onPress={hideModal}
+              mode="outlined"
+              textColor="black"
+              style={styles.modalButton}
+            >
               Cancel
             </Button>
             <Button
@@ -430,7 +435,7 @@ const TaskBoard = () => {
               disabled={!newTask.titulo}
               style={styles.modalButton}
             >
-              Create Task
+              Crear Tarea
             </Button>
           </View>
         </Modal>

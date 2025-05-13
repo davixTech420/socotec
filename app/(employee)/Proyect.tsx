@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { View, StyleSheet, ScrollView } from "react-native"
 import {

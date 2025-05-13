@@ -104,12 +104,13 @@ const ProfileScreen = () => {
             <IconButton
               icon={isEditing ? "content-save" : "pencil"}
               mode="contained"
+              iconColor="#00ACE8"
               onPress={isEditing ? handleSave : () => setIsEditing(true)}
             />
           </View>
           <View style={[styles.formFields, !isSmallScreen && styles.formFieldsRow]}>
           <View style={styles.formField}>
-      <MaterialCommunityIcons name="account" size={24} color={theme.colors.primary} style={styles.formIcon} />
+      <MaterialCommunityIcons name="account" size={24} color="#00ACE8" style={styles.formIcon} />
       <TextInput
         label="Nombre"
         value={profileData?.nombre}
@@ -121,7 +122,7 @@ const ProfileScreen = () => {
       />
     </View>
     <View style={styles.formField}>
-      <MaterialCommunityIcons name="email" size={24} color={theme.colors.primary} style={styles.formIcon} />
+      <MaterialCommunityIcons name="email" size={24} color="#00ACE8" style={styles.formIcon} />
       <TextInput
         label="Email"
         editable={false}
@@ -135,7 +136,7 @@ const ProfileScreen = () => {
           </View>
           <View style={[styles.formFields, !isSmallScreen && styles.formFieldsRow]}>
           <View style={styles.formField}>
-      <MaterialCommunityIcons name="phone" size={24} color={theme.colors.primary} style={styles.formIcon} />
+      <MaterialCommunityIcons name="phone" size={24} color="#00ACE8" style={styles.formIcon} />
       <TextInput
         value={profileData?.telefono}
         label="Telefono"
@@ -152,7 +153,7 @@ const ProfileScreen = () => {
       />
     </View>
     <View style={styles.formField}>
-      <MaterialCommunityIcons name="briefcase" size={24} color={theme.colors.primary} style={styles.formIcon} />
+      <MaterialCommunityIcons name="briefcase" size={24} color="#00ACE8" style={styles.formIcon} />
       <TextInput
         value={profileData?.role}
         label="Rol"

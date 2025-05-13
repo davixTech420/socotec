@@ -73,6 +73,8 @@ export default function Hiring() {
     { label: "Auxiliar", value: "Auxiliar" },
     { label: "Ingeniero", value: "Ingeniero" },
     { label: "Arquitecto", value: "Arquitecto" },
+    { label: "Laboratorista", value: "Laboratorista" },
+    { label: "Campo", value: "Campo" },
     { label: "TeamLider", value: "TeamLider" },
     { label: "Deliniante", value: "Deliniante" },
     { label: "Talento Humano", value: "Talento" },
@@ -185,8 +187,6 @@ export default function Hiring() {
       nota: "",
     });
   };
-
- 
 
   const handleEdit = useCallback((item) => {
     setFormData({
@@ -355,10 +355,20 @@ export default function Hiring() {
           </View>
         }
         actions={[
-          <Button key="cancel" onPress={resetForm}>
+          <Button
+            key="cancel"
+            mode="outlined"
+            textColor="black"
+            onPress={resetForm}
+          >
             Cancelar
           </Button>,
-          <Button key="submit" onPress={handleSubmit}>
+          <Button
+            key="submit"
+            mode="contained"
+            style={{ backgroundColor: "#00ACE8" }}
+            onPress={handleSubmit}
+          >
             {isEditing ? "Actualizar" : "Crear"}
           </Button>,
         ]}

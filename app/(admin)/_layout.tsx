@@ -172,7 +172,6 @@ function CustomAppBar({ title, navigation, drawerProgress }) {
       transform: [{ rotate: `${rotate}deg` }],
     };
   });
-
   return (
     <Appbar.Header style={{ backgroundColor: "#00ACE8" }}>
       <Animated.View style={animatedStyle}>
@@ -519,7 +518,7 @@ export default function App() {
             )}
           </Drawer.Screen>
 
-          <Drawer.Screen
+          {/* <Drawer.Screen
             name="report"
             options={{
               title: "Reportes",
@@ -537,7 +536,7 @@ export default function App() {
                 <Proyects {...props} />
               </AnimatedScreen>
             )}
-          </Drawer.Screen>
+          </Drawer.Screen> */}
 
           <Drawer.Screen
             name="models"
