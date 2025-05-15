@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://192.168.131.76:${port}/api/employee`;
+const baseUrl = `http://192.168.181.230:${port}/api/employee`;
 
 const makeRequest = async (method, url, data = null) => {
   try {
@@ -178,6 +178,10 @@ export const deletePermission = async (id) => {
 
 export const getPermissionsMyGroup = async (id) => {
  return makeRequest('get', `/permissionsByGroup/${id}`);
+}
+
+export const getPermissions = async () => {
+  return makeRequest("get","/permission");  
 }
 
 /**

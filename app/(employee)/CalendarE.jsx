@@ -18,6 +18,7 @@ import DropdownComponent from "@/components/DropdownComponent";
 import { router } from "expo-router";
 import {
   getMyPermissions,
+  getPermissions,
   getPermissionsMyGroup,
   createPermission,
   deletePermission,
@@ -110,7 +111,10 @@ export default function CalendarComponent() {
 
           // Obtener permisos según el cargo
           let response;
-          if (
+
+          if (userData.cargo === "DirectorTalento") {
+            response = await getPermissions();
+          } else if (
             userData.cargo === "TeamLider" ||
             userData.cargo === "DirectorContable" ||
             userData.cargo === "Directorsset" ||
