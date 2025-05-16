@@ -44,6 +44,7 @@ import MyTickets from "./MyTickets";
 import GeneratorReport from "./GeneratorRepor";
 import Hiring from "./Hiring";
 import AssignmentPPE from "./AssignmentPPE";
+import Apique from "./Apique";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import { router } from "expo-router";
 
@@ -57,9 +58,11 @@ const isMobileWeb = () => {
 };
 
 // Lógica combinada
-const DRAWER_WIDTH = 
-  Platform.OS === "web" 
-    ? (isMobileWeb() ? SCREEN_WIDTH * 0.5 : SCREEN_WIDTH * 0.2)
+const DRAWER_WIDTH =
+  Platform.OS === "web"
+    ? isMobileWeb()
+      ? SCREEN_WIDTH * 0.5
+      : SCREEN_WIDTH * 0.2
     : SCREEN_WIDTH * 0.7;
 
 function AnimatedScreen({ children, style, staticButton }) {
@@ -105,21 +108,20 @@ function CustomDrawerContent(props) {
     <SafeAreaView
       style={[styles.drawerContent, { backgroundColor: theme.colors.surface }]}
     >
-      
-        <View style={styles.userInfoSection}>
-          <Avatar.Image
-            source={require("../../assets/images/favicon.png")}
-            size={80}
-            style={{ backgroundColor: "transparent" }}
-          />
-          <Text style={[styles.title, { color: "#00ACE8" }]}>
-            {userData?.nombre || "Usuario"}
-          </Text>
-          <Text style={[styles.caption, { color: theme.colors.secondary }]}>
-            {userData?.email || "usuario@socotec.com"}
-          </Text>
-        </View>
-        <ScrollView>
+      <View style={styles.userInfoSection}>
+        <Avatar.Image
+          source={require("../../assets/images/favicon.png")}
+          size={80}
+          style={{ backgroundColor: "transparent" }}
+        />
+        <Text style={[styles.title, { color: "#00ACE8" }]}>
+          {userData?.nombre || "Usuario"}
+        </Text>
+        <Text style={[styles.caption, { color: theme.colors.secondary }]}>
+          {userData?.email || "usuario@socotec.com"}
+        </Text>
+      </View>
+      <ScrollView>
         <View style={styles.drawerSection}>
           {props.state.routes.map((route, index) => {
             const { title, drawerIcon } = props.descriptors[route.key].options;
@@ -582,6 +584,25 @@ export default function App() {
                   <AnimatedScreen style={animatedStyle}>
                     <AssignmentPPE {...props} />
                   </AnimatedScreen>
+                )}
+              </Drawer.Screen>
+
+              <Drawer.Screen
+                name="Apique"
+                options={{
+                  title: "Apique",
+                  drawerIcon: ({ color }) => (
+                    <AntDesign name="filetext1" size={24} color={color} />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <>
+                    <Apique {...props} />
+                    {/* <AnimatedScreen style={animatedStyle}>
+                    
+                  </AnimatedScreen> */}
+                  </>
                 )}
               </Drawer.Screen>
             </>

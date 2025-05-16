@@ -56,3 +56,4 @@ hacer modelado 3d
 dependencias posibles a borrar 
 
 
+expo asset
