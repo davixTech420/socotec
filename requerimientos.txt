@@ -56,4 +56,7 @@ hacer modelado 3d
 dependencias posibles a borrar 
 
 
-expo asset
+
+
+npm install xlsx-js-style
+base-64

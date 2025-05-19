@@ -46,6 +46,7 @@ import Task from "./Task";
 import Ticket from "./Ticket";
 import Hirings from "./Hirings";
 import Assignment from "./Assignment";
+import Apiques from "./Apiques";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import ProfileScreen from "./MyAccount";
 import { router } from "expo-router";
@@ -497,6 +498,28 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
+
+
+          <Drawer.Screen
+            name="Apiques"
+            options={{
+              title: "Apique",
+              drawerIcon: ({ color }) => (
+                <MaterialCommunityIcons
+                  name="bank-transfer"
+                  size={24}
+                  color={color}
+                />
+              ),
+            }}
+          >
+            {(props) => (
+              <AnimatedScreen style={animatedStyle}>
+                <Apiques {...props} />
+              </AnimatedScreen>
+            )}
+          </Drawer.Screen>
+
 
           <Drawer.Screen
             name="Calendar"

@@ -26,6 +26,7 @@
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.9",
     "babel-preset-expo": "^12.0.4",
+    "base-64": "^1.0.0",
     "expo": "~52.0.20",
     "expo-asset": "^11.1.5",
     "expo-blur": "~14.0.3",
@@ -60,7 +61,8 @@
     "react-native-svg": "^15.10.1",
     "react-native-web": "~0.19.13",
     "react-navigation": "^5.0.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
