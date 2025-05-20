@@ -27,16 +27,11 @@ import AddComponent from "../../components/AddComponent";
 import { AlertaScroll } from "@/components/alerta";
 import InputComponent from "@/components/InputComponent";
 import {
-  createPortfolio,
-  getPortfolio,
-  deletePortfolio,
-  activePortfolio,
-  inactivePortfolio,
   updatePortfolio,
+  getApique,
+  createApique,
+  deleteApique,
 } from "@/services/adminServices";
-import { getApique,createApique ,deleteApique} from "@/services/employeeService";
-import ExcelPreviewButton from "@/components/ExcelViewComponent";
-import PDFViewComponent from "@/components/PdfViewComponent";
 import * as ImagePicker from "expo-image-picker";
 import { SrcImagen } from "@/services/publicServices";
 
@@ -47,8 +42,16 @@ const columns = [
   { key: "tituloObra", title: "Titulo Obra", sortable: true, width: 100 },
   { key: "localizacion", title: "Localizacion", sortable: true },
   { key: "albaranNum", title: "Albaran No", sortable: true },
-  { key: "fechaEjecucionInicio", title: "Fecha Ejecucion Inicio", sortable: true },
-  { key: "fechaEjecucionFinal", title: "Fecha Ejecucion Final", sortable: true },
+  {
+    key: "fechaEjecucionInicio",
+    title: "Fecha Ejecucion Inicio",
+    sortable: true,
+  },
+  {
+    key: "fechaEjecucionFinal",
+    title: "Fecha Ejecucion Final",
+    sortable: true,
+  },
   { key: "fechaEmision", title: "Fecha Emision", sortable: true },
   { key: "tipo", title: "Tipo", sortable: true },
   { key: "operario", title: "Operario", sortable: true },
@@ -57,7 +60,6 @@ const columns = [
   { key: "profundidadApique", title: "Profundidad Apique", sortable: true },
   { key: "imagenes", title: "Imagenes", sortable: true },
   { key: "observaciones", title: "Observaciones", sortable: true },
-  { key: "estado", title: "Estado", sortable: true },
   { key: "createdAt", title: "Creado", sortable: true },
   { key: "updatedAt", title: "Modificado", sortable: true },
 ];
@@ -85,7 +87,7 @@ const Apiques = () => {
     anchoApique: "",
     profundidadApique: "",
     observaciones: "",
-    imagenes: []
+    imagenes: [],
   });
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -244,20 +246,20 @@ const Apiques = () => {
     setIsEditing(false);
     setEditingInventoryId(null);
     setFormData({
-        informeNum: "",
-        cliente: "",
-        tituloObra: "",
-        localizacion: "",
-        albaranNum: "",
-        fechaEjecucionInicio: "",
-        fechaEjecucionFinal: "",
-        fechaEmision: "",
-        operario: "",
-        largoApique: "",
-        anchoApique: "",
-        profundidadApique: "",
-        observaciones: "",
-        imagenes: []
+      informeNum: "",
+      cliente: "",
+      tituloObra: "",
+      localizacion: "",
+      albaranNum: "",
+      fechaEjecucionInicio: "",
+      fechaEjecucionFinal: "",
+      fechaEmision: "",
+      operario: "",
+      largoApique: "",
+      anchoApique: "",
+      profundidadApique: "",
+      observaciones: "",
+      imagenes: [],
     });
   };
 
@@ -306,18 +308,25 @@ const Apiques = () => {
           }))
         : [];
       setFormData({
-        nombre: item.nombre || "",
-        cliente: item.cliente || "",
-        ubicacion: item.ubicacion || "",
-        presupuesto: item.presupuesto || "",
-        descripcion: item.descripcion || "",
-        superficie: item.superficie || "",
+        informeNum: item.informeNum,
+        cliente: item.cliente,
+        tituloObra: item.tituloObra,
+        localizacion: item.localizacion,
+        albaranNum: item.albaranNum,
+        fechaEjecucionInicio: item.fechaEjecucionInicio,
+        fechaEjecucionFinal: item.fechaEjecucionFinal,
+        fechaEmision: item.fechaEmision,
+        operario: item.operario,
+        largoApique: item.largoApique,
+        anchoApique: item.anchoApique,
+        profundidadApique: item.profundidadApique,
+        observaciones: item.observaciones,
         imagenes: formattedImages,
-        detalle: item.detalle || "",
       });
       setEditingInventoryId(item.id);
       setIsEditing(true);
       setOpenForm(true);
+      console.log("formu", formData);
     } catch (error) {
       console.error("Error in handleEdit:", error);
       setSnackbarMessage({
@@ -405,7 +414,7 @@ const Apiques = () => {
     console.log(`Error loading image at index ${index}:`, error);
     setImageLoading((prev) => ({ ...prev, [index]: false }));
   };
-console.log("apique",data);
+
   return (
     <>
       <PaperProvider theme={theme}>
@@ -415,25 +424,13 @@ console.log("apique",data);
               items={[
                 {
                   label: "Dashboard",
-                  onPress: () => router.navigate("/(employee)/DashboardE"),
+                  onPress: () => router.navigate("/(admin)/Dashboard"),
                 },
                 {
                   label: "Apique",
                 },
               ]}
             />
-            <View style={styles.headerActions}>
-              <PDFViewComponent
-                data={data}
-                columns={columns}
-                iconStyle={styles.icon}
-              />
-              <ExcelPreviewButton
-                columns={columns}
-                data={data}
-                iconStyle={styles.icon}
-              />
-            </View>
           </View>
           <View
             style={[
@@ -443,7 +440,7 @@ console.log("apique",data);
           >
             <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
               <Card.Content>
-                <Text style={styles.cardTitle}>Total de Proyectos</Text>
+                <Text style={styles.cardTitle}>Total de apiques</Text>
                 <Text style={styles.cardValue}>{totalItems}</Text>
                 <ProgressBar
                   progress={itemsProgress}
@@ -474,10 +471,6 @@ console.log("apique",data);
                   await deleteApique(item.id);
                   setData(data.filter((p) => p.id !== item.id));
                 }}
-                onToggleActive={(item) => handleAction(activePortfolio, item)}
-                onToggleInactive={(item) =>
-                  handleAction(inactivePortfolio, item)
-                }
                 onDataUpdate={setData}
                 onCreate={() => setOpenForm(true)}
                 onEdit={handleEdit}
@@ -501,11 +494,7 @@ console.log("apique",data);
         <AlertaScroll
           onOpen={openForm}
           onClose={resetForm}
-          title={
-            isEditing
-              ? "Editar Apique"
-              : "Nueva Apique"
-          }
+          title={isEditing ? "Editar Apique" : "Nueva Apique"}
           content={
             <>
               <View style={isSmallScreen ? styles.fullWidth : { width: "48%" }}>
@@ -528,19 +517,33 @@ console.log("apique",data);
                   <InputComponent
                     key={field}
                     type={
-                      field === "nombre"
-                        ? "nombre"
+                      field === "informeNum"
+                        ? "number"
                         : field === "cliente"
-                        ? "descripcion"
-                        : field === "ubicacion"
+                        ? "nombre"
+                        : field === "tituloObra"
+                        ? "textarea"
+                        : field === "localizacion"
                         ? "ubicacion"
-                        : field === "presupuesto"
-                        ? "precio"
-                        : field == "descripcion"
-                        ? "descripcion"
-                        : field == "superficie"
+                        : field == "albaranNum"
+                        ? "number"
+                        : field == "fechaEjecucionInicio"
+                        ? "date"
+                        : field == "fechaEjecucionFinal"
+                        ? "date"
+                        : field == "fechaEmision"
+                        ? "date"
+                        : field == "tipo"
+                        ? "textarea"
+                        : field == "operario"
+                        ? "nombre"
+                        : field == "largoApique"
                         ? "superficie"
-                        : field == "detalle"
+                        : field == "anchoApique"
+                        ? "superficie"
+                        : field == "profundidadApique"
+                        ? "superficie"
+                        : field == "observaciones"
                         ? "descripcion"
                         : "text"
                     }
@@ -633,7 +636,7 @@ console.log("apique",data);
                   </ScrollView>
                 )}
               </View>
-              </>
+            </>
           }
           actions={[
             <Button
@@ -650,7 +653,7 @@ console.log("apique",data);
               key="submit"
               onPress={handleSubmit}
               mode="contained"
-              style={[styles.formButton, { backgroundColor: "#00ACE8" }]} 
+              style={[styles.formButton, { backgroundColor: "#00ACE8" }]}
               loading={loading}
               disabled={loading}
             >
@@ -774,7 +777,7 @@ const styles = StyleSheet.create({
   },
   buttonImages: {
     marginBottom: 16,
-    backgroundColor:"#00ACE8"
+    backgroundColor: "#00ACE8",
   },
   imageScrollView: {
     maxHeight: 300,

@@ -59,4 +59,3 @@ dependencias posibles a borrar
 
 
 npm install xlsx-js-style
-base-64

@@ -25,7 +25,7 @@ import {
 import Animated, { FadeInUp, Layout } from "react-native-reanimated";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SrcImagen } from "@/services/publicServices";
-
+import ExcelApique from "./ExcelApique";
 
 const TablaComponente = ({
   data,
@@ -229,7 +229,13 @@ const TablaComponente = ({
         });
     }
   }, [onCreate]);
-
+  const handleGeneration = (success) => {
+    if (success) {
+      console.log("Excel generado con éxito");
+    } else {
+      console.log("Error al generar Excel");
+    }
+  };
   const handleEdit = useCallback(
     async (item) => {
       if (onEdit) {
@@ -264,9 +270,18 @@ const TablaComponente = ({
               backgroundColor:
                 isActive == true ||
                 isActive == "Aprobado" ||
-                isActive == "Resuelto" || isActive == "Contrato Firmado" || isActive == "Oferta Enviada" || isActive == "Confirmado"
+                isActive == "Resuelto" ||
+                isActive == "Contrato Firmado" ||
+                isActive == "Oferta Enviada" ||
+                isActive == "Confirmado"
                   ? extendedTheme.colors.success
-                  : isActive == "Pendiente" || isActive == "En Proceso" || isActive == "Postulado" || isActive == "Entrevista 1" || isActive == "Entrevista 2" || isActive == "Prueba Tecnica" ||  isActive == "Asignado"
+                  : isActive == "Pendiente" ||
+                    isActive == "En Proceso" ||
+                    isActive == "Postulado" ||
+                    isActive == "Entrevista 1" ||
+                    isActive == "Entrevista 2" ||
+                    isActive == "Prueba Tecnica" ||
+                    isActive == "Asignado"
                   ? extendedTheme.colors.warning
                   : extendedTheme.colors.error,
               color: extendedTheme.colors.surface,
@@ -286,25 +301,25 @@ const TablaComponente = ({
               ? "En Proceso"
               : isActive === "Resuelto"
               ? "Resuelto"
-              : isActive === "Postulado" 
+              : isActive === "Postulado"
               ? "Postulado"
-              :isActive === "CV Aprobado"
+              : isActive === "CV Aprobado"
               ? "CV Aprobado"
-              :isActive === "Entrevista 1"
+              : isActive === "Entrevista 1"
               ? "Entrevista 1"
-              :isActive === "Entrevista 2"
+              : isActive === "Entrevista 2"
               ? "Entrevista 2"
               : isActive === "Prueba Tecnica"
               ? "Prueba Tecnica"
               : isActive === "Oferta Enviada"
               ? "Oferta Enviada"
-              :isActive === "Contrato Firmado"
+              : isActive === "Contrato Firmado"
               ? "Contrato Firmado"
-              :isActive === "Asignado"
+              : isActive === "Asignado"
               ? "Asignado"
-              :isActive === "Confirmado"
+              : isActive === "Confirmado"
               ? "Confirmado"
-              :isActive ==="Devuelto"
+              : isActive === "Devuelto"
               ? "Devuelto"
               : "Estado desconocido"}
           </Chip>
@@ -315,7 +330,11 @@ const TablaComponente = ({
           <>
             {/*   <ImageCarousel images={item?.imagenes} /> */}
             <Image
-              source={{ uri: SrcImagen(column.key == "imagenes" ? item.imagenes[0].uri : item.fotoppe )}}
+              source={{
+                uri: SrcImagen(
+                  column.key == "imagenes" ? item.imagenes[0].uri : item.fotoppe
+                ),
+              }}
               style={{ width: 100, height: 100 }}
             />
           </>
@@ -486,6 +505,13 @@ const TablaComponente = ({
                                 iconColor="#00ACE8"
                                 onPress={() => handleEdit(item)}
                               />
+
+                              {item.informeNum != null ? (
+                                <ExcelApique
+                                  data={item}
+                                  onGenerate={handleGeneration}
+                                />
+                              ) : null}
 
                               {item.estado === true || item.estado === false ? (
                                 <>

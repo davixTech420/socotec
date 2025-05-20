@@ -24,6 +24,7 @@ import {
   FontAwesome6,
   FontAwesome5,
   AntDesign,
+  FontAwesome,
 } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
@@ -592,7 +593,7 @@ export default function App() {
                 options={{
                   title: "Apique",
                   drawerIcon: ({ color }) => (
-                    <AntDesign name="filetext1" size={24} color={color} />
+                    <FontAwesome name="files-o" size={24} color={color} />
                   ),
                 }}
               >

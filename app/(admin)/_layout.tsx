@@ -23,6 +23,7 @@ import {
   MaterialIcons,
   FontAwesome5,
   AntDesign,
+  FontAwesome,
 } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
@@ -453,10 +454,10 @@ export default function App() {
           >
             {(props) => (
               <>
-             {/* <AnimatedScreen style={animatedStyle}>  */} 
+                {/* <AnimatedScreen style={animatedStyle}>  */}
                 <Portfolio {...props} />
-              {/*  </AnimatedScreen>  */}
-               </>
+                {/*  </AnimatedScreen>  */}
+              </>
             )}
           </Drawer.Screen>
 
@@ -499,17 +500,12 @@ export default function App() {
             )}
           </Drawer.Screen>
 
-
           <Drawer.Screen
             name="Apiques"
             options={{
               title: "Apique",
               drawerIcon: ({ color }) => (
-                <MaterialCommunityIcons
-                  name="bank-transfer"
-                  size={24}
-                  color={color}
-                />
+                <FontAwesome name="files-o" size={24} color={color} />
               ),
             }}
           >
@@ -519,7 +515,6 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
-
 
           <Drawer.Screen
             name="Calendar"
@@ -540,27 +535,6 @@ export default function App() {
               </AnimatedScreen>
             )}
           </Drawer.Screen>
-
-          {/* <Drawer.Screen
-            name="report"
-            options={{
-              title: "Reportes",
-              drawerIcon: ({ color }) => (
-                <MaterialCommunityIcons
-                  name="file-document"
-                  size={24}
-                  color={color}
-                />
-              ),
-            }}
-          >
-            {(props) => (
-              <AnimatedScreen style={animatedStyle}>
-                <Proyects {...props} />
-              </AnimatedScreen>
-            )}
-          </Drawer.Screen> */}
-
           <Drawer.Screen
             name="models"
             options={{

@@ -38,6 +38,32 @@ export const getDashboard = async () => {
   return makeRequest("get", "/dashboard");
 };
 
+//routes for files apique
+
+export const getApique = async () => {
+  return makeRequest("get","/apique");
+}
+
+export const createApique = async (data) => {
+  try {
+      const token = await AsyncStorage.getItem("userToken");
+      const response = await axios.post(`${baseUrl}/apique`,data, {
+          headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+          },
+      });
+      return response.data;
+  } catch (error) {
+      console.error("Error al obtener los permisos", error);
+      throw error;
+  }
+}
+export const deleteApique = async (id) => {
+  return makeRequest("delete",`/apique/${id}`);
+}
+
+
 //routes the ppe protect
 export const getAssignment = async () => {
   return makeRequest("get","/assignment");
