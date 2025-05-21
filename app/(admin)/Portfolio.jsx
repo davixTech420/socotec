@@ -37,7 +37,12 @@ import {
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFViewComponent from "@/components/PdfViewComponent";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from 'expo-file-system';
 import { SrcImagen } from "@/services/publicServices";
+
+
+
+
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -108,6 +113,36 @@ const Portfolio = () => {
     return emptyFields;
   }, []);
 
+
+
+
+  function dataURLtoFile(dataurl, filename) {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const handleSubmit = useCallback(async () => {
     try {
       setLoading(true);
@@ -131,8 +166,43 @@ const Portfolio = () => {
 
       // Crear FormData para enviar al backend
       const form = new FormData();
-
-      // Agregar todos los campos de texto al FormData
+      const handleImageUpload = (fieldName, imageData) => {
+        if (!imageData) return;
+      
+        // Si es dataURL (base64), convertir a File (solo para web)
+        if (typeof imageData === 'string' && imageData.startsWith('data:')) {
+          const filename = `${fieldName}_${Date.now()}.jpg`;
+          const file = dataURLtoFile(imageData, filename);
+          formData.append(fieldName, file, file.name);
+          return;
+        }
+      
+        // Caso Web (File object)
+        if (imageData instanceof File || imageData instanceof Blob) {
+          formData.append(fieldName, imageData, imageData.name);
+          return;
+        }
+      
+        // Caso React Native (URI local)
+        if (typeof imageData === 'string' && imageData.match(/^(file|content):\/\//)) {
+          const filename = imageData.split('/').pop();
+          const type = filename.split('.').pop() || 'jpeg';
+          formData.append(fieldName, {
+            uri: imageData,
+            name: filename,
+            type: `image/${type}`
+          });
+          return;
+        }
+      
+        // Caso URL remota o ruta existente
+        if (typeof imageData === 'string') {
+          formData.append(fieldName, imageData);
+        }
+      };
+      await handleImageUpload("imagenes",formData.imagenes);
+      
+     /*  // Agregar todos los campos de texto al FormData
       Object.keys(formData).forEach((key) => {
         if (key !== "imagenes" && formData[key]) {
           form.append(key, formData[key]);
@@ -192,7 +262,7 @@ const Portfolio = () => {
       for (const [key, value] of form.entries()) {
         console.log(`${key}:`, value);
       }
-
+ */
       let newData;
       if (isEditing) {
         await updatePortfolio(editingInventoryId, form);
@@ -223,6 +293,10 @@ const Portfolio = () => {
       setSnackbarVisible(true);
     }
   }, [formData, isEditing, editingInventoryId, data, validateRequiredFields]);
+
+
+
+ 
 
   const resetForm = () => {
     setOpenForm(false);

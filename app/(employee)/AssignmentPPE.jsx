@@ -522,8 +522,9 @@ function dataURLtoFile(dataurl, filename) {
   
       let response;
       if (isEditing && editingUserId) {
-        console.log("form data",formDataToSend)
+        
         response = await updateAssignment(editingUserId, formDataToSend);
+        response = data.map((item) => item.id === editingUserId ? { ...item,...formData } : item);
       } else {
         response = await createAssignment(formDataToSend);
       }
@@ -552,10 +553,10 @@ function dataURLtoFile(dataurl, filename) {
         });
         resetForm();
       } else {
-        throw new Error(result.message || result.error || "Error en la respuesta del servidor");
+        throw new Error(result.error || "Error en la respuesta del servidor");
       }
     } catch (error) {
-      console.error("Error en handleSubmit:", error);
+     
       resetForm();
       setSnackbarMessage({
         text: error.message || "Error al enviar los datos",
