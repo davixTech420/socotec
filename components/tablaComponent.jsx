@@ -325,14 +325,22 @@ const TablaComponente = ({
           </Chip>
         );
       }
-      if (column.key === "imagenes" || column.key == "fotoppe") {
+      if (
+        column.key === "imagenes" ||
+        column.key == "fotoppe" ||
+        column.key == "fotoRetorno"
+      ) {
         return (
           <>
             {/*   <ImageCarousel images={item?.imagenes} /> */}
             <Image
               source={{
                 uri: SrcImagen(
-                  column.key == "imagenes" ? item.imagenes[0].uri : item.fotoppe
+                  column.key == "imagenes"
+                    ? item.imagenes[0].uri
+                    : column.key == "fotoRetorno"
+                    ? item.fotoRetorno
+                    : item.fotoppe
                 ),
               }}
               style={{ width: 100, height: 100 }}
@@ -416,7 +424,7 @@ const TablaComponente = ({
             </Menu>
           </View>
           <ScrollView style={styles.tableWrapper}>
-            <ScrollView horizontal={isSmallScreen || isMediumScreen}>
+            <ScrollView horizontal>
               <View style={styles.tableContainer}>
                 <DataTable style={styles.table}>
                   <DataTable.Header style={styles.header}>
@@ -545,7 +553,6 @@ const TablaComponente = ({
               </View>
             </ScrollView>
           </ScrollView>
-
           <DataTable.Pagination
             page={page}
             numberOfPages={Math.ceil(
@@ -562,7 +569,6 @@ const TablaComponente = ({
             selectPageDropdownLabel={"Filas por página"}
           />
         </Animated.View>
-
         <Portal>
           <Dialog
             visible={deleteConfirmVisible}
@@ -579,7 +585,6 @@ const TablaComponente = ({
               <Button onPress={handleDeleteConfirm}>Eliminar</Button>
             </Dialog.Actions>
           </Dialog>
-
           <Dialog
             visible={toggleActiveConfirmVisible}
             onDismiss={() => setToggleActiveConfirmVisible(false)}
@@ -595,7 +600,6 @@ const TablaComponente = ({
               <Button onPress={handleToggleActiveConfirm}>Activar</Button>
             </Dialog.Actions>
           </Dialog>
-
           <Dialog
             visible={toggleInactiveConfirmVisible}
             onDismiss={() => setToggleInactiveConfirmVisible(false)}

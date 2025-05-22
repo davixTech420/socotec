@@ -35,8 +35,11 @@ import {
   updatePortfolio,
 } from "@/services/adminServices";
 
-import { getApique,createApique ,deleteApique} from "@/services/employeeService";
-
+import {
+  getApique,
+  createApique,
+  deleteApique,
+} from "@/services/employeeService";
 
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFViewComponent from "@/components/PdfViewComponent";
@@ -50,8 +53,16 @@ const columns = [
   { key: "tituloObra", title: "Titulo Obra", sortable: true, width: 100 },
   { key: "localizacion", title: "Localizacion", sortable: true },
   { key: "albaranNum", title: "Albaran No", sortable: true },
-  { key: "fechaEjecucionInicio", title: "Fecha Ejecucion Inicio", sortable: true },
-  { key: "fechaEjecucionFinal", title: "Fecha Ejecucion Final", sortable: true },
+  {
+    key: "fechaEjecucionInicio",
+    title: "Fecha Ejecucion Inicio",
+    sortable: true,
+  },
+  {
+    key: "fechaEjecucionFinal",
+    title: "Fecha Ejecucion Final",
+    sortable: true,
+  },
   { key: "fechaEmision", title: "Fecha Emision", sortable: true },
   { key: "tipo", title: "Tipo", sortable: true },
   { key: "operario", title: "Operario", sortable: true },
@@ -60,7 +71,6 @@ const columns = [
   { key: "profundidadApique", title: "Profundidad Apique", sortable: true },
   { key: "imagenes", title: "Imagenes", sortable: true },
   { key: "observaciones", title: "Observaciones", sortable: true },
-  { key: "estado", title: "Estado", sortable: true },
   { key: "createdAt", title: "Creado", sortable: true },
   { key: "updatedAt", title: "Modificado", sortable: true },
 ];
@@ -88,7 +98,7 @@ const Apique = () => {
     anchoApique: "",
     profundidadApique: "",
     observaciones: "",
-    imagenes: []
+    imagenes: [],
   });
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -247,20 +257,20 @@ const Apique = () => {
     setIsEditing(false);
     setEditingInventoryId(null);
     setFormData({
-        informeNum: "",
-        cliente: "",
-        tituloObra: "",
-        localizacion: "",
-        albaranNum: "",
-        fechaEjecucionInicio: "",
-        fechaEjecucionFinal: "",
-        fechaEmision: "",
-        operario: "",
-        largoApique: "",
-        anchoApique: "",
-        profundidadApique: "",
-        observaciones: "",
-        imagenes: []
+      informeNum: "",
+      cliente: "",
+      tituloObra: "",
+      localizacion: "",
+      albaranNum: "",
+      fechaEjecucionInicio: "",
+      fechaEjecucionFinal: "",
+      fechaEmision: "",
+      operario: "",
+      largoApique: "",
+      anchoApique: "",
+      profundidadApique: "",
+      observaciones: "",
+      imagenes: [],
     });
   };
 
@@ -408,7 +418,7 @@ const Apique = () => {
     console.log(`Error loading image at index ${index}:`, error);
     setImageLoading((prev) => ({ ...prev, [index]: false }));
   };
-console.log("apique",data);
+  console.log("apique", data);
   return (
     <>
       <PaperProvider theme={theme}>
@@ -504,11 +514,7 @@ console.log("apique",data);
         <AlertaScroll
           onOpen={openForm}
           onClose={resetForm}
-          title={
-            isEditing
-              ? "Editar Apique"
-              : "Nueva Apique"
-          }
+          title={isEditing ? "Editar Apique" : "Nueva Apique"}
           content={
             <>
               <View style={isSmallScreen ? styles.fullWidth : { width: "48%" }}>
@@ -636,7 +642,7 @@ console.log("apique",data);
                   </ScrollView>
                 )}
               </View>
-              </>
+            </>
           }
           actions={[
             <Button
@@ -653,7 +659,7 @@ console.log("apique",data);
               key="submit"
               onPress={handleSubmit}
               mode="contained"
-              style={[styles.formButton, { backgroundColor: "#00ACE8" }]} 
+              style={[styles.formButton, { backgroundColor: "#00ACE8" }]}
               loading={loading}
               disabled={loading}
             >
@@ -777,7 +783,7 @@ const styles = StyleSheet.create({
   },
   buttonImages: {
     marginBottom: 16,
-    backgroundColor:"#00ACE8"
+    backgroundColor: "#00ACE8",
   },
   imageScrollView: {
     maxHeight: 300,

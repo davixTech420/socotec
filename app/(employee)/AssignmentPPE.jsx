@@ -87,18 +87,18 @@ export default function Hiring() {
     { label: "Confirmado", value: "Confirmado" },
     { label: "Devuelto", value: "Devuelto" },
   ];
-// Utilidad para convertir base64/dataURL a File
-function dataURLtoFile(dataurl, filename) {
-  const arr = dataurl.split(',');
-  const mime = arr[0].match(/:(.*?);/)[1];
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
+  // Utilidad para convertir base64/dataURL a File
+  function dataURLtoFile(dataurl, filename) {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
   }
-  return new File([u8arr], filename, { type: mime });
-}
 
   // Función para mostrar mensajes al usuario
   const showMessage = (text, type = "info") => {
@@ -362,8 +362,7 @@ function dataURLtoFile(dataurl, filename) {
     }
   }, [formData, isEditing, editingUserId, data]); */
 
-
-/* 
+  /* 
   const handleSubmit = useCallback(async () => {
     try {
       const requiredFields = isEditing
@@ -469,83 +468,93 @@ function dataURLtoFile(dataurl, filename) {
   const handleSubmit = useCallback(async () => {
     try {
       const formDataToSend = new FormData();
-      
+
       // Añadir campos básicos
       formDataToSend.append("inventoryId", formData.inventoryId);
       formDataToSend.append("userId", formData.userId);
       formDataToSend.append("asignadorId", formData.asignadorId || "");
-      formDataToSend.append("fechaConfirmacion", formData.fechaConfirmacion || "");
+      formDataToSend.append(
+        "fechaConfirmacion",
+        formData.fechaConfirmacion || ""
+      );
       formDataToSend.append("fechaRetorno", formData.fechaRetorno || "");
       formDataToSend.append("estado", formData.estado);
-  
+
       // Función mejorada para manejar imágenes
       const handleImageUpload = (fieldName, imageData) => {
         if (!imageData) return;
-      
+
         // Si es dataURL (base64), convertir a File (solo para web)
-        if (typeof imageData === 'string' && imageData.startsWith('data:')) {
+        if (typeof imageData === "string" && imageData.startsWith("data:")) {
           const filename = `${fieldName}_${Date.now()}.jpg`;
           const file = dataURLtoFile(imageData, filename);
           formDataToSend.append(fieldName, file, file.name);
           return;
         }
-      
+
         // Caso Web (File object)
         if (imageData instanceof File || imageData instanceof Blob) {
           formDataToSend.append(fieldName, imageData, imageData.name);
           return;
         }
-      
+
         // Caso React Native (URI local)
-        if (typeof imageData === 'string' && imageData.match(/^(file|content):\/\//)) {
-          const filename = imageData.split('/').pop();
-          const type = filename.split('.').pop() || 'jpeg';
+        if (
+          typeof imageData === "string" &&
+          imageData.match(/^(file|content):\/\//)
+        ) {
+          const filename = imageData.split("/").pop();
+          const type = filename.split(".").pop() || "jpeg";
           formDataToSend.append(fieldName, {
             uri: imageData,
             name: filename,
-            type: `image/${type}`
+            type: `image/${type}`,
           });
           return;
         }
-      
+
         // Caso URL remota o ruta existente
-        if (typeof imageData === 'string') {
+        if (typeof imageData === "string") {
           formDataToSend.append(fieldName, imageData);
         }
       };
-      
-      
-  
+
       // Adjuntar fotos
       await handleImageUpload("fotoppe", formData.fotoppe);
       await handleImageUpload("fotoRetorno", formData.fotoRetorno);
-  
+
       let response;
       if (isEditing && editingUserId) {
-        
+        console.log("data", formDataToSend);
         response = await updateAssignment(editingUserId, formDataToSend);
-        response = data.map((item) => item.id === editingUserId ? { ...item,...formData } : item);
+        response = data.map((item) =>
+          item.id === editingUserId ? { ...item, ...formData } : item
+        );
       } else {
         response = await createAssignment(formDataToSend);
       }
-  
+
       // Verificar si la respuesta existe antes de intentar parsearla
       if (!response) {
         throw new Error("No se recibió respuesta del servidor");
       }
-  
+
       // Manejar diferentes tipos de respuesta
-      const result = typeof response.json === 'function' 
-        ? await response.json() 
-        : response;
-  
-      if (response.ok || (response.status && response.status >= 200 && response.status < 300)) {
+      const result =
+        typeof response.json === "function" ? await response.json() : response;
+
+      if (
+        response.ok ||
+        (response.status && response.status >= 200 && response.status < 300)
+      ) {
         const newData = isEditing
-          ? data.map(item => 
-              item.id === editingUserId ? { ...item, ...result.assignment } : item
+          ? data.map((item) =>
+              item.id === editingUserId
+                ? { ...item, ...result.assignment }
+                : item
             )
           : [...data, result.assignment || result];
-        
+
         setData(newData);
         setSnackbarMessage({
           text: `Equipo ${isEditing ? "actualizado" : "creado"} exitosamente`,
@@ -556,7 +565,6 @@ function dataURLtoFile(dataurl, filename) {
         throw new Error(result.error || "Error en la respuesta del servidor");
       }
     } catch (error) {
-     
       resetForm();
       setSnackbarMessage({
         text: error.message || "Error al enviar los datos",
@@ -566,8 +574,6 @@ function dataURLtoFile(dataurl, filename) {
       setSnackbarVisible(true);
     }
   }, [formData, isEditing, editingUserId, data, resetForm]);
-
- 
 
   const handleEdit = useCallback((item) => {
     setFormData({
@@ -641,8 +647,10 @@ function dataURLtoFile(dataurl, filename) {
               onSearch={console.log}
               onFilter={console.log}
               onDelete={async (item) => {
-                await deleteAssignment(item.id)
-                setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
+                await deleteAssignment(item.id);
+                setData((prevData) =>
+                  prevData.filter((dataItem) => dataItem.id !== item.id)
+                );
               }}
               onDataUpdate={setData}
               onCreate={handleSubmit}

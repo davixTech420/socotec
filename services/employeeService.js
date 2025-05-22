@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://192.168.208.230:${port}/api/employee`;
+const baseUrl = `http://192.168.128.13:${port}/api/employee`;
 
 const makeRequest = async (method, url, data = null) => {
   try {
@@ -47,12 +47,11 @@ export const createApique = async (data) => {
       const response = await axios.post(`${baseUrl}/apique`,data, {
           headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
+              /* "Content-Type": "multipart/form-data", */
           },
       });
       return response.data;
   } catch (error) {
-      console.error("Error al obtener los permisos", error);
       throw error;
   }
 }

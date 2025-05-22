@@ -280,8 +280,7 @@ export default function Hiring() {
               value={formData.userId}
             />
 
-            
-            {[
+            {/* {[
               "fechaConfirmacion",
               "fechaRetorno",
               ...(isEditing ? [] : []),
@@ -307,7 +306,8 @@ export default function Hiring() {
                 }}
                 errorMessage={`Por favor, introduce un ${field} válido`}
               />
-            ))}
+            ))} */}
+
             <DropdownComponent
               options={optionState}
               onSelect={(value) => {

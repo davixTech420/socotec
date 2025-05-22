@@ -125,11 +125,11 @@ const Apiques = () => {
     return emptyFields;
   }, []);
 
-  const handleSubmit = useCallback(async () => {
+  /* const handleSubmit = useCallback(async () => {
     try {
       setLoading(true);
       // Campos obligatorios
-      /* const requiredFields = [
+      const requiredFields = [
         "nombre",
         "cliente",
         "ubicacion",
@@ -144,7 +144,7 @@ const Apiques = () => {
         throw new Error(
           `Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`
         );
-      } */
+      }
 
       // Crear FormData para enviar al backend
       const form = new FormData();
@@ -240,6 +240,124 @@ const Apiques = () => {
       setSnackbarVisible(true);
     }
   }, [formData, isEditing, editingInventoryId, data, validateRequiredFields]);
+ */
+
+
+  const handleSubmit = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Crear FormData para enviar al backend
+      const form = new FormData();
+  
+      // Agregar todos los campos de texto al FormData
+      Object.keys(formData).forEach((key) => {
+        if (key !== "imagenes" && formData[key]) {
+          form.append(key, formData[key]);
+        }
+      });
+  
+      // Manejar imágenes de manera consistente con takePhoto
+      if (formData.imagenes && formData.imagenes.length > 0) {
+        for (const image of formData.imagenes) {
+          if (image.isFromAPI) {
+            // Imagen que ya existe en la API
+            form.append("existingImages[]", image.uri);
+            continue;
+          }
+  
+          // Usar el mismo enfoque que en handleSubmit del primer código
+          if (Platform.OS === "web") {
+            // Caso Web
+            if (image.file) {
+              // Si ya tenemos el File object (de dataURLtoFile)
+              form.append("imagenes", image.file, image.name);
+            } else if (image.uri.startsWith("data:")) {
+              // Convertir data URL a File
+              const file = dataURLtoFile(image.uri, image.name);
+              form.append("imagenes", file, file.name);
+            } else {
+              // URL o Blob
+              try {
+                const response = await fetch(image.uri);
+                const blob = await response.blob();
+                form.append(
+                  "imagenes",
+                  new File([blob], image.name, {
+                    type: image.type || "image/jpeg",
+                  })
+                );
+              } catch (error) {
+                console.error("Error procesando imagen web:", error);
+                form.append("imagenes", image.uri);
+              }
+            }
+          } else {
+            // Caso React Native (móvil)
+            if (image.uri.match(/^(file|content):\/\//)) {
+              // URI local - usar el mismo formato que en el primer handleSubmit
+              form.append("imagenes", {
+                uri: image.uri,
+                name: image.name,
+                type: image.type || "image/jpeg",
+              });
+            } else {
+              // Otros casos (poco probable)
+              form.append("imagenes", image.uri);
+            }
+          }
+        }
+      }
+  
+      // Enviar al backend
+      let response;
+      if (isEditing) {
+        response = await updatePortfolio(editingInventoryId, form);
+      } else {
+        response = await createApique(form);
+      }
+  
+      // Manejar respuesta
+      if (!response) {
+        throw new Error("No se recibió respuesta del servidor");
+      }
+  
+      const result = typeof response.json === "function" ? await response.json() : response;
+  
+      if (response.ok || (response.status && response.status >= 200 && response.status < 300)) {
+        const newData = isEditing
+          ? data.map((item) =>
+              item.id === editingInventoryId ? { ...item, ...result.apiques } : item
+            )
+          : [...data, result.apiques || result];
+  
+        setData(newData);
+        setSnackbarMessage({
+          text: `Apique ${isEditing ? "actualizado" : "creado"} exitosamente`,
+          type: "success",
+        });
+        resetForm();
+      } else {
+        throw new Error(result.error || "Error en la respuesta del servidor");
+      }
+    } catch (error) {
+      console.error("Error en handleSubmit:", error);
+      setSnackbarMessage({
+        text: error.message || "Error al procesar el formulario",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+      setSnackbarVisible(true);
+    }
+  }, [formData, isEditing, editingInventoryId, data, resetForm]);
+
+
+
+
+
+
+
 
   const resetForm = () => {
     setOpenForm(false);
@@ -263,35 +381,7 @@ const Apiques = () => {
     });
   };
 
-  const handleAction = useCallback(async (action, item) => {
-    try {
-      setLoading(true);
-      await action(item.id);
-      setData((prevData) =>
-        prevData.map((dataItem) =>
-          dataItem.id === item.id
-            ? { ...dataItem, estado: action === activePortfolio }
-            : dataItem
-        )
-      );
-    } catch (error) {
-      console.error(
-        `Error al ${
-          action === activePortfolio ? "activar" : "desactivar"
-        } el apique:`,
-        error
-      );
-      setSnackbarMessage({
-        text: `Error al ${
-          action === activePortfolio ? "activar" : "desactivar"
-        } el apique`,
-        type: "error",
-      });
-      setSnackbarVisible(true);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  
 
   const handleEdit = useCallback((item) => {
     try {
@@ -337,7 +427,7 @@ const Apiques = () => {
     }
   }, []);
 
-  const pickImages = async () => {
+  /* const pickImages = async () => {
     try {
       // Solo solicitar permisos en dispositivos móviles
       if (Platform.OS !== "web") {
@@ -382,7 +472,84 @@ const Apiques = () => {
       });
       setSnackbarVisible(true);
     }
+  }; */
+
+
+
+  const pickImages = async () => {
+    try {
+      // Solicitar permisos en dispositivos móviles
+      if (Platform.OS !== "web") {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "Permisos requeridos",
+            "Necesitamos acceso a la galería para seleccionar fotos.",
+            [
+              { text: "Cancelar", style: "cancel" },
+              {
+                text: "Intentar de nuevo",
+                onPress: pickImages,
+              },
+            ]
+          );
+          return;
+        }
+      }
+  
+      const pickerOptions = {
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 0.7, // Misma calidad que en takePhoto
+        allowsEditing: false,
+        // Opciones adicionales para consistencia
+        aspect: [4, 3], // Misma relación de aspecto que en takePhoto
+      };
+  
+      const result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
+  
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const newImages = result.assets.map((asset) => {
+          // Para web, convertir a File object si es data URL
+          if (Platform.OS === "web" && asset.uri.startsWith("data:")) {
+            const file = dataURLtoFile(asset.uri, asset.fileName || `image-${Date.now()}.jpg`);
+            return {
+              file, // Guardar el File object para web
+              uri: asset.uri,
+              type: asset.type || "image/jpeg",
+              name: asset.fileName || file.name,
+              isFromAPI: false,
+            };
+          }
+  
+          // Para móviles, usar el mismo formato que en takePhoto
+          return {
+            uri: asset.uri,
+            type: asset.type || "image/jpeg",
+            name: asset.fileName || asset.uri.split("/").pop() || `image-${Date.now()}.jpg`,
+            isFromAPI: false,
+          };
+        });
+  
+        setFormData((prevData) => ({
+          ...prevData,
+          imagenes: [...prevData.imagenes, ...newImages],
+        }));
+      }
+    } catch (error) {
+      console.error("Error seleccionando imágenes:", error);
+      setSnackbarMessage({
+        text: `Error al seleccionar imágenes: ${error.message || "Error desconocido"}`,
+        type: "error",
+      });
+      setSnackbarVisible(true);
+    }
   };
+
+
+
+
+
 
   const removeImage = (index) => {
     setFormData((prevData) => {
@@ -577,10 +744,14 @@ const Apiques = () => {
                 </Button>
 
                 {formData.imagenes.length > 0 && (
+              
                   <ScrollView
+                  showsVerticalScrollIndicator={!isSmallScreen}
                     horizontal={!isSmallScreen}
                     style={styles.imageScrollView}
                     contentContainerStyle={styles.imageScrollContent}
+                    scrollEnabled={true}
+                  
                   >
                     {formData.imagenes.map((image, index) => (
                       <Card
@@ -634,6 +805,7 @@ const Apiques = () => {
                       </Card>
                     ))}
                   </ScrollView>
+               
                 )}
               </View>
             </>
@@ -764,6 +936,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderTopWidth: 1,
     borderTopColor: "#eee",
+    flex:1,
   },
   imagesTitle: {
     fontSize: 18,
