@@ -41,86 +41,97 @@ export const getDashboard = async () => {
 //routes for files apique
 
 export const getApique = async () => {
-  return makeRequest("get","/apique");
-}
+  return makeRequest("get", "/apique");
+};
 
 export const createApique = async (data) => {
   try {
-      const token = await AsyncStorage.getItem("userToken");
-      const response = await axios.post(`${baseUrl}/apique`,data, {
-          headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-          },
-      });
-      return response.data;
+    const token = await AsyncStorage.getItem("userToken");
+    const response = await axios.post(`${baseUrl}/apique`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
   } catch (error) {
-      console.error("Error al obtener los permisos", error);
-      throw error;
+    throw error;
   }
-}
-export const deleteApique = async (id) => {
-  return makeRequest("delete",`/apique/${id}`);
-}
+};
 
+export const updateApique = async (id, data) => {
+  try {
+    const token = await AsyncStorage.getItem("userToken");
+    const response = await axios.put(`${baseUrl}/apique/${id}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteApique = async (id) => {
+  return makeRequest("delete", `/apique/${id}`);
+};
 
 //routes the ppe protect
 export const getAssignment = async () => {
-  return makeRequest("get","/assignment");
-}
+  return makeRequest("get", "/assignment");
+};
 export const createAssignment = async (data) => {
-  return makeRequest("post","/assignment",data);
-}
+  return makeRequest("post", "/assignment", data);
+};
 
-export const updateAssignment = async (id,data) => {
-  return makeRequest("put",`/assignment/${id}`,data);
-}
+export const updateAssignment = async (id, data) => {
+  return makeRequest("put", `/assignment/${id}`, data);
+};
 export const deleteAssignment = async (id) => {
-  return makeRequest("delete",`/assignment/${id}`);
-}
-
-
+  return makeRequest("delete", `/assignment/${id}`);
+};
 
 // rutas de candidatos
 
 export const getHiring = async () => {
-  return makeRequest("get","/hiring");
-}
+  return makeRequest("get", "/hiring");
+};
 export const createHiring = async (data) => {
-  return makeRequest("post","/hiring",data);
-}
+  return makeRequest("post", "/hiring", data);
+};
 
-export const updateHiring = async (id,data) => {
-  return makeRequest("put", `/hiring/${id}`,data);
-}
+export const updateHiring = async (id, data) => {
+  return makeRequest("put", `/hiring/${id}`, data);
+};
 
 export const deleteHiring = async (id) => {
   return makeRequest("delete", `/hiring/${id}`);
-}
+};
 /**
- * 
+ *
  * end point tickets de it
  */
 
 export const getTickets = async () => {
-  return makeRequest("get","/ticket");
-}
+  return makeRequest("get", "/ticket");
+};
 export const createTicket = async (data) => {
-  return makeRequest("post","/ticket",data);
-}
+  return makeRequest("post", "/ticket", data);
+};
 
 export const updateTicket = async (id) => {
-  return makeRequest("put", `/ticket/${id}`,data);
-}
+  return makeRequest("put", `/ticket/${id}`, data);
+};
 
 export const deleteTicket = async (id) => {
-  return makeRequest("delete",`/ticket/${id}`)
-}
+  return makeRequest("delete", `/ticket/${id}`);
+};
 
 /**
- * 
+ *
  */
-
 
 /**
  * endpoints para las tareas
@@ -241,10 +252,9 @@ export const createEmployee = async (employee) => {
 
 //crear usuario api
 
-export const getUsersCampoAD = async () =>{
-  return makeRequest("get","/usersCampo");
-}
-
+export const getUsersCampoAD = async () => {
+  return makeRequest("get", "/usersCampo");
+};
 
 export const createUser = async (user) => {
   try {
@@ -972,7 +982,6 @@ export const createPortfolio = async (data) => {
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
-    console.log("Error al crear el portafolio:", error);
     throw error;
   }
 };

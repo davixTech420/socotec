@@ -511,10 +511,10 @@ export default function App() {
           >
             {(props) => (
               <>
-              {/* <AnimatedScreen style={animatedStyle}> */}
+                {/* <AnimatedScreen style={animatedStyle}> */}
                 <Apiques {...props} />
-              {/*  </AnimatedScreen>  */}
-             </>
+                {/*  </AnimatedScreen>  */}
+              </>
             )}
           </Drawer.Screen>
 

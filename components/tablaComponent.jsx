@@ -516,8 +516,7 @@ const TablaComponente = ({
 
                               {item.informeNum != null ? (
                                 <ExcelApique
-                                  data={item}
-                                  onGenerate={handleGeneration}
+                                  id={item.id}
                                 />
                               ) : null}
 

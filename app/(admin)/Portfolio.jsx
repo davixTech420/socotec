@@ -37,12 +37,7 @@ import {
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFViewComponent from "@/components/PdfViewComponent";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from 'expo-file-system';
 import { SrcImagen } from "@/services/publicServices";
-
-
-
-
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -113,11 +108,8 @@ const Portfolio = () => {
     return emptyFields;
   }, []);
 
-
-
-
   function dataURLtoFile(dataurl, filename) {
-    const arr = dataurl.split(',');
+    const arr = dataurl.split(",");
     const mime = arr[0].match(/:(.*?);/)[1];
     const bstr = atob(arr[1]);
     let n = bstr.length;
@@ -127,21 +119,6 @@ const Portfolio = () => {
     }
     return new File([u8arr], filename, { type: mime });
   }
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -165,112 +142,74 @@ const Portfolio = () => {
       }
 
       // Crear FormData para enviar al backend
-      const form = new FormData();
-      const handleImageUpload = (fieldName, imageData) => {
-        if (!imageData) return;
+      const formDataToSend = new FormData();
       
-        // Si es dataURL (base64), convertir a File (solo para web)
-        if (typeof imageData === 'string' && imageData.startsWith('data:')) {
-          const filename = `${fieldName}_${Date.now()}.jpg`;
-          const file = dataURLtoFile(imageData, filename);
-          formData.append(fieldName, file, file.name);
-          return;
-        }
-      
-        // Caso Web (File object)
-        if (imageData instanceof File || imageData instanceof Blob) {
-          formData.append(fieldName, imageData, imageData.name);
-          return;
-        }
-      
-        // Caso React Native (URI local)
-        if (typeof imageData === 'string' && imageData.match(/^(file|content):\/\//)) {
-          const filename = imageData.split('/').pop();
-          const type = filename.split('.').pop() || 'jpeg';
-          formData.append(fieldName, {
-            uri: imageData,
-            name: filename,
-            type: `image/${type}`
-          });
-          return;
-        }
-      
-        // Caso URL remota o ruta existente
-        if (typeof imageData === 'string') {
-          formData.append(fieldName, imageData);
-        }
-      };
-      await handleImageUpload("imagenes",formData.imagenes);
-      
-     /*  // Agregar todos los campos de texto al FormData
       Object.keys(formData).forEach((key) => {
         if (key !== "imagenes" && formData[key]) {
-          form.append(key, formData[key]);
+          formDataToSend.append(key, formData[key]);
         }
       });
 
-      // Manejar imágenes según la plataforma
-      if (formData.imagenes && formData.imagenes.length > 0) {
-        if (Platform.OS === "web") {
-          // En web, procesar las imágenes como archivos
-          for (const image of formData.imagenes) {
-            if (image.isFromAPI) {
-              // Imagen que ya existe en la API
-              form.append("existingImages[]", image.uri);
-            } else {
-              try {
-                // Convertir la imagen a blob para web
-                const response = await fetch(image.uri);
-                const blob = await response.blob();
-                form.append(
-                  "imagenes",
-                  new File([blob], image.name || `photo_${Date.now()}.jpg`, {
-                    type: image.type || "image/jpeg",
-                  })
-                );
-              } catch (error) {
-                console.error("Error processing web image:", error);
-                // Fallback si hay error
-                form.append("imagenes", image.uri);
-              }
-            }
-          }
-        } else {
-          // En móvil, usar el formato específico que espera el backend
-          for (const image of formData.imagenes) {
-            if (image.isFromAPI) {
-              // Imagen que ya existe en la API
-              form.append("existingImages[]", image.uri);
-            } else {
-              // En móvil, usar el formato de archivo que espera el backend
-              // IMPORTANTE: Este es el formato que el backend espera para móviles
-              const fileAttachment = {
-                uri: image.uri,
-                type: image.type || "image/jpeg",
-                name: image.name || `photo_${Date.now()}.jpg`,
-              };
+      const handleImageUpload = (imageData, index) => {
+        if (!imageData) return;
 
-              // Asegurarse de que se envía como "fileAttachment" como espera el backend
-              form.append("imagenes", fileAttachment);
-            }
-          }
+        const fieldName = "imagenes"; // Para múltiples imágenes
+
+        // Si es dataURL (base64), convertir a File (solo para web)
+        if (
+          typeof imageData.uri === "string" &&
+          imageData.uri.startsWith("data:")
+        ) {
+          const filename = imageData.name || `image_${Date.now()}_${index}.jpg`;
+          const file = dataURLtoFile(imageData.uri, filename);
+          formDataToSend.append(fieldName, file, file.name);
+          return;
         }
-      }
 
-      // Log para depuración
-      console.log("FormData entries:");
-      for (const [key, value] of form.entries()) {
-        console.log(`${key}:`, value);
-      }
- */
+        // Caso Web (File object)
+        if (imageData.file instanceof File || imageData.file instanceof Blob) {
+          formDataToSend.append(fieldName, imageData.file, imageData.name);
+          return;
+        }
+
+        // Caso React Native (URI local)
+        if (
+          typeof imageData.uri === "string" &&
+          imageData.uri.match(/^(file|content):\/\//)
+        ) {
+          const filename =
+            imageData.name ||
+            imageData.uri.split("/").pop() ||
+            `image_${index}.jpg`;
+          const type = filename.split(".").pop() || "jpeg";
+          formDataToSend.append(fieldName, {
+            uri: imageData.uri,
+            name: filename,
+            type: `image/${type}`,
+          });
+          return;
+        }
+
+        // Caso imagen existente de la API
+        if (imageData.isFromAPI && typeof imageData.uri === "string") {
+          formDataToSend.append(fieldName, imageData.uri);
+        }
+      };
+
+      // Manejar imágenes en formData
+      formData.imagenes.forEach((imageData, index) => {
+        handleImageUpload(imageData, index);
+      });
+
       let newData;
       if (isEditing) {
-        await updatePortfolio(editingInventoryId, form);
+        await updatePortfolio(editingInventoryId, formDataToSend);
         newData = data.map((item) =>
           item.id === editingInventoryId ? { ...item, ...formData } : item
         );
       } else {
-        const newUser = await createPortfolio(form);
+        console.log(formDataToSend);
+        const newUser = await createPortfolio(formDataToSend);
         if (!newUser) throw new Error("Error al crear el proyecto");
         newData = [...data, newUser.proyect];
       }
@@ -293,10 +232,6 @@ const Portfolio = () => {
       setSnackbarVisible(true);
     }
   }, [formData, isEditing, editingInventoryId, data, validateRequiredFields]);
-
-
-
- 
 
   const resetForm = () => {
     setOpenForm(false);
@@ -459,6 +394,10 @@ const Portfolio = () => {
     setImageLoading((prev) => ({ ...prev, [index]: false }));
   };
 
+
+
+
+
   return (
     <>
       <PaperProvider theme={theme}>
@@ -560,10 +499,7 @@ const Portfolio = () => {
               : "Nuevo proyecto de portafolio"
           }
           content={
-
-
             <>
-          
               <View style={isSmallScreen ? styles.fullWidth : { width: "48%" }}>
                 {[
                   "nombre",
@@ -682,7 +618,7 @@ const Portfolio = () => {
                   </ScrollView>
                 )}
               </View>
-              </>
+            </>
           }
           actions={[
             <Button
@@ -699,7 +635,7 @@ const Portfolio = () => {
               key="submit"
               onPress={handleSubmit}
               mode="contained"
-              style={[styles.formButton, { backgroundColor: "#00ACE8" }]} 
+              style={[styles.formButton, { backgroundColor: "#00ACE8" }]}
               loading={loading}
               disabled={loading}
             >
@@ -823,7 +759,7 @@ const styles = StyleSheet.create({
   },
   buttonImages: {
     marginBottom: 16,
-    backgroundColor:"#00ACE8"
+    backgroundColor: "#00ACE8",
   },
   imageScrollView: {
     maxHeight: 300,
