@@ -19,19 +19,19 @@ import Breadcrumb from "@/components/BreadcrumbComponent";
 import AddComponent from "@/components/AddComponent";
 import { AlertaScroll } from "@/components/alerta";
 import InputComponent from "@/components/InputComponent";
+import { getCampoUsers, getActiveInventory } from "@/services/employeeService";
 import {
-  getCampoUsers,
- 
-  getActiveInventory,
-} from "@/services/employeeService";
-import { getAssignment,createAssignment,updateAssignment,deleteAssignment } from "@/services/adminServices";
+  getAssignment,
+  createAssignment,
+  updateAssignment,
+  deleteAssignment,
+} from "@/services/adminServices";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
 import { useAuth } from "@/context/userContext";
 import DropdownComponent from "@/components/DropdownComponent";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFPreviewButton from "@/components/PdfViewComponent";
-
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -52,8 +52,8 @@ export default function Hiring() {
   const [inventario, setInventario] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [openForm, setOpenForm] = useState(false);
-  const { user } = useAuth()
-  const [profileData,setProfileData] = useState({});
+  const { user } = useAuth();
+  const [profileData, setProfileData] = useState({});
   const [formData, setFormData] = useState({
     inventoryId: "",
     userId: "",
@@ -83,7 +83,9 @@ export default function Hiring() {
       getAssignment().then(setData).catch(console.error);
       getActiveInventory().then(setInventario).catch(console.error);
       getCampoUsers().then(setUsuarios).catch(console.error);
-      user().then(setProfileData).catch(error => console.log('Error user data:', error));
+      user()
+        .then(setProfileData)
+        .catch((error) => console.log("Error user data:", error));
     }, [])
   );
 
@@ -101,10 +103,10 @@ export default function Hiring() {
   const handleSubmit = useCallback(async () => {
     try {
       const requiredFields = isEditing
-        ? ["inventoryId", "userId",  "estado"]
-        : ["inventoryId", "userId",  "estado"];
+        ? ["inventoryId", "userId", "estado"]
+        : ["inventoryId", "userId", "estado"];
       const emptyFields = requiredFields.filter(
-        (field) => !formData[field] &&  formData[field].trim() === ""
+        (field) => !formData[field] && formData[field].trim() === ""
       );
 
       if (emptyFields.length > 0) {
@@ -152,7 +154,7 @@ export default function Hiring() {
     setFormData({
       inventoryId: "",
       userId: "",
-      asignadorId:profileData?.id || "",
+      asignadorId: profileData?.id || "",
       fechaConfirmacion: "",
       fechaRetorno: "",
       fotoppe: "",
@@ -177,7 +179,7 @@ export default function Hiring() {
 
   const isSmallScreen = width < 600;
   console.log(data);
-  
+
   return (
     <>
       <ScrollView style={styles.container}>
@@ -280,34 +282,6 @@ export default function Hiring() {
               value={formData.userId}
             />
 
-            {/* {[
-              "fechaConfirmacion",
-              "fechaRetorno",
-              ...(isEditing ? [] : []),
-            ].map((field) => (
-              <InputComponent
-                key={field}
-                type={
-                  field === "fechaConfirmacion"
-                    ? "date"
-                    : field === "fechaRetorno"
-                    ? "date"
-                    : "text"
-                }
-                value={formData[field]}
-                onChangeText={(text) =>
-                  setFormData((prev) => ({ ...prev, [field]: text }))
-                }
-                label={field.charAt(0).toUpperCase() + field.slice(1)}
-                placeholder={`Introduce el ${field}`}
-                validationRules={{
-                  required: field !== "role" && field !== "fechaConfirmacion" && field !== "fechaRetorno",
-                  ...(field === "email" && { email: true }),
-                }}
-                errorMessage={`Por favor, introduce un ${field} válido`}
-              />
-            ))} */}
-
             <DropdownComponent
               options={optionState}
               onSelect={(value) => {
@@ -319,10 +293,20 @@ export default function Hiring() {
           </View>
         }
         actions={[
-          <Button key="cancel" mode="outlined" textColor="black" onPress={resetForm}>
+          <Button
+            key="cancel"
+            mode="outlined"
+            textColor="black"
+            onPress={resetForm}
+          >
             Cancelar
           </Button>,
-          <Button key="submit" mode="contained" style={{backgroundColor:"#00ACE8"}}  onPress={handleSubmit}>
+          <Button
+            key="submit"
+            mode="contained"
+            style={{ backgroundColor: "#00ACE8" }}
+            onPress={handleSubmit}
+          >
             {isEditing ? "Actualizar" : "Crear"}
           </Button>,
         ]}

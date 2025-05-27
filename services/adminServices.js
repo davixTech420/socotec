@@ -40,6 +40,12 @@ export const getDashboard = async () => {
 
 //routes for files apique
 
+export const getSampleApiqueId = async (id) => {
+  return makeRequest("get",`/sampleApique/${id}`);
+}
+
+
+
 export const getApique = async () => {
   return makeRequest("get", "/apique");
 };

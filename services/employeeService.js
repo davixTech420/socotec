@@ -104,6 +104,11 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
+
+export const getSampleApiqueId = async (id) => {
+  return makeRequest("get",`/sampleApique/${id}`);
+}
+
 export const getApique = async () => {
   return makeRequest("get", "/apique");
 };
@@ -114,7 +119,22 @@ export const createApique = async (data) => {
     const response = await axios.post(`${baseUrl}/apique`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
-        /* "Content-Type": "multipart/form-data", */
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateApique = async (id, data) => {
+  try {
+    const token = await AsyncStorage.getItem("userToken");
+    const response = await axios.put(`${baseUrl}/apique/${id}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;

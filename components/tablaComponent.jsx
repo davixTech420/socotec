@@ -332,7 +332,6 @@ const TablaComponente = ({
       ) {
         return (
           <>
-            {/*   <ImageCarousel images={item?.imagenes} /> */}
             <Image
               source={{
                 uri: SrcImagen(
@@ -498,6 +497,7 @@ const TablaComponente = ({
                             ]}
                           >
                             <View style={styles.actionButtons}>
+                              
                               <IconButton
                                 icon="delete-outline"
                                 size={20}
@@ -507,6 +507,7 @@ const TablaComponente = ({
                                   setDeleteConfirmVisible(true);
                                 }}
                               />
+
                               <IconButton
                                 icon="pencil-outline"
                                 size={20}
@@ -515,9 +516,7 @@ const TablaComponente = ({
                               />
 
                               {item.informeNum != null ? (
-                                <ExcelApique
-                                  id={item.id}
-                                />
+                                <ExcelApique id={item.id} />
                               ) : null}
 
                               {item.estado === true || item.estado === false ? (
@@ -578,10 +577,20 @@ const TablaComponente = ({
               <Text>¿Está seguro que desea eliminar este registro?</Text>
             </Dialog.Content>
             <Dialog.Actions>
-              <Button onPress={() => setDeleteConfirmVisible(false)}>
+              <Button
+                textColor="black"
+                mode="outlined"
+                onPress={() => setDeleteConfirmVisible(false)}
+              >
                 Cancelar
               </Button>
-              <Button onPress={handleDeleteConfirm}>Eliminar</Button>
+              <Button
+                buttonColor="red"
+                mode="contained"
+                onPress={handleDeleteConfirm}
+              >
+                Eliminar
+              </Button>
             </Dialog.Actions>
           </Dialog>
           <Dialog
@@ -593,10 +602,20 @@ const TablaComponente = ({
               <Text>¿Está seguro que desea activar este registro?</Text>
             </Dialog.Content>
             <Dialog.Actions>
-              <Button onPress={() => setToggleActiveConfirmVisible(false)}>
+              <Button
+                textColor="black"
+                mode="outlined"
+                onPress={() => setToggleActiveConfirmVisible(false)}
+              >
                 Cancelar
               </Button>
-              <Button onPress={handleToggleActiveConfirm}>Activar</Button>
+              <Button
+                buttonColor="#00ACE8"
+                mode="contained"
+                onPress={handleToggleActiveConfirm}
+              >
+                Activar
+              </Button>
             </Dialog.Actions>
           </Dialog>
           <Dialog
@@ -608,10 +627,20 @@ const TablaComponente = ({
               <Text>¿Está seguro que desea inactivar este registro?</Text>
             </Dialog.Content>
             <Dialog.Actions>
-              <Button onPress={() => setToggleInactiveConfirmVisible(false)}>
+              <Button
+                textColor="black"
+                mode="outlined"
+                onPress={() => setToggleInactiveConfirmVisible(false)}
+              >
                 Cancelar
               </Button>
-              <Button onPress={handleToggleInactiveConfirm}>Inactivar</Button>
+              <Button
+                buttonColor="red"
+                mode="contained"
+                onPress={handleToggleInactiveConfirm}
+              >
+                Inactivar
+              </Button>
             </Dialog.Actions>
           </Dialog>
         </Portal>

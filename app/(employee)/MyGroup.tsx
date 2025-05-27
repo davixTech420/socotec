@@ -358,6 +358,7 @@ const TaskBoard = () => {
         </Title>
         {selectedMember && (
           <Button
+            textColor="#00ACE8"
             mode="text"
             onPress={() => {
               setSelectedMember(null);
@@ -441,7 +442,7 @@ const TaskBoard = () => {
         </Modal>
       </Portal>
 
-      <FAB style={styles.fab} icon="plus" onPress={showModal} />
+      <FAB style={styles.fab} color="white" icon="plus" onPress={showModal} />
     </View>
   );
 };
@@ -633,6 +634,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   fab: {
+    backgroundColor: "#00ACE8",
     position: "absolute",
     margin: 16,
     right: 0,

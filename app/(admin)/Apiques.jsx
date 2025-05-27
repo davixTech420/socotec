@@ -1,3 +1,4 @@
+import React from "react";
 import { useCallback, useState } from "react";
 import {
   View,
@@ -7,6 +8,7 @@ import {
   Platform,
   TouchableOpacity,
   Image,
+  Animated as ReanimatedAnimated,
 } from "react-native";
 import {
   PaperProvider,
@@ -18,8 +20,16 @@ import {
   Text,
   Button,
   IconButton,
+  Divider,
 } from "react-native-paper";
 import { useFocusEffect } from "@react-navigation/native";
+import {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+} from "react-native-reanimated";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import TablaComponente from "@/components/tablaComponent";
 import Breadcrumb from "@/components/BreadcrumbComponent";
 import { AlertaScroll } from "@/components/alerta";
@@ -30,10 +40,324 @@ import {
   getApique,
   createApique,
   deleteApique,
+  getSampleApiqueId,
 } from "@/services/adminServices";
 import * as ImagePicker from "expo-image-picker";
 import { SrcImagen } from "@/services/publicServices";
 import { router } from "expo-router";
+
+// Componente para el selector de color
+const ColorPicker = ({ selectedColor, onColorSelect, colors }) => {
+  const theme = useTheme();
+
+  return (
+    <View style={styles.colorPickerContainer}>
+      <Text style={styles.colorPickerTitle}>Seleccionar Color</Text>
+      <View style={styles.colorGrid}>
+        {colors.map((color, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.colorOption,
+              { backgroundColor: color },
+              selectedColor === color && styles.selectedColor,
+            ]}
+            onPress={() => onColorSelect(color)}
+          >
+            {selectedColor === color && (
+              <Ionicons name="checkmark" size={20} color="#fff" />
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+};
+
+// Componente para una muestra individual
+const SampleCard = ({ sample, index, onEdit, onDelete, onToggleExpand }) => {
+  const theme = useTheme();
+  const expandAnimation = useSharedValue(sample.expanded ? 1 : 0);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      height: withTiming(expandAnimation.value * 120 + 60, { duration: 300 }),
+      opacity: withTiming(1, { duration: 200 }),
+    };
+  });
+
+  const toggleExpand = () => {
+    expandAnimation.value = withSpring(sample.expanded ? 0 : 1);
+    onToggleExpand(index);
+  };
+
+  return (
+    <ReanimatedAnimated.View style={[styles.sampleCard, animatedStyle]}>
+      <TouchableOpacity onPress={toggleExpand} style={styles.sampleHeader}>
+        <View style={styles.sampleHeaderContent}>
+          <View style={styles.sampleColorIndicator}>
+            <View
+              style={[
+                styles.colorDot,
+                { backgroundColor: sample.color || "#ccc" },
+              ]}
+            />
+            <Text style={styles.sampleTitle}>
+              {sample.nombre || `Muestra ${index + 1}`}
+            </Text>
+          </View>
+          <View style={styles.sampleActions}>
+            <IconButton
+              icon="pencil"
+              size={16}
+              onPress={() => onEdit(index)}
+              style={styles.actionButton}
+            />
+            <IconButton
+              icon="delete"
+              size={16}
+              onPress={() => onDelete(index)}
+              style={styles.actionButton}
+            />
+            <IconButton
+              icon={sample.expanded ? "chevron-up" : "chevron-down"}
+              size={20}
+              onPress={toggleExpand}
+            />
+          </View>
+        </View>
+      </TouchableOpacity>
+
+      {sample.expanded && (
+        <View style={styles.sampleDetails}>
+          <Text style={styles.sampleDetailText}>
+            Profundidad Inicio: {sample.profundidadInicio || "N/A"} cm
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            Profundidad Fin: {sample.profundidadFin || "N/A"} cm
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            Espresor: {sample.espresor || "N/A"} cm
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            Tipo Muestra: {sample.tipoMuestra || "N/A"}
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            Descripción: {sample.descripcion || "Sin descripción"}
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            PDC Li: {sample.pdcLi || "N/A"} cm
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            PDC Lf: {sample.pdcLf || "N/A"} cm
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            PDC Gi: {sample.pdcGi || "Sin descripción"}
+          </Text>
+        </View>
+      )}
+    </ReanimatedAnimated.View>
+  );
+};
+
+// Componente principal para el formulario de muestras
+const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
+  const theme = useTheme();
+  const [sampleData, setSampleData] = useState({
+    sampleNum: "",
+    profundidadInicio: "",
+    profundidadFin: "",
+    espresor: "",
+    estrato: "",
+    descripcion: "",
+    tipoMuestra: "",
+    pdcLi: "",
+    pdcLf: "",
+    pdcGi: "",
+    color: "#FF6B6B",
+  });
+
+  const colors = [
+    "#FF6B6B",
+    "#4ECDC4",
+    "#45B7D1",
+    "#96CEB4",
+    "#FFEAA7",
+    "#DDA0DD",
+    "#98D8C8",
+    "#F7DC6F",
+    "#BB8FCE",
+    "#85C1E9",
+    "#F8C471",
+    "#82E0AA",
+    "#F1948A",
+    "#85C1E9",
+    "#D7BDE2",
+    "#A3E4D7",
+    "#F9E79F",
+    "#FADBD8",
+    "#D5DBDB",
+    "#2C3E50",
+  ];
+
+  React.useEffect(() => {
+    if (isEditing && editingSample) {
+      setSampleData(editingSample);
+    } else {
+      setSampleData({
+        sampleNum: "",
+        profundidadInicio: "",
+        profundidadFin: "",
+        espresor: "",
+        estrato: "",
+        descripcion: "",
+        tipoMuestra: "",
+        pdcLi: "",
+        pdcLf: "",
+        pdcGi: "",
+        color: "#FF6B6B",
+      });
+    }
+  }, [isEditing, editingSample, visible]);
+
+  const handleSave = () => {
+    if (!sampleData.sampleNum.trim()) {
+      alert("Por favor, ingresa un nombre para la muestra");
+      return;
+    }
+    onSave(sampleData);
+    onClose();
+  };
+
+  return (
+    <AlertaScroll
+      onOpen={visible}
+      onClose={onClose}
+      title={isEditing ? "Editar Muestra" : "Nueva Muestra"}
+      content={
+        <View style={styles.sampleFormContainer}>
+          <InputComponent
+            type="text"
+            value={sampleData.sampleNum}
+            onChangeText={(text) =>
+              setSampleData((prev) => ({ ...prev, sampleNum: text }))
+            }
+            label="Muestra"
+            placeholder="Ej: 1"
+            validationRules={{ required: true }}
+            errorMessage="Por favor, introduce un numero valido"
+          />
+
+          <InputComponent
+            type="superficie"
+            value={sampleData.profundidadInicio}
+            onChangeText={(text) =>
+              setSampleData((prev) => ({ ...prev, profundidadInicio: text }))
+            }
+            label="Profundidad Inicio (cm)"
+            placeholder="Ej: 15"
+          />
+          <InputComponent
+            type="superficie"
+            value={sampleData.profundidadFin}
+            onChangeText={(text) =>
+              setSampleData((prev) => ({ ...prev, profundidadFin: text }))
+            }
+            label="Profundidad Final (cm)"
+            placeholder="Ej: 15"
+          />
+
+          <InputComponent
+            type="text"
+            value={sampleData.espresor}
+            onChangeText={(text) =>
+              setSampleData((prev) => ({ ...prev, espresor: text }))
+            }
+            label="Espresor"
+            placeholder="Ej: 12.5"
+          />
+
+          <InputComponent
+            type="descripcion"
+            value={sampleData.descripcion}
+            onChangeText={(text) =>
+              setSampleData((prev) => ({ ...prev, descripcion: text }))
+            }
+            label="Descripción"
+            placeholder="Descripción detallada de la muestra"
+          />
+
+          <InputComponent
+            type="descripcion"
+            value={sampleData.tipoMuestra}
+            onChangeText={(text) =>
+              setSampleData((prev) => ({ ...prev, tipoMuestra: text }))
+            }
+            label="Tipo Muestra"
+            placeholder="Descripción detallada de la muestra"
+          />
+
+          <InputComponent
+            type="descripcion"
+            value={sampleData.pdcLi}
+            onChangeText={(text) =>
+              setSampleData((prev) => ({ ...prev, pdcLi: text }))
+            }
+            label="PDC Li (cm)"
+            placeholder="Descripción detallada de la muestra"
+          />
+
+          <InputComponent
+            type="descripcion"
+            value={sampleData.pdcLf}
+            onChangeText={(text) =>
+              setSampleData((prev) => ({ ...prev, pdcLf: text }))
+            }
+            label="PDC Lf (cm)"
+            placeholder="Descripción detallada de la muestra"
+          />
+
+          <InputComponent
+            type="descripcion"
+            value={sampleData.pdcGi}
+            onChangeText={(text) =>
+              setSampleData((prev) => ({ ...prev, pdcGi: text }))
+            }
+            label="PDC GI "
+            placeholder="Descripción detallada de la muestra"
+          />
+
+          <ColorPicker
+            selectedColor={sampleData.color}
+            onColorSelect={(color) =>
+              setSampleData((prev) => ({ ...prev, color }))
+            }
+            colors={colors}
+          />
+        </View>
+      }
+      actions={[
+        <Button
+          key="cancel"
+          onPress={onClose}
+          mode="outlined"
+          textColor="black"
+          style={styles.formButton}
+        >
+          Cancelar
+        </Button>,
+        <Button
+          key="save"
+          onPress={handleSave}
+          mode="contained"
+          style={[styles.formButton, { backgroundColor: "#00ACE8" }]}
+        >
+          {isEditing ? "Actualizar" : "Guardar"}
+        </Button>,
+      ]}
+    />
+  );
+};
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -88,17 +412,23 @@ const Apiques = () => {
     profundidadApique: "",
     observaciones: "",
     imagenes: [],
+    muestras: [],
   });
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState({});
+
+  // Estados para el formulario de muestras
+  const [sampleFormVisible, setSampleFormVisible] = useState(false);
+  const [editingSampleIndex, setEditingSampleIndex] = useState(null);
+  const [isEditingSample, setIsEditingSample] = useState(false);
 
   // Estados de los estilos
   const theme = useTheme();
   const { width } = useWindowDimensions();
   const isSmallScreen = width < 600;
 
-  // Función para convertir base64/dataURL a File (adaptada del componente hiring)
+  // Función para convertir base64/dataURL a File
   function dataURLtoFile(dataurl, filename) {
     const arr = dataurl.split(",");
     const mime = arr[0].match(/:(.*?);/)[1];
@@ -152,10 +482,56 @@ const Apiques = () => {
       profundidadApique: "",
       observaciones: "",
       imagenes: [],
+      muestras: [],
     });
   };
 
-  // HandleSubmit adaptado del componente hiring
+  // Funciones para manejar muestras
+  const handleAddSample = () => {
+    setIsEditingSample(false);
+    setEditingSampleIndex(null);
+    setSampleFormVisible(true);
+  };
+
+  const handleEditSample = (index) => {
+    setIsEditingSample(true);
+    setEditingSampleIndex(index);
+    setSampleFormVisible(true);
+  };
+
+  const handleSaveSample = (sampleData) => {
+    setFormData((prev) => {
+      const newMuestras = [...prev.muestras];
+      if (isEditingSample && editingSampleIndex !== null) {
+        newMuestras[editingSampleIndex] = { ...sampleData, expanded: false };
+      } else {
+        newMuestras.push({ ...sampleData, expanded: false });
+      }
+      return { ...prev, muestras: newMuestras };
+    });
+    setSampleFormVisible(false);
+  };
+
+  const handleDeleteSample = (index) => {
+    setFormData((prev) => {
+      const newMuestras = [...prev.muestras];
+      newMuestras.splice(index, 1);
+      return { ...prev, muestras: newMuestras };
+    });
+  };
+
+  const handleToggleSampleExpand = (index) => {
+    setFormData((prev) => {
+      const newMuestras = [...prev.muestras];
+      newMuestras[index] = {
+        ...newMuestras[index],
+        expanded: !newMuestras[index].expanded,
+      };
+      return { ...prev, muestras: newMuestras };
+    });
+  };
+
+  // HandleSubmit adaptado para incluir muestras
   const handleSubmit = useCallback(async () => {
     try {
       setLoading(true);
@@ -164,18 +540,22 @@ const Apiques = () => {
 
       // Añadir campos básicos
       Object.keys(formData).forEach((key) => {
-        if (key !== "imagenes" && formData[key]) {
+        if (key !== "imagenes" && key !== "muestras" && formData[key]) {
           formDataToSend.append(key, formData[key]);
         }
       });
 
-      // Función mejorada para manejar imágenes (adaptada del componente hiring)
+      // Añadir muestras como JSON
+      if (formData.muestras.length > 0) {
+        formDataToSend.append("muestras", JSON.stringify(formData.muestras));
+      }
+
+      // Función para manejar imágenes
       const handleImageUpload = (imageData, index) => {
         if (!imageData) return;
 
-        const fieldName = "imagenes"; // Para múltiples imágenes
+        const fieldName = "imagenes";
 
-        // Si es dataURL (base64), convertir a File (solo para web)
         if (
           typeof imageData.uri === "string" &&
           imageData.uri.startsWith("data:")
@@ -186,13 +566,11 @@ const Apiques = () => {
           return;
         }
 
-        // Caso Web (File object)
         if (imageData.file instanceof File || imageData.file instanceof Blob) {
           formDataToSend.append(fieldName, imageData.file, imageData.name);
           return;
         }
 
-        // Caso React Native (URI local)
         if (
           typeof imageData.uri === "string" &&
           imageData.uri.match(/^(file|content):\/\//)
@@ -210,7 +588,6 @@ const Apiques = () => {
           return;
         }
 
-        // Caso imagen existente de la API
         if (imageData.isFromAPI && typeof imageData.uri === "string") {
           formDataToSend.append(fieldName, imageData.uri);
         }
@@ -223,7 +600,6 @@ const Apiques = () => {
 
       // Lógica para enviar datos al servidor
       if (isEditing) {
-        console.log(formDataToSend);
         await updateApique(editingInventoryId, formDataToSend);
         showMessage("Datos actualizados correctamente");
       } else {
@@ -245,20 +621,36 @@ const Apiques = () => {
     }
   }, [formData, isEditing, editingInventoryId]);
 
-  const handleEdit = useCallback((item) => {
+  const handleEdit = useCallback(async (item) => {
     try {
-      // Format images from API to include isFromAPI flag
+      // Format images from API
       const formattedImages = Array.isArray(item.imagenes)
         ? item.imagenes.map((img) => ({
             uri: typeof img === "string" ? img : img.uri || "",
-            type: "image/jpeg", // Default type if not available
+            type: "image/jpeg",
             name:
               typeof img === "string"
                 ? img.split("/").pop() || "image.jpg"
                 : img.name || "image.jpg",
-            isFromAPI: true, // Mark as coming from API
+            isFromAPI: true,
           }))
         : [];
+
+      // Obtener las muestras del API usando el ID del apique
+      let formattedSamples = [];
+      try {
+        const samplesFromAPI = await getSampleApiqueId(item.id);
+        formattedSamples = Array.isArray(samplesFromAPI)
+          ? samplesFromAPI.map((sample) => ({
+              ...sample,
+              expanded: false,
+            }))
+          : [];
+      } catch (error) {
+        console.error("Error al cargar las muestras:", error);
+        showMessage("Error al cargar las muestras del apique", "error");
+      }
+
       setFormData({
         informeNum: item.informeNum,
         cliente: item.cliente,
@@ -275,13 +667,12 @@ const Apiques = () => {
         profundidadApique: item.profundidadApique,
         observaciones: item.observaciones,
         imagenes: formattedImages,
+        muestras: formattedSamples,
       });
       setEditingInventoryId(item.id);
       setIsEditing(true);
       setOpenForm(true);
-      console.log("formu", formData);
     } catch (error) {
-      console.error("Error in handleEdit:", error);
       setSnackbarMessage({
         text: "Error al editar el proyecto",
         type: "error",
@@ -292,22 +683,11 @@ const Apiques = () => {
 
   const pickImages = async () => {
     try {
-      // Solicitar permisos en dispositivos móviles
       if (Platform.OS !== "web") {
         const { status } =
           await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert(
-            "Permisos requeridos",
-            "Necesitamos acceso a la galería para seleccionar fotos.",
-            [
-              { text: "Cancelar", style: "cancel" },
-              {
-                text: "Intentar de nuevo",
-                onPress: pickImages,
-              },
-            ]
-          );
+          alert("Necesitamos acceso a la galería para seleccionar fotos.");
           return;
         }
       }
@@ -315,24 +695,22 @@ const Apiques = () => {
       const pickerOptions = {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsMultipleSelection: true,
-        quality: 0.7, // Misma calidad que en takePhoto
+        quality: 0.7,
         allowsEditing: false,
-        // Opciones adicionales para consistencia
-        aspect: [4, 3], // Misma relación de aspecto que en takePhoto
+        aspect: [4, 3],
       };
 
       const result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const newImages = result.assets.map((asset) => {
-          // Para web, convertir a File object si es data URL
           if (Platform.OS === "web" && asset.uri.startsWith("data:")) {
             const file = dataURLtoFile(
               asset.uri,
               asset.fileName || `image-${Date.now()}.jpg`
             );
             return {
-              file, // Guardar el File object para web
+              file,
               uri: asset.uri,
               type: asset.type || "image/jpeg",
               name: asset.fileName || file.name,
@@ -340,7 +718,6 @@ const Apiques = () => {
             };
           }
 
-          // Para móviles, usar el mismo formato que en takePhoto
           return {
             uri: asset.uri,
             type: asset.type || "image/jpeg",
@@ -391,12 +768,12 @@ const Apiques = () => {
   };
 
   const totalItems = data.length;
-
   const calculateProgress = (value, max) => {
     const progress = Math.min(Math.max(value / max, 0), 1);
     return Number.parseFloat(progress.toFixed(2));
   };
   const itemsProgress = calculateProgress(totalItems, 1000);
+
   return (
     <>
       <PaperProvider theme={theme}>
@@ -541,6 +918,50 @@ const Apiques = () => {
                 ))}
               </View>
 
+              {/* Sección de Muestras */}
+              <View style={styles.samplesSection}>
+                <View style={styles.samplesSectionHeader}>
+                  <Text style={styles.sectionTitle}>Muestras del Apique</Text>
+                  <Button
+                    mode="contained"
+                    onPress={handleAddSample}
+                    style={styles.addSampleButton}
+                    icon="plus"
+                    compact
+                  >
+                    Agregar Muestra
+                  </Button>
+                </View>
+
+                {formData.muestras.length > 0 ? (
+                  <ScrollView style={styles.samplesContainer}>
+                    {formData.muestras.map((sample, index) => (
+                      <SampleCard
+                        key={index}
+                        sample={sample}
+                        index={index}
+                        onEdit={handleEditSample}
+                        onDelete={handleDeleteSample}
+                        onToggleExpand={handleToggleSampleExpand}
+                      />
+                    ))}
+                  </ScrollView>
+                ) : (
+                  <View style={styles.noSamplesContainer}>
+                    <MaterialIcons name="science" size={48} color="#ccc" />
+                    <Text style={styles.noSamplesText}>
+                      No hay muestras agregadas
+                    </Text>
+                    <Text style={styles.noSamplesSubtext}>
+                      Presiona "Agregar Muestra" para comenzar
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              <Divider style={styles.divider} />
+
+              {/* Sección de Imágenes */}
               <View style={styles.containerImages}>
                 <Text style={styles.imagesTitle}>Imágenes del Proyecto</Text>
                 <Text style={styles.imagesSubtitle}>
@@ -645,6 +1066,19 @@ const Apiques = () => {
             </Button>,
           ]}
         />
+
+        {/* Formulario de Muestras */}
+        <SampleForm
+          visible={sampleFormVisible}
+          onClose={() => setSampleFormVisible(false)}
+          onSave={handleSaveSample}
+          editingSample={
+            isEditingSample && editingSampleIndex !== null
+              ? formData.muestras[editingSampleIndex]
+              : null
+          }
+          isEditing={isEditingSample}
+        />
       </PaperProvider>
       <AddComponent onOpen={() => setOpenForm(true)} />
     </>
@@ -676,12 +1110,6 @@ const styles = StyleSheet.create({
         boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
       },
     }),
-  },
-  headerActions: {
-    flexDirection: "row",
-  },
-  icon: {
-    marginLeft: 16,
   },
   cardContainer: {
     flexDirection: "row",
@@ -742,6 +1170,167 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  // Estilos para las muestras
+  samplesSection: {
+    width: "100%",
+    padding: 16,
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  samplesSectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  addSampleButton: {
+    backgroundColor: "#00ACE8",
+  },
+  samplesContainer: {
+    maxHeight: 300,
+  },
+  sampleCard: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    overflow: "hidden",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1.41,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
+      },
+    }),
+  },
+  sampleHeader: {
+    padding: 12,
+  },
+  sampleHeaderContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  sampleColorIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  colorDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  sampleTitle: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+  },
+  sampleActions: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  actionButton: {
+    margin: 0,
+  },
+  sampleDetails: {
+    paddingHorizontal: 12,
+    paddingBottom: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
+  },
+  sampleDetailText: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 4,
+  },
+  noSamplesContainer: {
+    alignItems: "center",
+    padding: 32,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderStyle: "dashed",
+  },
+  noSamplesText: {
+    fontSize: 16,
+    color: "#999",
+    marginTop: 8,
+    fontWeight: "500",
+  },
+  noSamplesSubtext: {
+    fontSize: 14,
+    color: "#bbb",
+    marginTop: 4,
+  },
+  // Estilos para el formulario de muestras
+  sampleFormContainer: {
+    width: "100%",
+  },
+  colorPickerContainer: {
+    marginTop: 16,
+  },
+  colorPickerTitle: {
+    fontSize: 16,
+    fontWeight: "500",
+    marginBottom: 12,
+    color: "#333",
+  },
+  colorGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  colorOption: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: "#ddd",
+    justifyContent: "center",
+    alignItems: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1.41,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
+      },
+    }),
+  },
+  selectedColor: {
+    borderColor: "#00ACE8",
+    borderWidth: 3,
+  },
+  divider: {
+    marginVertical: 16,
+  },
+  // Estilos existentes para imágenes
   containerImages: {
     width: "100%",
     padding: 16,

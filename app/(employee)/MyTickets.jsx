@@ -36,12 +36,12 @@ import PDFViewComponent from "@/components/PdfViewComponent";
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
-  { key: "sitio", title: "Sitio", sortable: true, width: 80 },
-  { key: "remoto", title: "Remoto", sortable: true, width: 100 },
-  { key: "descripcion", title: "Descripcion", sortable: true },
-  { key: "estado", title: "Estado", sortable: true },
-  { key: "createdAt", title: "Creado", sortable: true },
-  { key: "updatedAt", title: "Modificado", sortable: true },
+  { key: "sitio", title: "Sitio", sortable: true, width: 120 },
+  { key: "remoto", title: "Remoto", sortable: true, width: 80 },
+  { key: "descripcion", title: "Descripcion", sortable: true,width: 150 },
+  { key: "estado", title: "Estado", sortable: true,width: 100 },
+  { key: "createdAt", title: "Creado", sortable: true,width: 150 },
+  { key: "updatedAt", title: "Modificado", sortable: true,width: 150 },
 ];
 
 const MyTickets = () => {
@@ -330,8 +330,14 @@ const MyTickets = () => {
             </View>
           }
           actions={[
-            <Button onPress={resetForm} mode="outlined" textColor="black">Cancelar</Button>,
-            <Button onPress={handleSubmit} mode="contained" style={{backgroundColor: "#00ACE8"}} >
+            <Button onPress={resetForm} mode="outlined" textColor="black">
+              Cancelar
+            </Button>,
+            <Button
+              onPress={handleSubmit}
+              mode="contained"
+              style={{ backgroundColor: "#00ACE8" }}
+            >
               {isEditing ? "Actualizar" : "Crear"}
             </Button>,
           ]}

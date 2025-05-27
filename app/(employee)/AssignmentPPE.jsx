@@ -314,142 +314,6 @@ export default function Hiring() {
     value: user.id,
   }));
 
-  /* const handleSubmit = useCallback(async () => {
-    try {
-      const requiredFields = isEditing
-        ? ["inventoryId", "userId", "estado"]
-        : ["inventoryId", "userId", "estado"];
-      const emptyFields = requiredFields.filter(
-        (field) => !formData[field] && formData[field].trim() === ""
-      );
-
-      if (emptyFields.length > 0) {
-        setOpenForm(false);
-        throw new Error(
-          `Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`
-        );
-      }
-
-      let newData;
-      if (isEditing) {
-        console.log(formData);
-        await updateAssignment(editingUserId, formData);
-        newData = data.map((item) =>
-          item.id === editingUserId ? { ...item, ...formData } : item
-        );
-      } else {
-        const newUser = await createAssignment(formData);
-        if (!newUser) throw new Error("Error al crear el candidato");
-        newData = [...data, newUser.assignment];
-      }
-      setData(newData);
-      setSnackbarMessage({
-        text: `Equipo ${isEditing ? "actualizado" : "creado"} exitosamente`,
-        type: "success",
-      });
-      resetForm();
-    } catch (error) {
-      resetForm();
-      setSnackbarMessage({
-        text:
-          error.response?.data.message ||
-          error.response?.data.errors[0].msg ||
-          error.message,
-        type: "error",
-      });
-    } finally {
-      setSnackbarVisible(true);
-    }
-  }, [formData, isEditing, editingUserId, data]); */
-
-  /* 
-  const handleSubmit = useCallback(async () => {
-    try {
-      const requiredFields = isEditing
-        ? ["inventoryId", "userId", "estado"]
-        : ["inventoryId", "userId", "estado"];
-      const emptyFields = requiredFields.filter(
-        (field) => !formData[field] || formData[field].trim() === ""
-      );
-
-      if (emptyFields.length > 0) {
-        setOpenForm(false);
-        throw new Error(
-          `Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`
-        );
-      }
-
-      const formDataToSend = new FormData();
-      formDataToSend.append("inventoryId", formData.inventoryId);
-      formDataToSend.append("userId", formData.userId);
-      formDataToSend.append("asignadorId", formData.asignadorId || "");
-      formDataToSend.append("fechaConfirmacion", formData.fechaConfirmacion || "");
-      formDataToSend.append("fechaRetorno", formData.fechaRetorno || "");
-      formDataToSend.append("estado", formData.estado);
-
-      // Adjuntar la foto PPE si existe
-      if (formData.fotoppe) {
-        const uriParts = formData.fotoppe.split(".");
-        const fileType = uriParts[uriParts.length - 1];
-        formDataToSend.append("fotoppe", {
-          uri: formData.fotoppe,
-          name: `fotoppe.${fileType}`, // Nombre del archivo que llegará al backend
-          type: `image/${fileType}`,
-        });
-      }
-
-      // Adjuntar la foto de retorno si existe
-      if (formData.fotoRetorno) {
-        const uriParts = formData.fotoRetorno.split(".");
-        const fileType = uriParts[uriParts.length - 1];
-        formDataToSend.append("fotoRetorno", {
-          uri: formData.fotoRetorno,
-          name: `fotoRetorno.${fileType}`, // Nombre del archivo que llegará al backend
-          type: `image/${fileType}`,
-        });
-      }
-
-      let response;
-      if (isEditing && editingUserId) {
-        console.log("data",formDataToSend);
-        response = await updateAssignment(editingUserId,formDataToSend);
-      } else {
-        // Asumo que tienes un endpoint POST para crear asignaciones
-        response = await createAssignment(formDataToSend);
-      }
-
-      const result = await response;
-
-      if (response) {
-        const newData = isEditing
-          ? data.map((item) =>
-              item.id === editingUserId ? { ...item, ...result.assignment } : item
-            )
-          : [...data, result.assignment];
-        setData(newData);
-        setSnackbarMessage({
-          text: `Equipo ${isEditing ? "actualizado" : "creado"} exitosamente`,
-          type: "success",
-        });
-        resetForm();
-      } else {
-        throw new Error(result.message || "Error en la respuesta del servidor");
-      }
-    } catch (error) {
-      resetForm();
-      setSnackbarMessage({
-        text:
-          error.response?.data?.message ||
-          error.response?.data?.errors?.[0]?.msg ||
-          error.message ||
-          "Error al enviar los datos",
-        type: "error",
-      });
-    } finally {
-      setSnackbarVisible(true);
-    }
-  }, [formData, isEditing, editingUserId, data]); */
-
   const resetForm = () => {
     setOpenForm(false);
     setIsEditing(false);
@@ -846,10 +710,20 @@ export default function Hiring() {
           </View>
         }
         actions={[
-          <Button key="cancel" onPress={resetForm}>
+          <Button
+            key="cancel"
+            mode="outlined"
+            textColor="black"
+            onPress={resetForm}
+          >
             Cancelar
           </Button>,
-          <Button key="submit" onPress={handleSubmit}>
+          <Button
+            key="submit"
+            mode="contained"
+            buttonColor="#00ACE8"
+            onPress={handleSubmit}
+          >
             {isEditing ? "Actualizar" : "Crear"}
           </Button>,
         ]}
