@@ -51,7 +51,7 @@ const Inventario = () => {
   const handleSubmit = useCallback(async () => {
     try {
       const requiredFields = isEditing ? ["nombreMaterial", "descripcion", "cantidad", "unidadMedida", "precioUnidad"] : ["nombreMaterial", "descripcion", "cantidad", "unidadMedida", "precioUnidad"];
-     /*  const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "") */
+     
      const emptyFields = requiredFields.filter((field) => {
       const value = formData[field];
       return !value || (typeof value === 'string' && value.trim() === "");

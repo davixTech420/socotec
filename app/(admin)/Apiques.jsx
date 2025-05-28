@@ -99,21 +99,23 @@ const SampleCard = ({ sample, index, onEdit, onDelete, onToggleExpand }) => {
             <View
               style={[
                 styles.colorDot,
-                { backgroundColor: sample.color || "#ccc" },
+                { backgroundColor: sample.estrato || "#ccc" },
               ]}
             />
             <Text style={styles.sampleTitle}>
-              {sample.nombre || `Muestra ${index + 1}`}
+              {sample.sampleNum || `Muestra ${index + 1}`}
             </Text>
           </View>
           <View style={styles.sampleActions}>
             <IconButton
+            iconColor="#00ACE8"
               icon="pencil"
               size={16}
               onPress={() => onEdit(index)}
               style={styles.actionButton}
             />
             <IconButton
+            iconColor="#ff0000"
               icon="delete"
               size={16}
               onPress={() => onDelete(index)}
@@ -168,7 +170,7 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
     profundidadInicio: "",
     profundidadFin: "",
     espresor: "",
-    estrato: "",
+    estrato: "#FF6B6B",
     descripcion: "",
     tipoMuestra: "",
     pdcLi: "",
@@ -209,7 +211,7 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
         profundidadInicio: "",
         profundidadFin: "",
         espresor: "",
-        estrato: "",
+        estrato: "#FF6B6B",
         descripcion: "",
         tipoMuestra: "",
         pdcLi: "",
@@ -221,7 +223,7 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
   }, [isEditing, editingSample, visible]);
 
   const handleSave = () => {
-    if (!sampleData.sampleNum.trim()) {
+    if (!sampleData.sampleNum) {
       alert("Por favor, ingresa un nombre para la muestra");
       return;
     }
@@ -237,7 +239,7 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
       content={
         <View style={styles.sampleFormContainer}>
           <InputComponent
-            type="text"
+            type="muestra"
             value={sampleData.sampleNum}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, sampleNum: text }))
@@ -249,7 +251,7 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
           />
 
           <InputComponent
-            type="superficie"
+            type="profundidad"
             value={sampleData.profundidadInicio}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, profundidadInicio: text }))
@@ -258,7 +260,7 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
             placeholder="Ej: 15"
           />
           <InputComponent
-            type="superficie"
+            type="profundidad"
             value={sampleData.profundidadFin}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, profundidadFin: text }))
@@ -268,7 +270,7 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
           />
 
           <InputComponent
-            type="text"
+            type="espresor"
             value={sampleData.espresor}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, espresor: text }))
@@ -288,49 +290,49 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
           />
 
           <InputComponent
-            type="descripcion"
+            type="tipo"
             value={sampleData.tipoMuestra}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, tipoMuestra: text }))
             }
             label="Tipo Muestra"
-            placeholder="Descripción detallada de la muestra"
+            placeholder="Tipo de muestra"
           />
 
           <InputComponent
-            type="descripcion"
+            type="pdc"
             value={sampleData.pdcLi}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, pdcLi: text }))
             }
             label="PDC Li (cm)"
-            placeholder="Descripción detallada de la muestra"
+            placeholder="PDC Li"
           />
 
           <InputComponent
-            type="descripcion"
+            type="pdc"
             value={sampleData.pdcLf}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, pdcLf: text }))
             }
             label="PDC Lf (cm)"
-            placeholder="Descripción detallada de la muestra"
+            placeholder="PDC Lf"
           />
 
           <InputComponent
-            type="descripcion"
+            type="pdc"
             value={sampleData.pdcGi}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, pdcGi: text }))
             }
-            label="PDC GI "
-            placeholder="Descripción detallada de la muestra"
+            label="PDC GI"
+            placeholder="PDC Gi"
           />
 
           <ColorPicker
-            selectedColor={sampleData.color}
+            selectedColor={sampleData.estrato}
             onColorSelect={(color) =>
-              setSampleData((prev) => ({ ...prev, color }))
+              setSampleData((prev) => ({ ...prev, estrato:color }))
             }
             colors={colors}
           />
@@ -414,6 +416,9 @@ const Apiques = () => {
     imagenes: [],
     muestras: [],
   });
+
+
+
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState({});
@@ -427,6 +432,31 @@ const Apiques = () => {
   const theme = useTheme();
   const { width } = useWindowDimensions();
   const isSmallScreen = width < 600;
+
+
+
+  const resetForm = () => {
+    setOpenForm(false);
+    setIsEditing(false);
+    setEditingInventoryId(null);
+    setFormData({
+      informeNum: "",
+      cliente: "",
+      tituloObra: "",
+      localizacion: "",
+      albaranNum: "",
+      fechaEjecucionInicio: "",
+      fechaEjecucionFinal: "",
+      fechaEmision: "",
+      operario: "",
+      largoApique: "",
+      anchoApique: "",
+      profundidadApique: "",
+      observaciones: "",
+      imagenes: [],
+      muestras: [],
+    });
+  };
 
   // Función para convertir base64/dataURL a File
   function dataURLtoFile(dataurl, filename) {
@@ -463,28 +493,7 @@ const Apiques = () => {
     }, [])
   );
 
-  const resetForm = () => {
-    setOpenForm(false);
-    setIsEditing(false);
-    setEditingInventoryId(null);
-    setFormData({
-      informeNum: "",
-      cliente: "",
-      tituloObra: "",
-      localizacion: "",
-      albaranNum: "",
-      fechaEjecucionInicio: "",
-      fechaEjecucionFinal: "",
-      fechaEmision: "",
-      operario: "",
-      largoApique: "",
-      anchoApique: "",
-      profundidadApique: "",
-      observaciones: "",
-      imagenes: [],
-      muestras: [],
-    });
-  };
+  
 
   // Funciones para manejar muestras
   const handleAddSample = () => {
@@ -901,7 +910,7 @@ const Apiques = () => {
                         : field == "anchoApique"
                         ? "superficie"
                         : field == "profundidadApique"
-                        ? "superficie"
+                        ? "profundidad"
                         : field == "observaciones"
                         ? "descripcion"
                         : "text"
@@ -1173,23 +1182,26 @@ const styles = StyleSheet.create({
   // Estilos para las muestras
   samplesSection: {
     width: "100%",
-    padding: 16,
+    padding: 1,
     marginTop: 16,
     borderTopWidth: 1,
     borderTopColor: "#eee",
   },
   samplesSectionHeader: {
+  
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     alignItems: "center",
     marginBottom: 16,
   },
   sectionTitle: {
+    width:"40%",
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
   },
   addSampleButton: {
+    width:"60%",
     backgroundColor: "#00ACE8",
   },
   samplesContainer: {

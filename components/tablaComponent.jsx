@@ -280,7 +280,7 @@ const TablaComponente = ({
                     isActive == "Postulado" ||
                     isActive == "Entrevista 1" ||
                     isActive == "Entrevista 2" ||
-                    isActive == "Prueba Tecnica" ||
+                    isActive == "Prueba Técnica" ||
                     isActive == "Asignado"
                   ? extendedTheme.colors.warning
                   : extendedTheme.colors.error,
@@ -309,7 +309,7 @@ const TablaComponente = ({
               ? "Entrevista 1"
               : isActive === "Entrevista 2"
               ? "Entrevista 2"
-              : isActive === "Prueba Tecnica"
+              : isActive === "Prueba Técnica"
               ? "Prueba Tecnica"
               : isActive === "Oferta Enviada"
               ? "Oferta Enviada"
@@ -715,6 +715,7 @@ const styles = StyleSheet.create({
   },
   table: {
     width: "100%",
+    minWidth:"100%",
   },
   header: {
     width: "100%",

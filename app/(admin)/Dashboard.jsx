@@ -15,7 +15,7 @@ import {
   BarChart,
   PieChart,
 } from "react-native-chart-kit";
-import Animated, { 
+import Animated, {  
   FadeInUp, 
   useSharedValue, 
   useAnimatedStyle, 
@@ -875,10 +875,10 @@ export default function AnalyticsDashboardPro() {
                     <Chip
                       mode="outlined"
                       style={{
-                        backgroundColor: user.activo ? "#E6FFFA" : "#FFF5F5",
+                        backgroundColor: user.estado ? "#E6FFFA" : "#FFF5F5",
                       }}
                     >
-                      {user.activo ? "Activo" : "Inactivo"}
+                      {user.estado ? "Activo" : "Inactivo"}
                     </Chip>
                   </DataTable.Cell>
                 </DataTable.Row>

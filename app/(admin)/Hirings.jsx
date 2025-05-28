@@ -108,7 +108,7 @@ export default function Hirings() {
 
   const handleSubmit = useCallback(async () => {
     try {
-      /* const requiredFields = isEditing
+      const requiredFields = isEditing
         ? [
             "nombre",
             "email",
@@ -131,7 +131,7 @@ export default function Hirings() {
             "nota",
           ];
       const emptyFields = requiredFields.filter(
-        (field) => !formData[field] || formData[field].trim() === ""
+        (field) => !formData[field] /* || formData[field].trim() === "" */
       );
 
       if (emptyFields.length > 0) {
@@ -139,7 +139,7 @@ export default function Hirings() {
         throw new Error(
           `Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`
         );
-      } */
+      }
 
       let newData;
       if (isEditing) {

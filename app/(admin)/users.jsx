@@ -52,8 +52,15 @@ export default function Users() {
       if (emptyFields.length > 0) {
         setOpenForm(false);
         throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
-
       }
+      if(formData.telefono.length < 10){
+        setOpenForm(false);
+        throw new Error("El Numero De Telefono Debe Tener 10 Digitos");
+      }
+      if (!formData.email.toLowerCase().endsWith("@socotec.com")) {
+        throw new Error("El email debe pertenecer al dominio socotec.com");
+    }
+
 
       let newData
       if (isEditing) {
@@ -93,6 +100,7 @@ export default function Users() {
           dataItem.id === item.id ? { ...dataItem, estado: action === activateUser } : dataItem,
         ),
       )
+      await getUsers();
     } catch (error) {
       console.log(`Error al ${action === activateUser ? "activar" : "desactivar"} el usuario:`, error)
       throw error;

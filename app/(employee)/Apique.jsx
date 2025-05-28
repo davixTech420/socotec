@@ -1,5 +1,5 @@
-import React from "react"
-import { useCallback, useState } from "react"
+import React from "react";
+import { useCallback, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   Image,
   Animated as ReanimatedAnimated,
-} from "react-native"
+} from "react-native";
 import {
   PaperProvider,
   useTheme,
@@ -21,23 +21,34 @@ import {
   Button,
   IconButton,
   Divider,
-} from "react-native-paper"
-import { useFocusEffect } from "@react-navigation/native"
-import { useSharedValue, useAnimatedStyle, withTiming, withSpring } from "react-native-reanimated"
-import { MaterialIcons, Ionicons } from "@expo/vector-icons"
-import TablaComponente from "@/components/tablaComponent"
-import Breadcrumb from "@/components/BreadcrumbComponent"
-import { AlertaScroll } from "@/components/alerta"
-import AddComponent from "../../components/AddComponent"
-import InputComponent from "@/components/InputComponent"
-import { updateApique, getApique, createApique, deleteApique, getSampleApiqueId } from "@/services/employeeService"
-import * as ImagePicker from "expo-image-picker"
-import { SrcImagen } from "@/services/publicServices"
-import { router } from "expo-router"
+} from "react-native-paper";
+import { useFocusEffect } from "@react-navigation/native";
+import {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+} from "react-native-reanimated";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import TablaComponente from "@/components/tablaComponent";
+import Breadcrumb from "@/components/BreadcrumbComponent";
+import { AlertaScroll } from "@/components/alerta";
+import AddComponent from "../../components/AddComponent";
+import InputComponent from "@/components/InputComponent";
+import {
+  updateApique,
+  getApique,
+  createApique,
+  deleteApique,
+  getSampleApiqueId,
+} from "@/services/employeeService";
+import * as ImagePicker from "expo-image-picker";
+import { SrcImagen } from "@/services/publicServices";
+import { router } from "expo-router";
 
 // Componente para el selector de color
 const ColorPicker = ({ selectedColor, onColorSelect, colors }) => {
-  const theme = useTheme()
+  const theme = useTheme();
 
   return (
     <View style={styles.colorPickerContainer}>
@@ -46,98 +57,127 @@ const ColorPicker = ({ selectedColor, onColorSelect, colors }) => {
         {colors.map((color, index) => (
           <TouchableOpacity
             key={index}
-            style={[styles.colorOption, { backgroundColor: color }, selectedColor === color && styles.selectedColor]}
+            style={[
+              styles.colorOption,
+              { backgroundColor: color },
+              selectedColor === color && styles.selectedColor,
+            ]}
             onPress={() => onColorSelect(color)}
           >
-            {selectedColor === color && <Ionicons name="checkmark" size={20} color="#fff" />}
+            {selectedColor === color && (
+              <Ionicons name="checkmark" size={20} color="#fff" />
+            )}
           </TouchableOpacity>
         ))}
       </View>
     </View>
-  )
-}
+  );
+};
 
 // Componente para una muestra individual
 const SampleCard = ({ sample, index, onEdit, onDelete, onToggleExpand }) => {
-  const theme = useTheme()
-  const expandAnimation = useSharedValue(sample.expanded ? 1 : 0)
+  const theme = useTheme();
+  const expandAnimation = useSharedValue(sample.expanded ? 1 : 0);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
       height: withTiming(expandAnimation.value * 120 + 60, { duration: 300 }),
       opacity: withTiming(1, { duration: 200 }),
-    }
-  })
+    };
+  });
 
   const toggleExpand = () => {
-    expandAnimation.value = withSpring(sample.expanded ? 0 : 1)
-    onToggleExpand(index)
-  }
+    expandAnimation.value = withSpring(sample.expanded ? 0 : 1);
+    onToggleExpand(index);
+  };
 
   return (
     <ReanimatedAnimated.View style={[styles.sampleCard, animatedStyle]}>
       <TouchableOpacity onPress={toggleExpand} style={styles.sampleHeader}>
         <View style={styles.sampleHeaderContent}>
           <View style={styles.sampleColorIndicator}>
-            <View style={[styles.colorDot, { backgroundColor: sample.color || "#ccc" }]} />
-            <Text style={styles.sampleTitle}>{sample.nombre || `Muestra ${index + 1}`}</Text>
+            <View
+              style={[
+                styles.colorDot,
+                { backgroundColor: sample.estrato || "#ccc" },
+              ]}
+            />
+            <Text style={styles.sampleTitle}>
+              {sample.sampleNum || `Muestra ${index + 1}`}
+            </Text>
           </View>
           <View style={styles.sampleActions}>
-            <IconButton icon="pencil" size={16} onPress={() => onEdit(index)} style={styles.actionButton} />
-            <IconButton icon="delete" size={16} onPress={() => onDelete(index)} style={styles.actionButton} />
-            <IconButton icon={sample.expanded ? "chevron-up" : "chevron-down"} size={20} onPress={toggleExpand} />
+            <IconButton
+            iconColor="#00ACE8"
+              icon="pencil"
+              size={16}
+              onPress={() => onEdit(index)}
+              style={styles.actionButton}
+            />
+            <IconButton
+            iconColor="#ff0000"
+              icon="delete"
+              size={16}
+              onPress={() => onDelete(index)}
+              style={styles.actionButton}
+            />
+            <IconButton
+              icon={sample.expanded ? "chevron-up" : "chevron-down"}
+              size={20}
+              onPress={toggleExpand}
+            />
           </View>
         </View>
       </TouchableOpacity>
 
       {sample.expanded && (
-       <View style={styles.sampleDetails}>
-       <Text style={styles.sampleDetailText}>
-         Profundidad Inicio: {sample.profundidadInicio || "N/A"} cm
-       </Text>
-       <Text style={styles.sampleDetailText}>
-         Profundidad Fin: {sample.profundidadFin || "N/A"} cm
-       </Text>
-       <Text style={styles.sampleDetailText}>
-         Espresor: {sample.espresor || "N/A"} cm
-       </Text>
-       <Text style={styles.sampleDetailText}>
-         Tipo Muestra: {sample.tipoMuestra || "N/A"}
-       </Text>
-       <Text style={styles.sampleDetailText}>
-         Descripción: {sample.descripcion || "Sin descripción"}
-       </Text>
-       <Text style={styles.sampleDetailText}>
-         PDC Li: {sample.pdcLi || "N/A"} cm
-       </Text>
-       <Text style={styles.sampleDetailText}>
-         PDC Lf: {sample.pdcLf || "N/A"} cm
-       </Text>
-       <Text style={styles.sampleDetailText}>
-         PDC Gi: {sample.pdcGi || "Sin descripción"}
-       </Text>
-     </View>
+        <View style={styles.sampleDetails}>
+          <Text style={styles.sampleDetailText}>
+            Profundidad Inicio: {sample.profundidadInicio || "N/A"} cm
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            Profundidad Fin: {sample.profundidadFin || "N/A"} cm
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            Espresor: {sample.espresor || "N/A"} cm
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            Tipo Muestra: {sample.tipoMuestra || "N/A"}
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            Descripción: {sample.descripcion || "Sin descripción"}
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            PDC Li: {sample.pdcLi || "N/A"} cm
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            PDC Lf: {sample.pdcLf || "N/A"} cm
+          </Text>
+          <Text style={styles.sampleDetailText}>
+            PDC Gi: {sample.pdcGi || "Sin descripción"}
+          </Text>
+        </View>
       )}
     </ReanimatedAnimated.View>
-  )
-}
+  );
+};
 
 // Componente principal para el formulario de muestras
 const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
-  const theme = useTheme()
+  const theme = useTheme();
   const [sampleData, setSampleData] = useState({
     sampleNum: "",
     profundidadInicio: "",
     profundidadFin: "",
     espresor: "",
-    estrato: "",
+    estrato: "#FF6B6B",
     descripcion: "",
     tipoMuestra: "",
     pdcLi: "",
     pdcLf: "",
-    pdcGi:"",
+    pdcGi: "",
     color: "#FF6B6B",
-  })
+  });
 
   const colors = [
     "#FF6B6B",
@@ -160,36 +200,36 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
     "#FADBD8",
     "#D5DBDB",
     "#2C3E50",
-  ]
+  ];
 
   React.useEffect(() => {
     if (isEditing && editingSample) {
-      setSampleData(editingSample)
+      setSampleData(editingSample);
     } else {
       setSampleData({
         sampleNum: "",
-    profundidadInicio: "",
-    profundidadFin: "",
-    espresor: "",
-    estrato: "",
-    descripcion: "",
-    tipoMuestra: "",
-    pdcLi: "",
-    pdcLf: "",
-    pdcGi:"",
-    color: "#FF6B6B",
-      })
+        profundidadInicio: "",
+        profundidadFin: "",
+        espresor: "",
+        estrato: "#FF6B6B",
+        descripcion: "",
+        tipoMuestra: "",
+        pdcLi: "",
+        pdcLf: "",
+        pdcGi: "",
+        color: "#FF6B6B",
+      });
     }
-  }, [isEditing, editingSample, visible])
+  }, [isEditing, editingSample, visible]);
 
   const handleSave = () => {
-    if (!sampleData.sampleNum.trim()) {
-      alert("Por favor, ingresa un nombre para la muestra")
-      return
+    if (!sampleData.sampleNum) {
+      alert("Por favor, ingresa un nombre para la muestra");
+      return;
     }
-    onSave(sampleData)
-    onClose()
-  }
+    onSave(sampleData);
+    onClose();
+  };
 
   return (
     <AlertaScroll
@@ -199,7 +239,7 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
       content={
         <View style={styles.sampleFormContainer}>
           <InputComponent
-            type="text"
+            type="muestra"
             value={sampleData.sampleNum}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, sampleNum: text }))
@@ -211,7 +251,7 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
           />
 
           <InputComponent
-            type="superficie"
+            type="profundidad"
             value={sampleData.profundidadInicio}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, profundidadInicio: text }))
@@ -220,7 +260,7 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
             placeholder="Ej: 15"
           />
           <InputComponent
-            type="superficie"
+            type="profundidad"
             value={sampleData.profundidadFin}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, profundidadFin: text }))
@@ -230,7 +270,7 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
           />
 
           <InputComponent
-            type="text"
+            type="espresor"
             value={sampleData.espresor}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, espresor: text }))
@@ -250,58 +290,62 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
           />
 
           <InputComponent
-            type="descripcion"
+            type="tipo"
             value={sampleData.tipoMuestra}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, tipoMuestra: text }))
             }
             label="Tipo Muestra"
-            placeholder="Descripción detallada de la muestra"
+            placeholder="Tipo de muestra"
           />
 
-<InputComponent
-            type="descripcion"
+          <InputComponent
+            type="pdc"
             value={sampleData.pdcLi}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, pdcLi: text }))
             }
             label="PDC Li (cm)"
-            placeholder="Descripción detallada de la muestra"
+            placeholder="PDC Li"
           />
 
-
-<InputComponent
-            type="descripcion"
+          <InputComponent
+            type="pdc"
             value={sampleData.pdcLf}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, pdcLf: text }))
             }
             label="PDC Lf (cm)"
-            placeholder="Descripción detallada de la muestra"
+            placeholder="PDC Lf"
           />
 
-
-<InputComponent
-            type="descripcion"
+          <InputComponent
+            type="pdc"
             value={sampleData.pdcGi}
             onChangeText={(text) =>
               setSampleData((prev) => ({ ...prev, pdcGi: text }))
             }
-            label="PDC GI "
-            placeholder="Descripción detallada de la muestra"
+            label="PDC GI"
+            placeholder="PDC Gi"
           />
 
           <ColorPicker
-            selectedColor={sampleData.color}
+            selectedColor={sampleData.estrato}
             onColorSelect={(color) =>
-              setSampleData((prev) => ({ ...prev, color }))
+              setSampleData((prev) => ({ ...prev, estrato:color }))
             }
             colors={colors}
           />
         </View>
       }
       actions={[
-        <Button key="cancel" onPress={onClose} mode="outlined" textColor="black" style={styles.formButton}>
+        <Button
+          key="cancel"
+          onPress={onClose}
+          mode="outlined"
+          textColor="black"
+          style={styles.formButton}
+        >
           Cancelar
         </Button>,
         <Button
@@ -314,8 +358,8 @@ const SampleForm = ({ visible, onClose, onSave, editingSample, isEditing }) => {
         </Button>,
       ]}
     />
-  )
-}
+  );
+};
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -344,17 +388,17 @@ const columns = [
   { key: "observaciones", title: "Observaciones", sortable: true },
   { key: "createdAt", title: "Creado", sortable: true },
   { key: "updatedAt", title: "Modificado", sortable: true },
-]
+];
 
-const Apiques = () => {
-  const [data, setData] = useState([])
-  const [editingInventoryId, setEditingInventoryId] = useState(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [snackbarVisible, setSnackbarVisible] = useState(false)
+const Apique = () => {
+  const [data, setData] = useState([]);
+  const [editingInventoryId, setEditingInventoryId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState({
     text: "",
     type: "success",
-  })
+  });
   const [formData, setFormData] = useState({
     informeNum: "",
     cliente: "",
@@ -371,60 +415,30 @@ const Apiques = () => {
     observaciones: "",
     imagenes: [],
     muestras: [],
-  })
-  const [openForm, setOpenForm] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [imageLoading, setImageLoading] = useState({})
+  });
+
+
+
+  const [openForm, setOpenForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState({});
 
   // Estados para el formulario de muestras
-  const [sampleFormVisible, setSampleFormVisible] = useState(false)
-  const [editingSampleIndex, setEditingSampleIndex] = useState(null)
-  const [isEditingSample, setIsEditingSample] = useState(false)
+  const [sampleFormVisible, setSampleFormVisible] = useState(false);
+  const [editingSampleIndex, setEditingSampleIndex] = useState(null);
+  const [isEditingSample, setIsEditingSample] = useState(false);
 
   // Estados de los estilos
-  const theme = useTheme()
-  const { width } = useWindowDimensions()
-  const isSmallScreen = width < 600
+  const theme = useTheme();
+  const { width } = useWindowDimensions();
+  const isSmallScreen = width < 600;
 
-  // Función para convertir base64/dataURL a File
-  function dataURLtoFile(dataurl, filename) {
-    const arr = dataurl.split(",")
-    const mime = arr[0].match(/:(.*?);/)[1]
-    const bstr = atob(arr[1])
-    let n = bstr.length
-    const u8arr = new Uint8Array(n)
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n)
-    }
-    return new File([u8arr], filename, { type: mime })
-  }
 
-  // Función para mostrar mensajes al usuario
-  const showMessage = (text, type = "info") => {
-    setSnackbarMessage({ text, type })
-    setSnackbarVisible(true)
-  }
-
-  useFocusEffect(
-    useCallback(() => {
-      setLoading(true)
-      getApique()
-        .then(setData)
-        .catch((error) => {
-          setSnackbarMessage({
-            text: "Error al cargar los datos",
-            type: "error",
-          })
-          setSnackbarVisible(true)
-        })
-        .finally(() => setLoading(false))
-    }, []),
-  )
 
   const resetForm = () => {
-    setOpenForm(false)
-    setIsEditing(false)
-    setEditingInventoryId(null)
+    setOpenForm(false);
+    setIsEditing(false);
+    setEditingInventoryId(null);
     setFormData({
       informeNum: "",
       cliente: "",
@@ -441,134 +455,180 @@ const Apiques = () => {
       observaciones: "",
       imagenes: [],
       muestras: [],
-    })
+    });
+  };
+
+  // Función para convertir base64/dataURL a File
+  function dataURLtoFile(dataurl, filename) {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
   }
+
+  // Función para mostrar mensajes al usuario
+  const showMessage = (text, type = "info") => {
+    setSnackbarMessage({ text, type });
+    setSnackbarVisible(true);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      getApique()
+        .then(setData)
+        .catch((error) => {
+          setSnackbarMessage({
+            text: "Error al cargar los datos",
+            type: "error",
+          });
+          setSnackbarVisible(true);
+        })
+        .finally(() => setLoading(false));
+    }, [])
+  );
+
+  
 
   // Funciones para manejar muestras
   const handleAddSample = () => {
-    setIsEditingSample(false)
-    setEditingSampleIndex(null)
-    setSampleFormVisible(true)
-  }
+    setIsEditingSample(false);
+    setEditingSampleIndex(null);
+    setSampleFormVisible(true);
+  };
 
   const handleEditSample = (index) => {
-    setIsEditingSample(true)
-    setEditingSampleIndex(index)
-    setSampleFormVisible(true)
-  }
+    setIsEditingSample(true);
+    setEditingSampleIndex(index);
+    setSampleFormVisible(true);
+  };
 
   const handleSaveSample = (sampleData) => {
     setFormData((prev) => {
-      const newMuestras = [...prev.muestras]
+      const newMuestras = [...prev.muestras];
       if (isEditingSample && editingSampleIndex !== null) {
-        newMuestras[editingSampleIndex] = { ...sampleData, expanded: false }
+        newMuestras[editingSampleIndex] = { ...sampleData, expanded: false };
       } else {
-        newMuestras.push({ ...sampleData, expanded: false })
+        newMuestras.push({ ...sampleData, expanded: false });
       }
-      return { ...prev, muestras: newMuestras }
-    })
-    setSampleFormVisible(false)
-  }
+      return { ...prev, muestras: newMuestras };
+    });
+    setSampleFormVisible(false);
+  };
 
   const handleDeleteSample = (index) => {
     setFormData((prev) => {
-      const newMuestras = [...prev.muestras]
-      newMuestras.splice(index, 1)
-      return { ...prev, muestras: newMuestras }
-    })
-  }
+      const newMuestras = [...prev.muestras];
+      newMuestras.splice(index, 1);
+      return { ...prev, muestras: newMuestras };
+    });
+  };
 
   const handleToggleSampleExpand = (index) => {
     setFormData((prev) => {
-      const newMuestras = [...prev.muestras]
+      const newMuestras = [...prev.muestras];
       newMuestras[index] = {
         ...newMuestras[index],
         expanded: !newMuestras[index].expanded,
-      }
-      return { ...prev, muestras: newMuestras }
-    })
-  }
+      };
+      return { ...prev, muestras: newMuestras };
+    });
+  };
 
   // HandleSubmit adaptado para incluir muestras
   const handleSubmit = useCallback(async () => {
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const formDataToSend = new FormData()
+      const formDataToSend = new FormData();
 
       // Añadir campos básicos
       Object.keys(formData).forEach((key) => {
         if (key !== "imagenes" && key !== "muestras" && formData[key]) {
-          formDataToSend.append(key, formData[key])
+          formDataToSend.append(key, formData[key]);
         }
-      })
+      });
 
       // Añadir muestras como JSON
       if (formData.muestras.length > 0) {
-        formDataToSend.append("muestras", JSON.stringify(formData.muestras))
+        formDataToSend.append("muestras", JSON.stringify(formData.muestras));
       }
 
       // Función para manejar imágenes
       const handleImageUpload = (imageData, index) => {
-        if (!imageData) return
+        if (!imageData) return;
 
-        const fieldName = "imagenes"
+        const fieldName = "imagenes";
 
-        if (typeof imageData.uri === "string" && imageData.uri.startsWith("data:")) {
-          const filename = imageData.name || `image_${Date.now()}_${index}.jpg`
-          const file = dataURLtoFile(imageData.uri, filename)
-          formDataToSend.append(fieldName, file, file.name)
-          return
+        if (
+          typeof imageData.uri === "string" &&
+          imageData.uri.startsWith("data:")
+        ) {
+          const filename = imageData.name || `image_${Date.now()}_${index}.jpg`;
+          const file = dataURLtoFile(imageData.uri, filename);
+          formDataToSend.append(fieldName, file, file.name);
+          return;
         }
 
         if (imageData.file instanceof File || imageData.file instanceof Blob) {
-          formDataToSend.append(fieldName, imageData.file, imageData.name)
-          return
+          formDataToSend.append(fieldName, imageData.file, imageData.name);
+          return;
         }
 
-        if (typeof imageData.uri === "string" && imageData.uri.match(/^(file|content):\/\//)) {
-          const filename = imageData.name || imageData.uri.split("/").pop() || `image_${index}.jpg`
-          const type = filename.split(".").pop() || "jpeg"
+        if (
+          typeof imageData.uri === "string" &&
+          imageData.uri.match(/^(file|content):\/\//)
+        ) {
+          const filename =
+            imageData.name ||
+            imageData.uri.split("/").pop() ||
+            `image_${index}.jpg`;
+          const type = filename.split(".").pop() || "jpeg";
           formDataToSend.append(fieldName, {
             uri: imageData.uri,
             name: filename,
             type: `image/${type}`,
-          })
-          return
+          });
+          return;
         }
 
         if (imageData.isFromAPI && typeof imageData.uri === "string") {
-          formDataToSend.append(fieldName, imageData.uri)
+          formDataToSend.append(fieldName, imageData.uri);
         }
-      }
+      };
 
       // Manejar imágenes en formData
       formData.imagenes.forEach((imageData, index) => {
-        handleImageUpload(imageData, index)
-      })
+        handleImageUpload(imageData, index);
+      });
 
       // Lógica para enviar datos al servidor
       if (isEditing) {
-        await updateApique(editingInventoryId, formDataToSend)
-        showMessage("Datos actualizados correctamente")
+        await updateApique(editingInventoryId, formDataToSend);
+        showMessage("Datos actualizados correctamente");
       } else {
-        await createApique(formDataToSend)
-        showMessage("Apique creado correctamente")
+        await createApique(formDataToSend);
+        showMessage("Apique creado correctamente");
       }
 
       // Actualizar la lista de datos después de la operación
-      getApique().then(setData)
+      getApique().then(setData);
     } catch (error) {
       setSnackbarMessage({
         text: "Error al procesar los datos",
         type: "error",
-      })
-      setSnackbarVisible(true)
+      });
+      setSnackbarVisible(true);
     } finally {
-      setLoading(false)
-      resetForm()
+      setLoading(false);
+      resetForm();
     }
-  }, [formData, isEditing, editingInventoryId])
+  }, [formData, isEditing, editingInventoryId]);
 
   const handleEdit = useCallback(async (item) => {
     try {
@@ -577,24 +637,27 @@ const Apiques = () => {
         ? item.imagenes.map((img) => ({
             uri: typeof img === "string" ? img : img.uri || "",
             type: "image/jpeg",
-            name: typeof img === "string" ? img.split("/").pop() || "image.jpg" : img.name || "image.jpg",
+            name:
+              typeof img === "string"
+                ? img.split("/").pop() || "image.jpg"
+                : img.name || "image.jpg",
             isFromAPI: true,
           }))
-        : []
+        : [];
 
       // Obtener las muestras del API usando el ID del apique
-      let formattedSamples = []
+      let formattedSamples = [];
       try {
-        const samplesFromAPI = await getSampleApiqueId(item.id)
+        const samplesFromAPI = await getSampleApiqueId(item.id);
         formattedSamples = Array.isArray(samplesFromAPI)
           ? samplesFromAPI.map((sample) => ({
               ...sample,
               expanded: false,
             }))
-          : []
+          : [];
       } catch (error) {
-        console.error("Error al cargar las muestras:", error)
-        showMessage("Error al cargar las muestras del apique", "error")
+        console.error("Error al cargar las muestras:", error);
+        showMessage("Error al cargar las muestras del apique", "error");
       }
 
       setFormData({
@@ -614,27 +677,27 @@ const Apiques = () => {
         observaciones: item.observaciones,
         imagenes: formattedImages,
         muestras: formattedSamples,
-      })
-      setEditingInventoryId(item.id)
-      setIsEditing(true)
-      setOpenForm(true)
+      });
+      setEditingInventoryId(item.id);
+      setIsEditing(true);
+      setOpenForm(true);
     } catch (error) {
-      console.error("Error in handleEdit:", error)
       setSnackbarMessage({
         text: "Error al editar el proyecto",
         type: "error",
-      })
-      setSnackbarVisible(true)
+      });
+      setSnackbarVisible(true);
     }
-  }, [])
+  }, []);
 
   const pickImages = async () => {
     try {
       if (Platform.OS !== "web") {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
-          alert("Necesitamos acceso a la galería para seleccionar fotos.")
-          return
+          alert("Necesitamos acceso a la galería para seleccionar fotos.");
+          return;
         }
       }
 
@@ -644,73 +707,81 @@ const Apiques = () => {
         quality: 0.7,
         allowsEditing: false,
         aspect: [4, 3],
-      }
+      };
 
-      const result = await ImagePicker.launchImageLibraryAsync(pickerOptions)
+      const result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const newImages = result.assets.map((asset) => {
           if (Platform.OS === "web" && asset.uri.startsWith("data:")) {
-            const file = dataURLtoFile(asset.uri, asset.fileName || `image-${Date.now()}.jpg`)
+            const file = dataURLtoFile(
+              asset.uri,
+              asset.fileName || `image-${Date.now()}.jpg`
+            );
             return {
               file,
               uri: asset.uri,
               type: asset.type || "image/jpeg",
               name: asset.fileName || file.name,
               isFromAPI: false,
-            }
+            };
           }
 
           return {
             uri: asset.uri,
             type: asset.type || "image/jpeg",
-            name: asset.fileName || asset.uri.split("/").pop() || `image-${Date.now()}.jpg`,
+            name:
+              asset.fileName ||
+              asset.uri.split("/").pop() ||
+              `image-${Date.now()}.jpg`,
             isFromAPI: false,
-          }
-        })
+          };
+        });
 
         setFormData((prevData) => ({
           ...prevData,
           imagenes: [...prevData.imagenes, ...newImages],
-        }))
+        }));
       }
     } catch (error) {
-      console.error("Error seleccionando imágenes:", error)
+      console.error("Error seleccionando imágenes:", error);
       setSnackbarMessage({
-        text: `Error al seleccionar imágenes: ${error.message || "Error desconocido"}`,
+        text: `Error al seleccionar imágenes: ${
+          error.message || "Error desconocido"
+        }`,
         type: "error",
-      })
-      setSnackbarVisible(true)
+      });
+      setSnackbarVisible(true);
     }
-  }
+  };
 
   const removeImage = (index) => {
     setFormData((prevData) => {
-      const newImages = [...prevData.imagenes]
-      newImages.splice(index, 1)
-      return { ...prevData, imagenes: newImages }
-    })
-  }
+      const newImages = [...prevData.imagenes];
+      newImages.splice(index, 1);
+      return { ...prevData, imagenes: newImages };
+    });
+  };
 
   const handleImageLoadStart = (index) => {
-    setImageLoading((prev) => ({ ...prev, [index]: true }))
-  }
+    setImageLoading((prev) => ({ ...prev, [index]: true }));
+  };
 
   const handleImageLoadEnd = (index) => {
-    setImageLoading((prev) => ({ ...prev, [index]: false }))
-  }
+    setImageLoading((prev) => ({ ...prev, [index]: false }));
+  };
 
   const handleImageError = (index, error) => {
-    console.log(`Error loading image at index ${index}:`, error)
-    setImageLoading((prev) => ({ ...prev, [index]: false }))
-  }
+    console.log(`Error loading image at index ${index}:`, error);
+    setImageLoading((prev) => ({ ...prev, [index]: false }));
+  };
 
-  const totalItems = data.length
+  const totalItems = data.length;
   const calculateProgress = (value, max) => {
-    const progress = Math.min(Math.max(value / max, 0), 1)
-    return Number.parseFloat(progress.toFixed(2))
-  }
-  const itemsProgress = calculateProgress(totalItems, 1000)
+    const progress = Math.min(Math.max(value / max, 0), 1);
+    return Number.parseFloat(progress.toFixed(2));
+  };
+  const itemsProgress = calculateProgress(totalItems, 1000);
 
   return (
     <>
@@ -721,7 +792,7 @@ const Apiques = () => {
               items={[
                 {
                   label: "Dashboard",
-                  onPress: () => router.navigate("/(admin)/Dashboard"),
+                  onPress: () => router.navigate("/(employee)/DashboardE"),
                 },
                 {
                   label: "Apique",
@@ -729,12 +800,21 @@ const Apiques = () => {
               ]}
             />
           </View>
-          <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
+          <View
+            style={[
+              styles.cardContainer,
+              isSmallScreen && styles.cardContainerSmall,
+            ]}
+          >
             <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
               <Card.Content>
                 <Text style={styles.cardTitle}>Total de apiques</Text>
                 <Text style={styles.cardValue}>{totalItems}</Text>
-                <ProgressBar progress={itemsProgress} color="#00ACE8" style={styles.progressBar} />
+                <ProgressBar
+                  progress={itemsProgress}
+                  color="#00ACE8"
+                  style={styles.progressBar}
+                />
               </Card.Content>
             </Card>
           </View>
@@ -756,8 +836,8 @@ const Apiques = () => {
                 onSearch={console.log}
                 onFilter={console.log}
                 onDelete={async (item) => {
-                  await deleteApique(item.id)
-                  setData(data.filter((p) => p.id !== item.id))
+                  await deleteApique(item.id);
+                  setData(data.filter((p) => p.id !== item.id));
                 }}
                 onDataUpdate={setData}
                 onCreate={() => setOpenForm(true)}
@@ -774,7 +854,9 @@ const Apiques = () => {
           style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
           action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
         >
-          <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
+          <Text style={{ color: theme.colors.surface }}>
+            {snackbarMessage.text}
+          </Text>
         </Snackbar>
 
         <AlertaScroll
@@ -806,35 +888,37 @@ const Apiques = () => {
                       field === "informeNum"
                         ? "numberNum"
                         : field === "cliente"
-                          ? "nombre"
-                          : field === "tituloObra"
-                            ? "titulo"
-                            : field === "localizacion"
-                              ? "ubicacion"
-                              : field == "albaranNum"
-                                ? "numberNum"
-                                : field == "fechaEjecucionInicio"
-                                  ? "date"
-                                  : field == "fechaEjecucionFinal"
-                                    ? "date"
-                                    : field == "fechaEmision"
-                                      ? "date"
-                                      : field == "tipo"
-                                        ? "tipo"
-                                        : field == "operario"
-                                          ? "nombre"
-                                          : field == "largoApique"
-                                            ? "superficie"
-                                            : field == "anchoApique"
-                                              ? "superficie"
-                                              : field == "profundidadApique"
-                                                ? "superficie"
-                                                : field == "observaciones"
-                                                  ? "descripcion"
-                                                  : "text"
+                        ? "nombre"
+                        : field === "tituloObra"
+                        ? "titulo"
+                        : field === "localizacion"
+                        ? "ubicacion"
+                        : field == "albaranNum"
+                        ? "numberNum"
+                        : field == "fechaEjecucionInicio"
+                        ? "date"
+                        : field == "fechaEjecucionFinal"
+                        ? "date"
+                        : field == "fechaEmision"
+                        ? "date"
+                        : field == "tipo"
+                        ? "tipo"
+                        : field == "operario"
+                        ? "nombre"
+                        : field == "largoApique"
+                        ? "superficie"
+                        : field == "anchoApique"
+                        ? "superficie"
+                        : field == "profundidadApique"
+                        ? "profundidad"
+                        : field == "observaciones"
+                        ? "descripcion"
+                        : "text"
                     }
                     value={formData[field]}
-                    onChangeText={(text) => setFormData((prev) => ({ ...prev, [field]: text }))}
+                    onChangeText={(text) =>
+                      setFormData((prev) => ({ ...prev, [field]: text }))
+                    }
                     label={field.charAt(0).toUpperCase() + field.slice(1)}
                     placeholder={`Introduce el ${field}`}
                     validationRules={{ required: true }}
@@ -847,7 +931,13 @@ const Apiques = () => {
               <View style={styles.samplesSection}>
                 <View style={styles.samplesSectionHeader}>
                   <Text style={styles.sectionTitle}>Muestras del Apique</Text>
-                  <Button mode="contained" onPress={handleAddSample} style={styles.addSampleButton} icon="plus" compact>
+                  <Button
+                    mode="contained"
+                    onPress={handleAddSample}
+                    style={styles.addSampleButton}
+                    icon="plus"
+                    compact
+                  >
                     Agregar Muestra
                   </Button>
                 </View>
@@ -868,8 +958,12 @@ const Apiques = () => {
                 ) : (
                   <View style={styles.noSamplesContainer}>
                     <MaterialIcons name="science" size={48} color="#ccc" />
-                    <Text style={styles.noSamplesText}>No hay muestras agregadas</Text>
-                    <Text style={styles.noSamplesSubtext}>Presiona "Agregar Muestra" para comenzar</Text>
+                    <Text style={styles.noSamplesText}>
+                      No hay muestras agregadas
+                    </Text>
+                    <Text style={styles.noSamplesSubtext}>
+                      Presiona "Agregar Muestra" para comenzar
+                    </Text>
                   </View>
                 )}
               </View>
@@ -885,7 +979,12 @@ const Apiques = () => {
                     : "No hay imágenes seleccionadas"}
                 </Text>
 
-                <Button mode="contained" onPress={pickImages} style={styles.buttonImages} icon="image-plus">
+                <Button
+                  mode="contained"
+                  onPress={pickImages}
+                  style={styles.buttonImages}
+                  icon="image-plus"
+                >
                   Seleccionar Imágenes
                 </Button>
 
@@ -900,26 +999,46 @@ const Apiques = () => {
                     {formData.imagenes.map((image, index) => (
                       <Card
                         key={index}
-                        style={[styles.cardImages, isSmallScreen ? styles.cardImagesSmall : styles.cardImagesLarge]}
+                        style={[
+                          styles.cardImages,
+                          isSmallScreen
+                            ? styles.cardImagesSmall
+                            : styles.cardImagesLarge,
+                        ]}
                       >
                         <Card.Content style={styles.cardImageContent}>
                           <View style={styles.imageContainer}>
                             {imageLoading[index] && (
                               <View style={styles.imageLoadingOverlay}>
-                                <ActivityIndicator size="small" color={theme.colors.primary} />
+                                <ActivityIndicator
+                                  size="small"
+                                  color={theme.colors.primary}
+                                />
                               </View>
                             )}
                             <Image
                               source={{
-                                uri: image.isFromAPI ? SrcImagen(image.uri) : image.uri,
+                                uri: image.isFromAPI
+                                  ? SrcImagen(image.uri)
+                                  : image.uri,
                               }}
                               style={styles.images}
                               onLoadStart={() => handleImageLoadStart(index)}
                               onLoad={() => handleImageLoadEnd(index)}
-                              onError={(e) => handleImageError(index, e.nativeEvent.error)}
+                              onError={(e) =>
+                                handleImageError(index, e.nativeEvent.error)
+                              }
                             />
-                            <TouchableOpacity style={styles.removeImageButton} onPress={() => removeImage(index)}>
-                              <IconButton icon="close-circle" size={24} iconColor="#fff" style={styles.removeIcon} />
+                            <TouchableOpacity
+                              style={styles.removeImageButton}
+                              onPress={() => removeImage(index)}
+                            >
+                              <IconButton
+                                icon="close-circle"
+                                size={24}
+                                iconColor="#fff"
+                                style={styles.removeIcon}
+                              />
                             </TouchableOpacity>
                           </View>
                           <Text style={styles.imageCaption} numberOfLines={1}>
@@ -962,14 +1081,18 @@ const Apiques = () => {
           visible={sampleFormVisible}
           onClose={() => setSampleFormVisible(false)}
           onSave={handleSaveSample}
-          editingSample={isEditingSample && editingSampleIndex !== null ? formData.muestras[editingSampleIndex] : null}
+          editingSample={
+            isEditingSample && editingSampleIndex !== null
+              ? formData.muestras[editingSampleIndex]
+              : null
+          }
           isEditing={isEditingSample}
         />
       </PaperProvider>
       <AddComponent onOpen={() => setOpenForm(true)} />
     </>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -1059,23 +1182,26 @@ const styles = StyleSheet.create({
   // Estilos para las muestras
   samplesSection: {
     width: "100%",
-    padding: 16,
+    padding: 1,
     marginTop: 16,
     borderTopWidth: 1,
     borderTopColor: "#eee",
   },
   samplesSectionHeader: {
+  
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     alignItems: "center",
     marginBottom: 16,
   },
   sectionTitle: {
+    width:"40%",
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
   },
   addSampleButton: {
+    width:"60%",
     backgroundColor: "#00ACE8",
   },
   samplesContainer: {
@@ -1327,6 +1453,6 @@ const styles = StyleSheet.create({
   formButton: {
     minWidth: 120,
   },
-})
+});
 
-export default Apiques;
+export default Apique;

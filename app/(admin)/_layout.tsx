@@ -329,9 +329,12 @@ export default function App() {
             }}
           >
             {(props) => (
-              <AnimatedScreen style={animatedStyle}>
+              <>
+              {/* <AnimatedScreen style={animatedStyle}> */}
                 <Hirings {...props} />
-              </AnimatedScreen>
+              {/* </AnimatedScreen> */}
+              </>
+              
             )}
           </Drawer.Screen>
 

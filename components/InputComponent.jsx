@@ -11,6 +11,7 @@ import {
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
+  Entypo,
 } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
@@ -119,6 +120,7 @@ function InputComponent({
       inputProps.value = inputValue;
       break;
     case "descripcion":
+      inputProps.multiline = true;
       inputProps.left = (
         <TextInput.Icon
           icon={() => (
@@ -231,6 +233,7 @@ function InputComponent({
       );
       break;
     case "superficie":
+      inputProps.keyboardType = "numeric";
       inputProps.left = (
         <TextInput.Icon
           icon={() => (
@@ -242,6 +245,19 @@ function InputComponent({
           )}
         />
       );
+      inputProps.onChangeText = (text) => {
+        let validText = text.replace(/[^0-9.]/g, "");
+       
+        if (validText.startsWith(".")) {
+          validText = "0" + validText;
+        }
+        validText = validText.replace(/(\..*)\./g, "$1");
+      
+        if (validText !== inputValue) {
+          setInputValue(validText);
+          onChangeText?.(validText);
+        }
+      };
       break;
       case "titulo":
       inputProps.left = (
@@ -251,6 +267,7 @@ function InputComponent({
           )}
         />
       );
+      inputProps.maxLength = 15;
       break;
       case "tipo":
       inputProps.left = (
@@ -260,6 +277,14 @@ function InputComponent({
           )}
         />
       );
+      inputProps.onChangeText = (text) => {
+        const validText = text.replace(/[^A-Za-z]/g, "");
+        if (validText !== inputValue) {
+          setInputValue(validText);
+          onChangeText?.(validText);
+        }
+      };
+      inputProps.maxLength = 15;
       break;
     case "textarea":
       inputProps.multiline = true;
@@ -273,6 +298,84 @@ function InputComponent({
         />
       );
       break;
+      case "muestra":
+        inputProps.left = (
+          <TextInput.Icon
+          icon={() => <Entypo name="lab-flask" size={24} color="black" />}
+          onPress={showDatePicker}
+        />
+          
+        );
+        break;
+        case "profundidad":
+          inputProps.keyboardType = "numeric";
+          inputProps.left = (
+            <TextInput.Icon
+            icon={() => <Entypo name="layers" size={24} color="black" />}
+            onPress={showDatePicker}
+          />
+            
+          );
+          inputProps.onChangeText = (text) => {
+            let validText = text.replace(/[^0-9.]/g, "");
+           
+            if (validText.startsWith(".")) {
+              validText = "0" + validText;
+            }
+            validText = validText.replace(/(\..*)\./g, "$1");
+          
+            if (validText !== inputValue) {
+              setInputValue(validText);
+              onChangeText?.(validText);
+            }
+          };
+          break;
+          case "espresor":
+            inputProps.keyboardType = "numeric";
+          inputProps.left = (
+            <TextInput.Icon
+            icon={() => <MaterialCommunityIcons name="arrow-expand-horizontal" size={24} color="black" />}
+            onPress={showDatePicker}
+          />
+            
+          );
+          inputProps.onChangeText = (text) => {
+            let validText = text.replace(/[^0-9.]/g, "");
+           
+            if (validText.startsWith(".")) {
+              validText = "0" + validText;
+            }
+            validText = validText.replace(/(\..*)\./g, "$1");
+          
+            if (validText !== inputValue) {
+              setInputValue(validText);
+              onChangeText?.(validText);
+            }
+          };
+          break;
+          case "pdc":
+            inputProps.keyboardType = "numeric";
+            inputProps.left = (
+              <TextInput.Icon
+              icon={() => <MaterialCommunityIcons name="chart-bell-curve-cumulative" size={24} color="black" />}
+              onPress={showDatePicker}
+            />
+              
+            );
+            inputProps.onChangeText = (text) => {
+              let validText = text.replace(/[^0-9.]/g, "");
+             
+              if (validText.startsWith(".")) {
+                validText = "0" + validText;
+              }
+              validText = validText.replace(/(\..*)\./g, "$1");
+            
+              if (validText !== inputValue) {
+                setInputValue(validText);
+                onChangeText?.(validText);
+              }
+            };
+            break;
     default:
       break;
   }
