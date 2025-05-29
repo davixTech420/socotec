@@ -1,36 +1,47 @@
-import { useState} from 'react';
-import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { useAuth } from '@/context/userContext';
-import {router}  from "expo-router";
+import { useState, useEffect } from "react"
+import { Tabs } from "expo-router"
+import { Platform } from "react-native"
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
+import { HapticTab } from "@/components/HapticTab"
+import { IconSymbol } from "@/components/ui/IconSymbol"
+import TabBarBackground from "@/components/ui/TabBarBackground"
+import { useColorScheme } from "@/hooks/useColorScheme"
+import { useAuth } from "@/context/userContext"
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const [role,setRole] = useState(null);
+  const colorScheme = useColorScheme()
+  const [role, setRole] = useState(null)
+  const { isAuthenticated, user } = useAuth()
 
-  const { isAuthenticated,user } = useAuth();
-   user()
-          .then((userData) => {
-            setRole(userData.role);
-          })
-          .catch((error) => {
-            console.log('Error obteniendo el rol:', error);
-          });
+  // Obtener el rol del usuario
+  useEffect(() => {
+    if (isAuthenticated) {
+      user()
+        .then((userData) => {
+          setRole(userData.role)
+        })
+        .catch((error) => {
+          console.log("Error obteniendo el rol:", error)
+        })
+    } else {
+      // Si no está autenticado, limpiar el rol
+      setRole(null)
+    }
+  }, [isAuthenticated, user])
 
+  
+  const getHref = () => {
+    if (!isAuthenticated) return "/(tabs)/singUp"
 
-
-          const getHref = () => {
-            if (isAuthenticated) {
-              return role === "admin" ? router.navigate("/(admin)/Dashboard") : role === "employee" ? router.navigate("/(employee)/DashboardE") : router.navigate("/(tabs)/singUp");
-            }
-            return "/(tabs)/singUp";
-          };
-          
+    // Si está autenticado, devolver la ruta según el rol
+    if (role === "admin") {
+      return "/(admin)/Dashboard"
+    } else if (role === "employee") {
+      return "/(employee)/DashboardE"
+    }
+    // Si está autenticado pero aún no tenemos el rol, ir al login temporalmente
+    return "/(tabs)/singIn"
+  }
 
   return (
     <>
@@ -55,16 +66,15 @@ export default function TabLayout() {
                 position: "absolute",
                 marginInline: 15,
               },
-              default: {
-
-              },
+              default: {},
             }),
-          }
-        }}>
+          },
+        }}
+      >
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Inicio',
+            title: "Inicio",
             tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
           }}
         />
@@ -73,27 +83,27 @@ export default function TabLayout() {
           options={{
             title: "Portafolio",
             tabBarIcon: ({ color }) => <MaterialCommunityIcons name="briefcase" size={28} color={color} />,
-
           }}
         />
         <Tabs.Screen
           name="singIn"
           options={{
-            href: getHref() /* isAuthenticated && role === "admin" ? "/(admin)/Dashboard" : role === "employee" ? "/(employee)/DashboardE" : "/(tabs)/singUp", */,
-            title: isAuthenticated ? 'Dashboard' : 'Login',
-            tabBarIcon: ({ color }) => <MaterialCommunityIcons name={isAuthenticated ? "view-dashboard" : "account"} size={28} color={color} />,
-
+            href: getHref(),
+            title: isAuthenticated ? "Dashboard" : "Login",
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name={isAuthenticated ? "view-dashboard" : "account"} size={28} color={color} />
+            ),
           }}
         />
         <Tabs.Screen
           name="singUp"
           options={{
             href: null,
-            title: 'Registrar',
+            title: "Registrar",
             tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account" size={28} color={color} />,
           }}
         />
       </Tabs>
     </>
-  );
+  )
 }

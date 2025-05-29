@@ -6,89 +6,74 @@ import Breadcrumb from "@/components/BreadcrumbComponent"
 import AddComponent from "@/components/AddComponent"
 import { AlertaScroll } from "@/components/alerta"
 import InputComponent from "@/components/InputComponent"
-import {getAccounts, getMotions, deleteMotion, activeMotion, inactiveMotion, updateMotion, createMotion } from "@/services/adminServices"
+import { getUsers, deleteUser, activateUser, inactivateUser, updateUser, createUser } from "@/services/employeeService";
 import { useFocusEffect } from "@react-navigation/native"
 import { router } from "expo-router"
 import DropdownComponent from "@/components/DropdownComponent"
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFPreviewButton from "@/components/PdfViewComponent";
 
-
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
-  { key: "tipoMovimiento", title: "Tipo Movimiento  ", sortable: true },
-  { key: "fecha", title: "Fecha", sortable: true, width: 80 },
-  { key: "monto", title: "Monto", sortable: true, width: 100 },
-  { key: "descripcion", title: "Descripcion", sortable: true },
-  { key: "cuentaEmisoraId", title: "Emisor", sortable: true },
-  { key: "cuentaReceptoraId", title: "Receptor", sortable: true },
-  {key: "estado", title: "Estado", sortable: true},
+  { key: "nombre", title: "Nombre", sortable: true },
+  { key: "telefono", title: "Teléfono", sortable: true, width: 80 },
+  { key: "email", title: "Email", sortable: true, width: 100 },
+  { key: "estado", title: "Estado", sortable: true },
+  { key: "role", title: "Rol", sortable: true },
   { key: "createdAt", title: "Creado", sortable: true },
   { key: "updatedAt", title: "Modificado", sortable: true },
 ];
 
-export default function MotionsE() {
+export default function Users() {
   const [data, setData] = useState([])
-  const [accounts,setAccounts]=useState([]);
   const [openForm, setOpenForm] = useState(false)
-  const [formData, setFormData] = useState({ tipoMovimiento: "", fecha: "", monto: "", descripcion: "",cuentaEmisoraId : "", cuentaReceptoraId: "" })
+  const [formData, setFormData] = useState({ nombre: "", email: "", telefono: "", role: "", password: "" })
   const [isEditing, setIsEditing] = useState(false)
   const [editingUserId, setEditingUserId] = useState(null)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState({ text: "", type: "success" })
   const theme = useTheme()
   const { width } = useWindowDimensions()
-  const optionsTipoMovimiento = [
-    { label: "Transacción", value: "transaccion" },
-    { label: "Presupuesto", value: "presupuesto" },
-    { label: "Proyecto", value: "proyecto" },
+  const options = [
+    { label: "Administrador", value: "admin" },
+    { label: "Empleado", value: "employee" },
   ]
-
-
-  const optionsEmisor = accounts.map(account => ({ label: account.nombreCuenta, value: account.id }));
-     useFocusEffect(
-        useCallback(() => {
-          const fetchData = async () => {
-            try {
-              const [groupsData, usersData] = await Promise.all([getMotions(), getAccounts()]);
-              setData(groupsData);
-              setAccounts(usersData.filter(account => account.estado === true));
-            } catch (error) {
-              console.error("Error fetching data:", error);
-              setSnackbarMessage({ text: "Error al cargar los datos", type: "error" });
-              setSnackbarVisible(true);
-            }
-          };
-    
-          fetchData();
-        }, [])
-      );
-
-      
+  useFocusEffect(
+    useCallback(() => {
+      getUsers().then(setData).catch(console.error)
+    }, []),
+  )
 
   const handleSubmit = useCallback(async () => {
     try {
-      const requiredFields = isEditing ? ["tipoMovimiento", "fecha", "monto", "descripcion", "cuentaEmisoraId","cuentaReceptoraId"] : ["tipoMovimiento", "fecha", "monto", "descripcion", "cuentaEmisoraId","cuentaReceptoraId"]
+      const requiredFields = isEditing ? ["nombre", "email", "telefono", "role"] : ["nombre", "email", "telefono", "password"]
       const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "")
 
       if (emptyFields.length > 0) {
         setOpenForm(false);
         throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
-
       }
+      if(formData.telefono.length < 10){
+        setOpenForm(false);
+        throw new Error("El Numero De Telefono Debe Tener 10 Digitos");
+      }
+      if (!formData.email.toLowerCase().endsWith("@socotec.com")) {
+        throw new Error("El email debe pertenecer al dominio socotec.com");
+    }
+
 
       let newData
       if (isEditing) {
-        await updateMotion(editingUserId, formData)
+        await updateUser(editingUserId, formData)
         newData = data.map((item) => (item.id === editingUserId ? { ...item, ...formData } : item))
       } else {
-        const newUser = await createMotion(formData)
-        if (!newUser) throw new Error("Error al crear el movimiento")
-        newData = [...data, newUser.motion]
+        const newUser = await createUser(formData)
+        if (!newUser) throw new Error("Error al crear el usuario")
+        newData = [...data, newUser.user]
       }
       setData(newData)
       setSnackbarMessage({
-        text: `Movimiento ${isEditing ? "actualizado" : "creado"} exitosamente`,
+        text: `Usuario ${isEditing ? "actualizado" : "creado"} exitosamente`,
         type: "success",
       })
       resetForm()
@@ -104,7 +89,7 @@ export default function MotionsE() {
     setOpenForm(false)
     setIsEditing(false)
     setEditingUserId(null)
-    setFormData({ tipoMovimiento: "", fecha: "", monto: "", descripcion: "",  cuentaEmisoraId: "", cuentaReceptoraId: "" })
+    setFormData({ nombre: "", email: "", telefono: "", role: "", password: "" })
   }
 
   const handleAction = useCallback(async (action, item) => {
@@ -112,23 +97,23 @@ export default function MotionsE() {
      await action(item.id)
       setData((prevData) =>
         prevData.map((dataItem) =>
-          dataItem.id === item.id ? { ...dataItem, estado: action === activeMotion } : dataItem,
+          dataItem.id === item.id ? { ...dataItem, estado: action === activateUser } : dataItem,
         ),
       )
+      await getUsers();
     } catch (error) {
-      console.log(`Error al ${action === activeMotion ? "activar" : "desactivar"} el usuario:`, error)
+      console.log(`Error al ${action === activateUser ? "activar" : "desactivar"} el usuario:`, error)
       throw error;
     }
   }, []);
 
   const handleEdit = useCallback((item) => {
     setFormData({
-      tipoMovimiento: item.tipoMovimiento,
-      fecha: item.fecha,
-      monto: item.monto,
-      descripcion: item.descripcion,
-      cuentaEmisoraId: item.cuentaEmisoraId,
-      cuentaReceptoraId: item.cuentaReceptoraId
+      nombre: item.nombre,
+      email: item.email,
+      telefono: item.telefono,
+      role: item.role,
+      password: "",
     })
     setEditingUserId(item.id)
     setIsEditing(true)
@@ -136,7 +121,6 @@ export default function MotionsE() {
   }, [])
 
   const isSmallScreen = width < 600
- 
   return (
     <>
       <ScrollView style={styles.container}>
@@ -144,7 +128,7 @@ export default function MotionsE() {
           <Breadcrumb
             items={[
               { label: "Dashboard", onPress: () => router.navigate("/(admin)/Dashboard") },
-              { label: "Movimientos De Cuentas" },
+              { label: "Usuarios" },
             ]}
           />
           <View style={styles.headerActions}>
@@ -155,7 +139,7 @@ export default function MotionsE() {
         <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
           <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
             <Card.Content>
-              <Text style={styles.cardTitle}>Total de movimientos</Text>
+              <Text style={styles.cardTitle}>Total de Usuarios</Text>
               <Text style={styles.cardValue}>{data.length}</Text>
               <ProgressBar progress={data.length * 0.01} color="#00ACE8" style={styles.progressBar} />
             </Card.Content>
@@ -170,12 +154,12 @@ export default function MotionsE() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-              /* onDelete={async (item) => {
-                await deleteMotion(item.id)
+              onDelete={async (item) => {
+                await deleteUser(item.id)
                 setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-              }} */
-              onToggleActive={(item) => handleAction(activeMotion, item)}
-              onToggleInactive={(item) => handleAction(inactiveMotion, item)}
+              }}
+              onToggleActive={(item) => handleAction(activateUser, item)}
+              onToggleInactive={(item) => handleAction(inactivateUser, item)}
               onDataUpdate={setData}
               onCreate={handleSubmit}
               onEdit={handleEdit}
@@ -195,28 +179,21 @@ export default function MotionsE() {
       <AlertaScroll
         onOpen={openForm}
         onClose={resetForm}
-        title={isEditing ? "Editar movimiento" : "Nuevo movimiento"}
+        title={isEditing ? "Editar usuario" : "Nuevo usuario"}
         content={
           <View style={styles.formContainer}>
-
-<DropdownComponent
-              options={optionsTipoMovimiento}
-              onSelect={(value) => {
-                setFormData({ ...formData, tipoMovimiento: value })
-              }}
-              placeholder="Tipo Movimiento"
-              value={formData.tipoMovimiento}
-            />
-            {[ "fecha", "monto", "descripcion"].map((field) => (
+            {["nombre", "email", "telefono", ...(isEditing ? [] : ["password"])].map((field) => (
               <InputComponent
                 key={field}
                 type={
-                  field === "fecha"
-                    ? "date"
-                    : field === "monto"
-                      ? "precio"
-                      : field === "descripcion"
-                        ? "descripcion"
+                  field === "nombre"
+                    ? "nombre"
+                    : field === "email"
+                      ? "email"
+                      : field === "telefono"
+                        ? "number"
+                        : field === "password"
+                          ? "password"
                           : "text"
                 }
                 value={formData[field]}
@@ -227,29 +204,21 @@ export default function MotionsE() {
                 errorMessage={`Por favor, introduce un ${field} válido`}
               />
             ))}
-            <DropdownComponent
-              options={optionsEmisor}
+            {isEditing ? (<DropdownComponent
+              options={options}
               onSelect={(value) => {
-                setFormData({ ...formData, cuentaEmisoraId: value })
+                setFormData({ ...formData, role: value })
               }}
-              placeholder="Cuenta Emisora"
-              value={formData.cuentaEmisoraId}
-            />
-            <DropdownComponent
-              options={optionsEmisor}
-              onSelect={(value) => {
-                setFormData({ ...formData, cuentaReceptoraId: value })
-              }}
-              placeholder="Cuenta Receptora"
-              value={formData.cuentaReceptoraId}
-            />
+              placeholder="ROl"
+              value={formData.role}
+            />) : null}
           </View>
         }
         actions={[
           <Button key="cancel" mode="outlined" textColor="black" onPress={resetForm}>
             Cancelar
           </Button>,
-          <Button key="submit" mode="contained" buttonColor="#00ACE8" onPress={handleSubmit}>
+          <Button key="submit"mode="contained"  style={ {backgroundColor:"#00ACE8"}} onPress={handleSubmit}>
             {isEditing ? "Actualizar" : "Crear"}
           </Button>,
         ]}

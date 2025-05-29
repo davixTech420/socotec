@@ -46,6 +46,7 @@ import GeneratorReport from "./GeneratorRepor";
 import Hiring from "./Hiring";
 import AssignmentPPE from "./AssignmentPPE";
 import Apique from "./Apique";
+import Users from "./Users";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
 import { router } from "expo-router";
 
@@ -421,6 +422,30 @@ export default function App() {
           {logueado?.cargo === "DirectorTalento" ||
           logueado?.cargo === "Talento" ? (
             <>
+
+<Drawer.Screen
+                name="Users"
+                options={{
+                  title: "Usuarios",
+                  drawerIcon: ({ color }) => (
+                    <MaterialCommunityIcons
+                  name="account-multiple-outline"
+                  size={24}
+                  color={color}
+                />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <AnimatedScreen style={animatedStyle}>
+                    <Users {...props} />
+                  </AnimatedScreen>
+                )}
+              </Drawer.Screen>
+
+
+
+
               <Drawer.Screen
                 name="Hiring"
                 options={{

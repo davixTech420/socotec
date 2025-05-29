@@ -375,7 +375,7 @@ export default function CalendarComponent() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-              onDelete={async (item) => {
+              /* onDelete={async (item) => {
                 try {
                   await deletePermission(item.id);
                   showSnackbar("Permiso eliminado correctamente");
@@ -384,7 +384,7 @@ export default function CalendarComponent() {
                   showSnackbar("Error al eliminar el permiso", "error");
                   return false;
                 }
-              }}
+              }} */
               onDataUpdate={handleDataUpdate}
               onEdit={handleEdit}
             />

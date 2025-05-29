@@ -26,6 +26,10 @@ import Animated, { FadeInUp, Layout } from "react-native-reanimated";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SrcImagen } from "@/services/publicServices";
 import ExcelApique from "./ExcelApique";
+import { useProtectedRoute, useAuth } from "@/context/userContext";
+
+
+
 
 const TablaComponente = ({
   data,
@@ -497,8 +501,9 @@ const TablaComponente = ({
                             ]}
                           >
                             <View style={styles.actionButtons}>
-                              
-                              <IconButton
+                              {onDelete == null ? null :(
+                                <>
+                                <IconButton
                                 icon="delete-outline"
                                 size={20}
                                 iconColor="red"
@@ -507,6 +512,9 @@ const TablaComponente = ({
                                   setDeleteConfirmVisible(true);
                                 }}
                               />
+                                </>
+                              )}
+                              
 
                               <IconButton
                                 icon="pencil-outline"
@@ -657,6 +665,7 @@ const TablaComponente = ({
           }}
           action={{
             label: "Cerrar",
+            color: "#ffffff",
             onPress: () => setSnackbarVisible(false),
           }}
         >
@@ -715,7 +724,7 @@ const styles = StyleSheet.create({
   },
   table: {
     width: "100%",
-    minWidth:"100%",
+    minWidth: "100%",
   },
   header: {
     width: "100%",

@@ -48,7 +48,7 @@ export default function MinimalistFooter() {
       <View style={[styles.content, isMobile && styles.contentMobile]}>
         <View style={styles.section}>
           <TouchableOpacity onPress={() => toggleSection('company')} style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Company</Text>
+            <Text style={styles.sectionTitle}>Compañia</Text>
             <Feather
               name={expandedSection === 'company' ? 'chevron-up' : 'chevron-down'}
               size={20}
@@ -72,7 +72,7 @@ export default function MinimalistFooter() {
 
         <View style={styles.section}>
           <TouchableOpacity onPress={() => toggleSection('social')} style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Follow Us</Text>
+            <Text style={styles.sectionTitle}>Redes Sociales</Text>
             <Feather
               name={expandedSection === 'social' ? 'chevron-up' : 'chevron-down'}
               size={20}

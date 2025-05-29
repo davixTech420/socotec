@@ -147,6 +147,31 @@ export const deleteApique = async (id) => {
 };
 
 //routes for users active
+export const getUsers = async () => {
+  return makeRequest("get","/users");
+}
+
+export const createUser = async (data) => {
+  return makeRequest("post","/users",data);
+}
+
+export const updateUser = async (id,data) => {
+  return makeRequest("put",`/users/${id}`,data);
+}
+export const deleteUser = async(id) => {
+  return makeRequest("delete",`/users/${id}`);
+}
+
+export const activateUser = async(id) => {
+  return makeRequest("put",`/users/${id}/active`);
+}
+
+export const inactivateUser = async(id) => {
+  return makeRequest("put",`/users/${id}/inactive`);
+}
+
+
+
 export const getActiveUsers = async () => {
   return makeRequest("get", "/activeUsers");
 };

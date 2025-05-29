@@ -191,10 +191,10 @@ const Inventario = () => {
                 onSort={console.log}
                 onSearch={console.log}
                 onFilter={console.log}
-                onDelete={async (item) => {
+                /* onDelete={async (item) => {
                   await deleteInventory(item.id)
                   setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-                }}
+                }} */
                 onToggleActive={(item) => handleAction(activeInventory, item)}
                 onToggleInactive={(item) => handleAction(inactiveInventory, item)}
                 onDataUpdate={setData}
@@ -228,7 +228,7 @@ const Inventario = () => {
                     : field === "descripcion"
                       ? "descripcion"
                       : field === "cantidad"
-                        ? "number"
+                        ? "numberNum"
                         : field === "unidadMedida"
                           ? "nombre"
                           : field === "precioUnidad"

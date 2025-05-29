@@ -153,10 +153,10 @@ export default function AccountE() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-              onDelete={async (item) => {
+              /* onDelete={async (item) => {
                 await deleteAccount(item.id)
                 setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-              }}
+              }} */
               onToggleActive={(item) => handleAction(activeAccount, item)}
               onToggleInactive={(item) => handleAction(inactiveAccount, item)}
               onDataUpdate={setData}

@@ -55,7 +55,3 @@ hacer modelado 3d
 
 dependencias posibles a borrar 
 
-
-
-
-npm install xlsx-js-style

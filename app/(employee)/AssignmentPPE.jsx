@@ -510,12 +510,12 @@ export default function Hiring() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-              onDelete={async (item) => {
+              /* onDelete={async (item) => {
                 await deleteAssignment(item.id);
                 setData((prevData) =>
                   prevData.filter((dataItem) => dataItem.id !== item.id)
                 );
-              }}
+              }} */
               onDataUpdate={setData}
               onCreate={handleSubmit}
               onEdit={handleEdit}
