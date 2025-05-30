@@ -127,7 +127,7 @@ export default function Users() {
         <View style={styles.header}>
           <Breadcrumb
             items={[
-              { label: "Dashboard", onPress: () => router.navigate("/(admin)/Dashboard") },
+              { label: "Dashboard", onPress: () => router.navigate("/(employee)/DashboardE") },
               { label: "Usuarios" },
             ]}
           />
@@ -154,10 +154,10 @@ export default function Users() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-              onDelete={async (item) => {
+             /*  onDelete={async (item) => {
                 await deleteUser(item.id)
                 setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-              }}
+              }} */
               onToggleActive={(item) => handleAction(activateUser, item)}
               onToggleInactive={(item) => handleAction(inactivateUser, item)}
               onDataUpdate={setData}

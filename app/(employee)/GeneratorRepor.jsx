@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
   SafeAreaView,
+ 
 } from "react-native"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import Animated, {
@@ -19,7 +20,9 @@ import Animated, {
   Easing,
   interpolate,
   Extrapolate,
-} from "react-native-reanimated"
+} from "react-native-reanimated";
+import Breadcrumb from "@/components/BreadcrumbComponent";
+import  { router } from "expo-router";
 
 // Obtenemos las dimensiones de la pantalla
 const windowDimensions = Dimensions.get("window")
@@ -834,6 +837,7 @@ export default function GeneratorReport() {
   const renderContractPreview = () => {
     return (
       <View style={styles.previewContainer}>
+        
         {isGenerating ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#6366f1" />
@@ -944,6 +948,20 @@ export default function GeneratorReport() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+      <View style={styles.header}>
+                <Breadcrumb
+                  items={[
+                    {
+                      label: "Dashboard",
+                      onPress: () => router.navigate("/(employee)/DashboardE"),
+                    },
+                    {
+                      label: "Mi Grupo De Trabajo",
+                    },
+                  ]}
+                />
+                
+              </View>
         {/* Layout para pantallas grandes (web) */}
         {isLargeScreen ? (
           <View style={styles.webLayout}>
@@ -1145,6 +1163,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+     flexDirection: 'row',
+         justifyContent: 'space-between',
+         alignItems: 'center',
+         padding: 16,
+         backgroundColor: 'white',
+         ...Platform.select({
+           ios: {
+             shadowColor: '#000',
+             shadowOffset: { width: 0, height: 2 },
+             shadowOpacity: 0.25,
+             shadowRadius: 3.84,
+           },
+           android: {
+             elevation: 4,
+           },
+         }),
+    },
   webLayout: {
     flex: 1,
     flexDirection: "row",
@@ -1197,7 +1233,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#6366f1",
+    backgroundColor: "#00ACE8",
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
@@ -1256,7 +1292,7 @@ const styles = StyleSheet.create({
     minWidth: 180,
   },
   contractTypeButtonActive: {
-    backgroundColor: "#6366f1",
+    backgroundColor: "#00ACE8",
   },
   contractTypeCard: {
     flexDirection: "column",
@@ -1291,7 +1327,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 24,
     borderLeftWidth: 4,
-    borderLeftColor: "#6366f1",
+    borderLeftColor: "#00ACE8",
   },
   descriptionText: {
     fontSize: 14,
@@ -1356,7 +1392,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   selectOptionActive: {
-    backgroundColor: "#6366f1",
+    backgroundColor: "#00ACE8",
   },
   selectOptionText: {
     fontSize: 14,
@@ -1476,7 +1512,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   emptyPreviewButton: {
-    backgroundColor: "#6366f1",
+    backgroundColor: "#00ACE8",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,

@@ -146,7 +146,7 @@ const Inventario = () => {
               items={[
                 {
                   label: 'Dashboard',
-                  onPress: () => router.navigate('/(admin)/Dashboard'),
+                  onPress: () => router.navigate('/(employee)/DashboardE'),
                 },
                 {
                   label: 'Inventario'
@@ -257,10 +257,12 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent:"space-between",
     alignItems: 'center',
     padding: 16,
     backgroundColor: 'white',
+    width:"100%",
+    flex:1,
     ...Platform.select({
       ios: {
         shadowColor: '#000',

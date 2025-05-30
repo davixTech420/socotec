@@ -6,6 +6,7 @@ import {
   Dimensions,
   Pressable,
   Text,
+  Platform,
 } from "react-native";
 import {
   Card,
@@ -20,6 +21,7 @@ import {
   Paragraph,
   Divider,
   useTheme,
+  IconButton,
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Animated, {
@@ -31,6 +33,7 @@ import Animated, {
   SlideOutLeft,
 } from "react-native-reanimated";
 import Breadcrumb from "@/components/BreadcrumbComponent";
+import DropdownComponent from "@/components/DropdownComponent";
 import { createTask, getTaskMyGroup } from "@/services/employeeService";
 import { useAuth } from "@/context/userContext";
 import { useFocusEffect, router } from "expo-router";
@@ -125,6 +128,12 @@ const statusColors = {
   Done: "#4CAF50",
 };
 
+const stateTask = [{
+  label:"Resuelto",value:false
+},
+{
+  label:"En Proceso",value:true
+}]
 // Animated Task Card Component
 const TaskCard = ({ task, teamMembers, onPress }) => {
   const theme = useTheme();
@@ -162,12 +171,32 @@ const TaskCard = ({ task, teamMembers, onPress }) => {
           <Card.Content>
             <View style={styles.taskHeader}>
               <Title style={styles.taskTitle}>{task.titulo}</Title>
-              <Chip
-                style={{ backgroundColor: statusColors[task.status] }}
+
+
+             
+
+
+               <IconButton
+                                                  icon={
+                                                    task.estado
+                                                      ? "toggle-switch"
+                                                      : "toggle-switch-off"
+                                                  }
+                                                  size={20}
+                                                  iconColor={task.estado ? "#00ACE8" : "#666"}
+                                                  onPress={() => {
+                                                   console.log()
+                                                  }}
+                                                />
+
+
+
+              {/* <Chip
+                style={{ backgroundColor: statusColors[task.estado] }}
                 textStyle={{ color: "white", fontSize: 10 }}
               >
-                {task.estado}
-              </Chip>
+                {task.descripcion}
+              </Chip> */}
             </View>
             <Paragraph style={styles.taskDescription}>
               {task.descripcion}
@@ -178,14 +207,15 @@ const TaskCard = ({ task, teamMembers, onPress }) => {
                 <Avatar.Image
                   size={24}
                   source={{ uri: assignedMember?.avatar }}
+                  style={{backgroundColor:"#00ACE8"}}
                 />
-                <Text style={styles.assigneeName}>{assignedMember?.name}</Text>
+                <Text style={styles.assigneeName}>{assignedMember?.nombre}</Text>
               </View>
               <View style={styles.taskMeta}>
                 <MaterialCommunityIcons
                   name="calendar-clock"
                   size={16}
-                  color={theme.colors.primary}
+                  color="#00ACE8"
                 />
                 <Text style={styles.dueDate}>{task.createdAt}</Text>
               </View>
@@ -236,7 +266,7 @@ const TeamMember = ({ member, tasks, onPress, isSelected }) => {
           isSelected && { borderColor: theme.colors.primary, borderWidth: 2 },
         ]}
       >
-        <Avatar.Image size={60} source={{ uri: member.avatar }} />
+        <Avatar.Image size={60} source={{ uri: member.avatar }}  style={{backgroundColor:"#00ACE8"}} />
         <View style={styles.memberInfo}>
           <Title style={styles.memberName}>{member.nombre}</Title>
           <Paragraph style={styles.memberRole}>{member.role}</Paragraph>
@@ -332,8 +362,9 @@ const TaskBoard = () => {
             },
           ]}
         />
-        <Title style={styles.headerTitle}>Team Tasks</Title>
+        
       </View>
+      <Title style={styles.headerTitle}>Tareas Del Equipo</Title>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -365,7 +396,7 @@ const TaskBoard = () => {
               setTaskView("all");
             }}
           >
-            View All
+            Ver Todo
           </Button>
         )}
       </View>
@@ -384,7 +415,17 @@ const TaskBoard = () => {
               <TaskCard
                 task={task}
                 teamMembers={teamMembers}
-                onPress={() => console.log("Task pressed:", task)}
+                onPress={() =>{
+                  setNewTask({
+                    asignadoId:task.asignadoId,
+                    titulo:task.titulo,
+                    descripcion:task.descripcion,
+                    estado:task.estado
+                  });
+                  
+                  console.log(newTask);
+                  setVisible(true);
+                } }
               />
             </Animated.View>
           ))
@@ -420,6 +461,15 @@ const TaskBoard = () => {
             numberOfLines={3}
             mode="outlined"
           />
+           <DropdownComponent
+               options={stateTask}
+               onSelect={(value) => {
+                 setNewTask({ ...newTask, estado: value });
+               }}
+               placeholder="Estado"
+               value={newTask.estado}
+
+              />
 
           <View style={styles.modalActions}>
             <Button
@@ -431,6 +481,7 @@ const TaskBoard = () => {
               Cancel
             </Button>
             <Button
+            buttonColor="#00ACE8"
               mode="contained"
               onPress={handleAddTask}
               disabled={!newTask.titulo}
@@ -455,10 +506,22 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
+   flexDirection: 'row',
+       justifyContent: 'space-between',
+       alignItems: 'center',
+       padding: 16,
+       backgroundColor: 'white',
+       ...Platform.select({
+         ios: {
+           shadowColor: '#000',
+           shadowOffset: { width: 0, height: 2 },
+           shadowOpacity: 0.25,
+           shadowRadius: 3.84,
+         },
+         android: {
+           elevation: 4,
+         },
+       }),
   },
   headerTitle: {
     fontSize: 24,

@@ -422,17 +422,16 @@ export default function App() {
           {logueado?.cargo === "DirectorTalento" ||
           logueado?.cargo === "Talento" ? (
             <>
-
-<Drawer.Screen
+              <Drawer.Screen
                 name="Users"
                 options={{
                   title: "Usuarios",
                   drawerIcon: ({ color }) => (
                     <MaterialCommunityIcons
-                  name="account-multiple-outline"
-                  size={24}
-                  color={color}
-                />
+                      name="account-multiple-outline"
+                      size={24}
+                      color={color}
+                    />
                   ),
                 }}
               >
@@ -442,9 +441,6 @@ export default function App() {
                   </AnimatedScreen>
                 )}
               </Drawer.Screen>
-
-
-
 
               <Drawer.Screen
                 name="Hiring"
@@ -476,9 +472,11 @@ export default function App() {
                 }}
               >
                 {(props) => (
+            
                   <AnimatedScreen style={animatedStyle}>
                     <GeneratorReport {...props} />
-                  </AnimatedScreen>
+                    </AnimatedScreen>
+                 
                 )}
               </Drawer.Screen>
 
