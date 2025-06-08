@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "socotecnomina",
-    "slug": "socotecnomina",
+    "name": "Socotec",
+    "slug": "Socotec",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -20,7 +20,7 @@
         "WRITE_EXTERNAL_STORAGE",
         "READ_EXTERNAL_STORAGE"
       ],
-      "package": "com.datech420.socotecnomina"
+      "package": "com.datech420.socotec"
     },
     "web": {
       "bundler": "metro",

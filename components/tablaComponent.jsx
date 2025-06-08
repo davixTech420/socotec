@@ -273,11 +273,11 @@ const TablaComponente = ({
             style={{
               backgroundColor:
                 isActive == true ||
-                isActive == "Aprobado" ||
-                isActive == "Resuelto" ||
-                isActive == "Contrato Firmado" ||
-                isActive == "Oferta Enviada" ||
-                isActive == "Confirmado"
+                  isActive == "Aprobado" ||
+                  isActive == "Resuelto" ||
+                  isActive == "Contrato Firmado" ||
+                  isActive == "Oferta Enviada" ||
+                  isActive == "Confirmado"
                   ? extendedTheme.colors.success
                   : isActive == "Pendiente" ||
                     isActive == "En Proceso" ||
@@ -286,46 +286,46 @@ const TablaComponente = ({
                     isActive == "Entrevista 2" ||
                     isActive == "Prueba Técnica" ||
                     isActive == "Asignado"
-                  ? extendedTheme.colors.warning
-                  : extendedTheme.colors.error,
+                    ? extendedTheme.colors.warning
+                    : extendedTheme.colors.error,
               color: extendedTheme.colors.surface,
             }}
           >
             {isActive === true
               ? "Activo"
               : isActive === false
-              ? "Inactivo"
-              : isActive === "Pendiente"
-              ? "Pendiente"
-              : isActive === "Aprobado"
-              ? "Aprobado"
-              : isActive === "Rechazado"
-              ? "Rechazado"
-              : isActive === "En Proceso"
-              ? "En Proceso"
-              : isActive === "Resuelto"
-              ? "Resuelto"
-              : isActive === "Postulado"
-              ? "Postulado"
-              : isActive === "CV Aprobado"
-              ? "CV Aprobado"
-              : isActive === "Entrevista 1"
-              ? "Entrevista 1"
-              : isActive === "Entrevista 2"
-              ? "Entrevista 2"
-              : isActive === "Prueba Técnica"
-              ? "Prueba Tecnica"
-              : isActive === "Oferta Enviada"
-              ? "Oferta Enviada"
-              : isActive === "Contrato Firmado"
-              ? "Contrato Firmado"
-              : isActive === "Asignado"
-              ? "Asignado"
-              : isActive === "Confirmado"
-              ? "Confirmado"
-              : isActive === "Devuelto"
-              ? "Devuelto"
-              : "Estado desconocido"}
+                ? "Inactivo"
+                : isActive === "Pendiente"
+                  ? "Pendiente"
+                  : isActive === "Aprobado"
+                    ? "Aprobado"
+                    : isActive === "Rechazado"
+                      ? "Rechazado"
+                      : isActive === "En Proceso"
+                        ? "En Proceso"
+                        : isActive === "Resuelto"
+                          ? "Resuelto"
+                          : isActive === "Postulado"
+                            ? "Postulado"
+                            : isActive === "CV Aprobado"
+                              ? "CV Aprobado"
+                              : isActive === "Entrevista 1"
+                                ? "Entrevista 1"
+                                : isActive === "Entrevista 2"
+                                  ? "Entrevista 2"
+                                  : isActive === "Prueba Técnica"
+                                    ? "Prueba Tecnica"
+                                    : isActive === "Oferta Enviada"
+                                      ? "Oferta Enviada"
+                                      : isActive === "Contrato Firmado"
+                                        ? "Contrato Firmado"
+                                        : isActive === "Asignado"
+                                          ? "Asignado"
+                                          : isActive === "Confirmado"
+                                            ? "Confirmado"
+                                            : isActive === "Devuelto"
+                                              ? "Devuelto"
+                                              : "Estado desconocido"}
           </Chip>
         );
       }
@@ -342,8 +342,8 @@ const TablaComponente = ({
                   column.key == "imagenes"
                     ? item.imagenes[0].uri
                     : column.key == "fotoRetorno"
-                    ? item.fotoRetorno
-                    : item.fotoppe
+                      ? item.fotoRetorno
+                      : item.fotoppe
                 ),
               }}
               style={{ width: 100, height: 100 }}
@@ -351,7 +351,6 @@ const TablaComponente = ({
           </>
         );
       }
-
       if (item[column.key] === null) {
         return <Text style={styles.cellText}>Sin datos</Text>;
       }
@@ -501,20 +500,20 @@ const TablaComponente = ({
                             ]}
                           >
                             <View style={styles.actionButtons}>
-                              {onDelete == null ? null :(
+                              {onDelete == null ? null : (
                                 <>
-                                <IconButton
-                                icon="delete-outline"
-                                size={20}
-                                iconColor="red"
-                                onPress={() => {
-                                  setItemToDelete(item);
-                                  setDeleteConfirmVisible(true);
-                                }}
-                              />
+                                  <IconButton
+                                    icon="delete-outline"
+                                    size={20}
+                                    iconColor="red"
+                                    onPress={() => {
+                                      setItemToDelete(item);
+                                      setDeleteConfirmVisible(true);
+                                    }}
+                                  />
                                 </>
                               )}
-                              
+
 
                               <IconButton
                                 icon="pencil-outline"

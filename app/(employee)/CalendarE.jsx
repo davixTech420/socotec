@@ -14,6 +14,7 @@ import {
 import Breadcrumb from "@/components/BreadcrumbComponent";
 import TablaComponente from "@/components/tablaComponent";
 import InputComponent from "@/components/InputComponent";
+import { AlertaScroll } from "@/components/alerta";
 import DropdownComponent from "@/components/DropdownComponent";
 import { router } from "expo-router";
 import {
@@ -185,9 +186,9 @@ export default function CalendarComponent() {
 
       // Actualizar datos y marcas del calendario
       const updatedData = await (logueado.cargo === "TeamLider" ||
-      logueado.cargo === "DirectorContable" ||
-      logueado.cargo === "Directorsset" ||
-      logueado.cargo === "DirectorTalento"
+        logueado.cargo === "DirectorContable" ||
+        logueado.cargo === "Directorsset" ||
+        logueado.cargo === "DirectorTalento"
         ? getPermissionsMyGroup(logueado.id)
         : getMyPermissions(logueado.id));
 
@@ -201,8 +202,8 @@ export default function CalendarComponent() {
       console.error("Error al enviar el formulario:", error);
       showSnackbar(
         error.response?.data.message ||
-          error.response?.data.errors?.[0]?.msg ||
-          error.message,
+        error.response?.data.errors?.[0]?.msg ||
+        error.message,
         "error"
       );
     }
@@ -233,10 +234,10 @@ export default function CalendarComponent() {
       solicitanteId: item.solicitanteId,
       aprobadorId:
         logueado &&
-        (logueado.cargo === "TeamLider" ||
-          logueado.cargo === "DirectorContable" ||
-          logueado.cargo === "Directorsset" ||
-          logueado.cargo === "DirectorTalento")
+          (logueado.cargo === "TeamLider" ||
+            logueado.cargo === "DirectorContable" ||
+            logueado.cargo === "Directorsset" ||
+            logueado.cargo === "DirectorTalento")
           ? logueado.id
           : item.aprobadorId,
       tipoPermiso: item.tipoPermiso,
@@ -390,138 +391,126 @@ export default function CalendarComponent() {
             />
           </Card.Content>
         </Card>
+      </ScrollView>
 
-        {/* Snackbar para notificaciones */}
-        <Snackbar
-          visible={snackbarVisible}
-          onDismiss={() => setSnackbarVisible(false)}
-          duration={3000}
-          style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
-          action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
-        >
-          <Text style={{ color: theme.colors.surface }}>
-            {snackbarMessage.text}
-          </Text>
-        </Snackbar>
+      {/* Snackbar para notificaciones */}
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={3000}
+        style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
+        action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
+      >
+        <Text style={{ color: theme.colors.surface }}>
+          {snackbarMessage.text}
+        </Text>
+      </Snackbar>
 
-        {/* Modal de formulario */}
-        <Portal>
-          <Modal
-            visible={showForm}
-            onDismiss={resetForm}
-            contentContainerStyle={styles.modalContainer}
-          >
-            <ScrollView>
-              <View style={styles.modalContent}>
-                <View style={styles.headerCalendar}>
-                  <Text variant="headlineMedium" style={styles.title}>
-                    {isEditing ? "Editar Permiso" : "Crear Permiso"}
-                  </Text>
-                  <Text variant="bodySmall" style={styles.subtitle}>
-                    {isEditing
-                      ? "Modifica los detalles del permiso"
-                      : "Escoge el día o días para pedir permisos"}
-                  </Text>
-                </View>
+      {/* Modal de formulario */}
+      <AlertaScroll
+        onOpen={showForm}
+        onClose={resetForm}
+        title={isEditing ? "Editar Permiso" : "Crear Permiso"}
+        content={
+          <>
+            <View style={styles.modalContent}>
 
-                <View style={styles.form}>
-                  {/* Tipo de permiso */}
-                  <DropdownComponent
-                    options={optionsTipoPermiso}
-                    onSelect={(value) => {
-                      if (isFieldEditable) {
+              <View style={styles.form}>
+                {/* Tipo de permiso */}
+                <DropdownComponent
+                  options={optionsTipoPermiso}
+                  onSelect={(value) => {
+                    if (isFieldEditable) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        tipoPermiso: value,
+                      }));
+                    }
+                  }}
+                  value={formData.tipoPermiso}
+                  placeholder="Tipo de permiso"
+                  disabled={!isFieldEditable}
+                />
+
+                <View style={styles.dateSection}>
+                  {/* Fecha de inicio */}
+                  <Text style={{ fontWeight: "500" }}>Fecha Inicio</Text>
+                  <View style={styles.timeContainer}>
+                    <InputComponent
+                      type="date"
+                      value={formData.fechaInicio}
+                      onChangeText={(text) =>
                         setFormData((prev) => ({
                           ...prev,
-                          tipoPermiso: value,
-                        }));
+                          fechaInicio: text,
+                        }))
                       }
-                    }}
-                    value={formData.tipoPermiso}
-                    placeholder="Tipo de permiso"
-                    disabled={!isFieldEditable}
-                  />
-
-                  <View style={styles.dateSection}>
-                    <Text variant="bodyMedium" style={styles.dateLabel}>
-                      Fechas
-                    </Text>
-
-                    {/* Fecha de inicio */}
-                    <Text style={{ fontWeight: "500" }}>Fecha Inicio</Text>
-                    <View style={styles.timeContainer}>
-                      <InputComponent
-                        type="date"
-                        value={formData.fechaInicio}
-                        onChangeText={(text) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            fechaInicio: text,
-                          }))
-                        }
-                        label="Fecha Inicio"
-                        placeholder="Introduce la fecha de inicio"
-                        validationRules={{ required: true }}
-                        errorMessage="Por favor, introduce una fecha válida"
-                        style={styles.input}
-                        editable={isFieldEditable}
-                      />
-                    </View>
-
-                    {/* Fecha de fin */}
-                    <Text style={{ fontWeight: "500" }}>Fecha Fin</Text>
-                    <View style={styles.timeContainer}>
-                      <InputComponent
-                        type="date"
-                        value={formData.fechaFin}
-                        onChangeText={(text) =>
-                          setFormData((prev) => ({ ...prev, fechaFin: text }))
-                        }
-                        label="Fecha Fin"
-                        placeholder="Introduce la fecha de fin"
-                        validationRules={{ required: true }}
-                        errorMessage="Por favor, introduce una fecha válida"
-                        style={styles.input}
-                        editable={isFieldEditable}
-                      />
-                    </View>
-
-                    {/* Estado (solo para roles específicos) */}
-                    {canEditState && (
-                      <DropdownComponent
-                        options={optionsState}
-                        onSelect={(value) => {
-                          setFormData((prev) => ({ ...prev, estado: value }));
-                        }}
-                        value={formData.estado}
-                        placeholder="Estado"
-                      />
-                    )}
+                      label="Fecha Inicio"
+                      placeholder="Introduce la fecha de inicio"
+                      validationRules={{ required: true }}
+                      errorMessage="Por favor, introduce una fecha válida"
+                      style={styles.input}
+                      editable={isFieldEditable}
+                    />
                   </View>
-                </View>
 
-                {/* Botones de acción */}
-                <View style={styles.actions}>
-                  <Button
-                    mode="outlined"
-                    onPress={resetForm}
-                    textColor="black"
-                    style={styles.cancelButton}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    mode="contained"
-                    onPress={handleSubmit}
-                    style={styles.submitButton}
-                  >
-                    {isEditing ? "Actualizar" : "Crear"}
-                  </Button>
+                  {/* Fecha de fin */}
+                  <Text style={{ fontWeight: "500" }}>Fecha Fin</Text>
+                  <View style={styles.timeContainer}>
+                    <InputComponent
+                      type="date"
+                      value={formData.fechaFin}
+                      onChangeText={(text) =>
+                        setFormData((prev) => ({ ...prev, fechaFin: text }))
+                      }
+                      label="Fecha Fin"
+                      placeholder="Introduce la fecha de fin"
+                      validationRules={{ required: true }}
+                      errorMessage="Por favor, introduce una fecha válida"
+                      style={styles.input}
+                      editable={isFieldEditable}
+                    />
+                  </View>
+
+                  {/* Estado (solo para roles específicos) */}
+                  {canEditState && (
+                    <DropdownComponent
+                      options={optionsState}
+                      onSelect={(value) => {
+                        setFormData((prev) => ({ ...prev, estado: value }));
+                      }}
+                      value={formData.estado}
+                      placeholder="Estado"
+                    />
+                  )}
                 </View>
               </View>
-            </ScrollView>
-          </Modal>
-        </Portal>
-      </ScrollView>
+
+
+            </View>
+          </>
+        }
+        actions={[
+          <>
+            <Button
+              mode="outlined"
+              onPress={resetForm}
+              textColor="black"
+              style={styles.cancelButton}
+            >
+              Cancelar
+            </Button>
+            <Button
+              mode="contained"
+              onPress={handleSubmit}
+              style={styles.submitButton}
+            >
+              {isEditing ? "Actualizar" : "Crear"}
+            </Button>
+          </>
+        ]}
+
+      />
     </PaperProvider>
   );
 }
@@ -555,6 +544,7 @@ const styles = StyleSheet.create({
   icon: {
     marginLeft: 16,
   },
+
   modalContainer: {
     backgroundColor: "white",
     margin: 20,

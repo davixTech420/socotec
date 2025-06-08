@@ -1,10 +1,13 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import { Platform } from "react-native";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://192.168.62.230:${port}/api/admin`;
-/* const baseUrl = `https://socotecback.onrender.com/api/admin`; */
+/* const baseUrl = `http://192.168.0.14:${port}/api/admin`; */
+const baseUrl = `https://socotecback.onrender.com/api/admin`;
 
 
 
@@ -42,6 +45,86 @@ export const getDashboard = async () => {
 };
 
 //routes for files apique
+
+export const generateApique = async (id) => {
+  try {
+
+const token = await AsyncStorage.getItem("userToken");
+    if (!token) {
+      console.error("No se encontró el token");
+      throw new Error("No se encontró el token");
+    }
+
+
+    const apiUrl = `${baseUrl}/generateApique/${id}`;
+
+    if (Platform.OS === "web") {
+      // 🖥 Solución para Web
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob",
+      });
+
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "Apique.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } else {
+      // 📱 Solución para Móviles (iOS/Android)
+      const response = await axios.get(apiUrl, {
+         headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "arraybuffer",
+      });
+
+      const fileUri = FileSystem.documentDirectory + "Apique.xlsx";
+
+      // Convertir arraybuffer a base64 sin usar Buffer
+      const base64Data = arrayBufferToBase64(response.data);
+
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Compartir archivo
+      await Sharing.shareAsync(fileUri, {
+        mimeType:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        dialogTitle: "Descargar Apique",
+        UTI: "com.microsoft.excel.xlsx",
+      });
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error al descargar el archivo:", error.message || error);
+    throw error;
+  }
+};
+function arrayBufferToBase64(buffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+
+  return btoa(binary);
+}
+
+
+
 
 export const getSampleApiqueId = async (id) => {
   return makeRequest("get",`/sampleApique/${id}`);

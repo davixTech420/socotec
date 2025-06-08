@@ -4,12 +4,12 @@ import { useAuth } from "@/context/userContext";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://192.168.62.230:${port}/api/public`;
-/* const baseUrl = `https://socotecback.onrender.com/api/public`; */
+/* const baseUrl = `http://192.168.0.14:${port}/api/public`; */
+const baseUrl = `https://socotecback.onrender.com/api/public`;
 
 
 export const SrcImagen = (path) => {
-  return `http://192.168.62.230:${port}${path}`;
+  return `https://socotecback.onrender.com${path}`;
 }
 //end point para enviar el email recien se registra un usuario
 export const emailRegistro = async (user) => {
