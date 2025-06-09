@@ -18,9 +18,10 @@ import TablaComponente from "@/components/tablaComponent";
 import Breadcrumb from "@/components/BreadcrumbComponent";
 import AddComponent from "@/components/AddComponent";
 import { AlertaScroll } from "@/components/alerta";
-import InputComponent from "@/components/InputComponent";
-import { getCampoUsers, getActiveInventory } from "@/services/employeeService";
+
 import {
+  getActiveInventory,
+  getUsersCampoAD,
   getAssignment,
   createAssignment,
   updateAssignment,
@@ -82,7 +83,7 @@ export default function Hiring() {
     useCallback(() => {
       getAssignment().then(setData).catch(console.error);
       getActiveInventory().then(setInventario).catch(console.error);
-      getCampoUsers().then(setUsuarios).catch(console.error);
+      getUsersCampoAD().then(setUsuarios).catch(console.error);
       user()
         .then(setProfileData)
         .catch((error) => console.log("Error user data:", error));

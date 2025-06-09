@@ -27,9 +27,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SrcImagen } from "@/services/publicServices";
 import ExcelApique from "./ExcelApique";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
-
-
-
+import { getUserById } from "../services/adminServices"
 
 const TablaComponente = ({
   data,
@@ -273,11 +271,11 @@ const TablaComponente = ({
             style={{
               backgroundColor:
                 isActive == true ||
-                  isActive == "Aprobado" ||
-                  isActive == "Resuelto" ||
-                  isActive == "Contrato Firmado" ||
-                  isActive == "Oferta Enviada" ||
-                  isActive == "Confirmado"
+                isActive == "Aprobado" ||
+                isActive == "Resuelto" ||
+                isActive == "Contrato Firmado" ||
+                isActive == "Oferta Enviada" ||
+                isActive == "Confirmado"
                   ? extendedTheme.colors.success
                   : isActive == "Pendiente" ||
                     isActive == "En Proceso" ||
@@ -286,46 +284,46 @@ const TablaComponente = ({
                     isActive == "Entrevista 2" ||
                     isActive == "Prueba Técnica" ||
                     isActive == "Asignado"
-                    ? extendedTheme.colors.warning
-                    : extendedTheme.colors.error,
+                  ? extendedTheme.colors.warning
+                  : extendedTheme.colors.error,
               color: extendedTheme.colors.surface,
             }}
           >
             {isActive === true
               ? "Activo"
               : isActive === false
-                ? "Inactivo"
-                : isActive === "Pendiente"
-                  ? "Pendiente"
-                  : isActive === "Aprobado"
-                    ? "Aprobado"
-                    : isActive === "Rechazado"
-                      ? "Rechazado"
-                      : isActive === "En Proceso"
-                        ? "En Proceso"
-                        : isActive === "Resuelto"
-                          ? "Resuelto"
-                          : isActive === "Postulado"
-                            ? "Postulado"
-                            : isActive === "CV Aprobado"
-                              ? "CV Aprobado"
-                              : isActive === "Entrevista 1"
-                                ? "Entrevista 1"
-                                : isActive === "Entrevista 2"
-                                  ? "Entrevista 2"
-                                  : isActive === "Prueba Técnica"
-                                    ? "Prueba Tecnica"
-                                    : isActive === "Oferta Enviada"
-                                      ? "Oferta Enviada"
-                                      : isActive === "Contrato Firmado"
-                                        ? "Contrato Firmado"
-                                        : isActive === "Asignado"
-                                          ? "Asignado"
-                                          : isActive === "Confirmado"
-                                            ? "Confirmado"
-                                            : isActive === "Devuelto"
-                                              ? "Devuelto"
-                                              : "Estado desconocido"}
+              ? "Inactivo"
+              : isActive === "Pendiente"
+              ? "Pendiente"
+              : isActive === "Aprobado"
+              ? "Aprobado"
+              : isActive === "Rechazado"
+              ? "Rechazado"
+              : isActive === "En Proceso"
+              ? "En Proceso"
+              : isActive === "Resuelto"
+              ? "Resuelto"
+              : isActive === "Postulado"
+              ? "Postulado"
+              : isActive === "CV Aprobado"
+              ? "CV Aprobado"
+              : isActive === "Entrevista 1"
+              ? "Entrevista 1"
+              : isActive === "Entrevista 2"
+              ? "Entrevista 2"
+              : isActive === "Prueba Técnica"
+              ? "Prueba Tecnica"
+              : isActive === "Oferta Enviada"
+              ? "Oferta Enviada"
+              : isActive === "Contrato Firmado"
+              ? "Contrato Firmado"
+              : isActive === "Asignado"
+              ? "Asignado"
+              : isActive === "Confirmado"
+              ? "Confirmado"
+              : isActive === "Devuelto"
+              ? "Devuelto"
+              : "Estado desconocido"}
           </Chip>
         );
       }
@@ -342,8 +340,8 @@ const TablaComponente = ({
                   column.key == "imagenes"
                     ? item.imagenes[0].uri
                     : column.key == "fotoRetorno"
-                      ? item.fotoRetorno
-                      : item.fotoppe
+                    ? item.fotoRetorno
+                    : item.fotoppe
                 ),
               }}
               style={{ width: 100, height: 100 }}
@@ -351,9 +349,17 @@ const TablaComponente = ({
           </>
         );
       }
+
+      if (column.key== "asignadorId" || column.key== "userId" || column.key == "asignadoId" || column.key == "solicitanteId" || column.key == "aprobadorId" ) {
+        return <Text style={styles.cellText}>esto es un usuario</Text>;
+      }
       if (item[column.key] === null) {
         return <Text style={styles.cellText}>Sin datos</Text>;
       }
+
+     
+
+
       if (column.render) {
         return column.render(item[column.key], item);
       }
@@ -513,7 +519,6 @@ const TablaComponente = ({
                                   />
                                 </>
                               )}
-
 
                               <IconButton
                                 icon="pencil-outline"

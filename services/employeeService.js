@@ -6,8 +6,8 @@ import { Platform } from "react-native";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-/* const baseUrl = `http://192.168.0.14:${port}/api/employee`; */
-const baseUrl = `https://socotecback.onrender.com/api/employee`;
+const baseUrl = `http://192.168.130.221:${port}/api/employee`;
+/* const baseUrl = `https://socotecback.onrender.com/api/employee`; */
 
 const makeRequest = async (method, url, data = null) => {
   try {
@@ -42,11 +42,23 @@ const makeRequest = async (method, url, data = null) => {
 
 export const generateApique = async (id) => {
   try {
+
+    
+const token = await AsyncStorage.getItem("userToken");
+if (!token) {
+  console.error("No se encontró el token");
+  throw new Error("No se encontró el token");
+}
+
+
     const apiUrl = `${baseUrl}/generateApique/${id}`;
 
     if (Platform.OS === "web") {
       // 🖥 Solución para Web
       const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         responseType: "blob",
       });
 
@@ -64,6 +76,9 @@ export const generateApique = async (id) => {
     } else {
       // 📱 Solución para Móviles (iOS/Android)
       const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         responseType: "arraybuffer",
       });
 
