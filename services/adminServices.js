@@ -368,71 +368,19 @@ export const createUser = async (user) => {
   }
 };
 
-//activar usuario
 export const activateUser = async (id) => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
+  return makeRequest("put", `/users/${id}/active`);
+}
 
-    const response = await axios.put(`${baseUrl}/users/${id}/active`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.error("Error al activar usuario:", error);
-  }
-};
 
-//inactivar usuario
 export const inactivateUser = async (id) => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
+  return makeRequest("put", `/users/${id}/inactive`);
+}
 
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-
-    const response = await axios.put(`${baseUrl}/users/${id}/inactive`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.log("Error al desactivar usuario:", error);
-    throw error;
-  }
-};
-
-//eliminar usuario
 export const deleteUser = async (id) => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
+  return makeRequest("delete", `/users/${id}`);
+}
 
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-    const response = await axios.delete(`${baseUrl}/users/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.log("Error al eliminar usuario:", error);
-    throw error;
-  }
-};
 
 export const updateUser = async (id, user) => {
   try {
@@ -945,63 +893,21 @@ export const deleteGroupProyect = async (id) => {
  *
  */
 export const getPermissions = async () => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    const response = await axios.get(`${baseUrl}/permissions`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al obtener los permisos", error);
-  }
-};
-
+  return makeRequest("get", "/permissions");
+}
+export const deletePermission = async (id) => {
+  return makeRequest("delete", `/permissions/${id}`);
+}
 export const createPermission = async (req) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    const response = await axios.post(`${baseUrl}/permissions`, req, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al crear el permiso", error.response);
-  }
-};
+  return makeRequest("post", "/permissions", req);
+}
 
 export const updatePermission = async (id, data) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    const response = await axios.put(`${baseUrl}/permissions/${id}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al actualizar el permiso", error);
-    throw error;
-  }
+  return makeRequest("put", `/permissions/${id}`, data);
 };
 
-export const deletePermission = async (id) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    const response = await axios.delete(`${baseUrl}/permissions/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al eliminar el permiso", error);
-  }
-};
+
+
 
 export const activePermission = async (id) => {
   try {

@@ -9,7 +9,7 @@ const baseUrl = `https://socotecback.onrender.com/api/public`;
 
 
 export const SrcImagen = (path) => {
-  return `https://socotecback.onrender.com${path}`;
+  return `http://192.168.0.14:${port}${path}`;
 }
 //end point para enviar el email recien se registra un usuario
 export const emailRegistro = async (user) => {
