@@ -500,7 +500,11 @@ const Portfolio = () => {
           }
           content={
             <>
-              <View style={isSmallScreen ? styles.fullWidth : { width: "48%" }}>
+              <View style={{
+                flexDirection: isSmallScreen ? "column" : "row",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+              }}>
                 {[
                   "nombre",
                   "cliente",

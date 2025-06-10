@@ -14,7 +14,7 @@ import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFPreviewButton from "@/components/PdfViewComponent";
 
 const columns = [
-  { key: "id", title: "ID", sortable: true, width: 50 },
+  { key: "id", title: "ID", sortable: true, width: 10 },
   { key: "nombre", title: "Nombre", sortable: true },
   { key: "telefono", title: "Teléfono", sortable: true, width: 80 },
   { key: "email", title: "Email", sortable: true, width: 100 },

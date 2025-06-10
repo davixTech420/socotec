@@ -1,11 +1,12 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import {
   StyleSheet,
   View,
-  Platform,
   ScrollView,
   useWindowDimensions,
   Image,
+  Dimensions,
 } from "react-native";
 import {
   DataTable,
@@ -21,13 +22,235 @@ import {
   Button,
   Snackbar,
   Chip,
+  Surface,
 } from "react-native-paper";
 import Animated, { FadeInUp, Layout } from "react-native-reanimated";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SrcImagen } from "@/services/publicServices";
+import { useAuth } from "@/context/userContext";
 import ExcelApique from "./ExcelApique";
-import { useProtectedRoute, useAuth } from "@/context/userContext";
-import { getUserById } from "../services/adminServices"
+import { getUserById as getUserByIdAdmin } from "@/services/adminServices";
+import { getUserById as getUserByIdEmployee } from "@/services/employeeService";
+
+// Constantes para responsividad
+const BREAKPOINTS = {
+  mobile: 480,
+  tablet: 768,
+  desktop: 1024,
+  large: 1440,
+};
+
+// Constantes para rendimiento
+const USER_ID_FIELDS = [
+  "asignadorId",
+  "userId",
+  "asignadoId",
+  "solicitanteId",
+  "aprobadorId",
+];
+const CACHE_MAX_AGE = 10 * 60 * 1000;
+const BATCH_SIZE = 15;
+const DEBOUNCE_TIME = 30;
+
+// Hook personalizado para responsividad
+const useResponsiveLayout = () => {
+  const { width, height } = useWindowDimensions();
+  const screenData = Dimensions.get("screen");
+
+  const deviceType = useMemo(() => {
+    if (width < BREAKPOINTS.mobile) return "mobile";
+    if (width < BREAKPOINTS.tablet) return "tablet";
+    if (width < BREAKPOINTS.desktop) return "desktop";
+    return "large";
+  }, [width]);
+
+  const columnWidths = useMemo(() => {
+    switch (deviceType) {
+      case "mobile":
+        return {
+          id: 60,
+          asignado: 120,
+          titulo: 150,
+          descripcion: 180,
+          estado: 100,
+          creado: 140,
+          modificado: 140,
+          acciones: 120,
+        };
+      case "tablet":
+        return {
+          id: 80,
+          asignado: 150,
+          titulo: 200,
+          descripcion: 220,
+          estado: 120,
+          creado: 160,
+          modificado: 160,
+          acciones: 140,
+        };
+      case "desktop":
+        return {
+          id: 100,
+          asignado: 180,
+          titulo: 250,
+          descripcion: 280,
+          estado: 140,
+          creado: 180,
+          modificado: 180,
+          acciones: 160,
+        };
+      default: // large
+        return {
+          id: 120,
+          asignado: 200,
+          titulo: 300,
+          descripcion: 350,
+          estado: 160,
+          creado: 200,
+          modificado: 200,
+          acciones: 180,
+        };
+    }
+  }, [deviceType]);
+
+  const tableHeight = useMemo(() => {
+    // Altura fija basada en el tipo de dispositivo
+    switch (deviceType) {
+      case "mobile":
+        return Math.min(height * 0.6, 400);
+      case "tablet":
+        return Math.min(height * 0.7, 500);
+      case "desktop":
+        return Math.min(height * 0.75, 600);
+      default:
+        return Math.min(height * 0.8, 700);
+    }
+  }, [deviceType, height]);
+
+  return {
+    deviceType,
+    columnWidths,
+    tableHeight,
+    screenWidth: width,
+    screenHeight: height,
+    isLandscape: width > height,
+  };
+};
+
+// Componente de celda de usuario optimizado
+const UserCell = React.memo(({ userId, getUser, isLoadingUser, fetchUser }) => {
+  useEffect(() => {
+    if (userId && !getUser(userId) && !isLoadingUser(userId)) {
+      fetchUser(userId);
+    }
+  }, [userId]);
+
+  if (!userId) {
+    return (
+      <View style={userCellStyles.container}>
+        <MaterialCommunityIcons name="account-off" size={14} color="#666" />
+        <Text
+          style={[userCellStyles.text, { color: "#666" }]}
+          numberOfLines={1}
+        >
+          Sin asignar
+        </Text>
+      </View>
+    );
+  }
+
+  if (isLoadingUser(userId)) {
+    return (
+      <View style={userCellStyles.container}>
+        <ActivityIndicator size="small" />
+        <Text style={userCellStyles.text} numberOfLines={1}>
+          Cargando...
+        </Text>
+      </View>
+    );
+  }
+
+  const cachedUser = getUser(userId);
+
+  if (!cachedUser) {
+    return (
+      <View style={userCellStyles.container}>
+        <ActivityIndicator size="small" />
+        <Text style={userCellStyles.text} numberOfLines={1}>
+          Cargando...
+        </Text>
+      </View>
+    );
+  }
+
+  if (cachedUser.error || !cachedUser.user) {
+    return (
+      <View style={userCellStyles.container}>
+        <MaterialCommunityIcons
+          name="account-alert"
+          size={14}
+          color="#F44336"
+        />
+        <Text
+          style={[userCellStyles.text, { color: "#F44336" }]}
+          numberOfLines={1}
+        >
+          Error
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={userCellStyles.container}>
+      <MaterialCommunityIcons name="account" size={14} color="#4CAF50" />
+      <Text style={userCellStyles.text} numberOfLines={1}>
+        {cachedUser.user.nombre}
+      </Text>
+    </View>
+  );
+});
+
+// Componente de celda de estado optimizado
+const StatusCell = React.memo(({ status, colors, compact = false }) => {
+  const statusMap = {
+    true: { text: "Activo", color: colors.success },
+    false: { text: "Inactivo", color: colors.error },
+    Pendiente: { text: "Pendiente", color: colors.warning },
+    "En Proceso": { text: "En Proceso", color: colors.warning },
+    Postulado: { text: "Postulado", color: colors.warning },
+    "Entrevista 1": { text: "Entrevista 1", color: colors.warning },
+    "Entrevista 2": { text: "Entrevista 2", color: colors.warning },
+    "Prueba Técnica": { text: "Prueba Tecnica", color: colors.warning },
+    Asignado: { text: "Asignado", color: colors.warning },
+    Aprobado: { text: "Aprobado", color: colors.success },
+    Resuelto: { text: "Resuelto", color: colors.success },
+    "Contrato Firmado": { text: "Contrato Firmado", color: colors.success },
+    "Oferta Enviada": { text: "Oferta Enviada", color: colors.success },
+    Confirmado: { text: "Confirmado", color: colors.success },
+    Rechazado: { text: "Rechazado", color: colors.error },
+    Devuelto: { text: "Devuelto", color: colors.error },
+  };
+
+  const statusInfo = statusMap[status] || {
+    text: "Estado desconocido",
+    color: colors.error,
+  };
+
+  return (
+    <Chip
+      compact={compact}
+      style={{
+        backgroundColor: statusInfo.color,
+        color: colors.surface,
+        maxWidth: "100%",
+      }}
+      textStyle={{ fontSize: compact ? 11 : 12 }}
+    >
+      {statusInfo.text}
+    </Chip>
+  );
+});
 
 const TablaComponente = ({
   data,
@@ -56,7 +279,14 @@ const TablaComponente = ({
       warning: theme.colors.warning || "#FFB300",
     },
   };
-  const { width } = useWindowDimensions();
+
+  const { user } = useAuth();
+  const { deviceType, columnWidths, tableHeight, screenWidth } =
+    useResponsiveLayout();
+
+  // Estados principales
+  const [logueado, setLogueado] = useState(null);
+  const [role, setRole] = useState(null);
   const [page, setPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
   const [sortBy, setSortBy] = useState(null);
@@ -64,6 +294,8 @@ const TablaComponente = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({});
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
+
+  // Estados de diálogos
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [toggleActiveConfirmVisible, setToggleActiveConfirmVisible] =
     useState(false);
@@ -77,30 +309,197 @@ const TablaComponente = ({
     type: "success",
   });
 
-  const isSmallScreen = width < 768;
-  const isMediumScreen = width >= 768 && width < 1024;
+  // Sistema de cache optimizado
+  const [usersCache, setUsersCache] = useState(new Map());
+  const [loadingUsers, setLoadingUsers] = useState(new Set());
+  const pendingRequests = useRef(new Map());
+  const [cacheSize, setCacheSize] = useState(0);
+  const batchQueue = useRef([]);
+  const batchTimeoutRef = useRef(null);
 
-  const filteredAndSortedData = useMemo(() => {
-    const result = data?.filter((item) =>
-      Object.entries(item).some(([key, value]) =>
-        String(value).toLowerCase().includes(searchQuery.toLowerCase())
+  // Cargar información del usuario
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const result = await user();
+        setLogueado(result);
+        setRole(result?.role || "guest");
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        setRole("guest");
+      }
+    }
+    fetchUser();
+  }, [user]);
+
+  // Sistema de cache optimizado
+  const fetchUsersInBatch = useCallback(
+    async (userIds) => {
+      if (!userIds || userIds.length === 0 || !role) return;
+
+      const uniqueIds = [...new Set(userIds)].filter(
+        (id) => id && !usersCache.has(id) && !loadingUsers.has(id)
+      );
+      if (uniqueIds.length === 0) return;
+
+      setLoadingUsers((prev) => {
+        const newSet = new Set(prev);
+        uniqueIds.forEach((id) => newSet.add(id));
+        return newSet;
+      });
+
+      try {
+        const batches = [];
+        for (let i = 0; i < uniqueIds.length; i += BATCH_SIZE) {
+          batches.push(uniqueIds.slice(i, i + BATCH_SIZE));
+        }
+
+        await Promise.all(
+          batches.map(async (batch) => {
+            const promises = batch.map(async (userId) => {
+              try {
+                const getUserById =
+                  role === "employee" ? getUserByIdEmployee : getUserByIdAdmin;
+                const userData = await getUserById(userId);
+                return { userId, user: userData, error: null };
+              } catch (error) {
+                return { userId, user: null, error };
+              }
+            });
+
+            const results = await Promise.all(promises);
+
+            setUsersCache((prev) => {
+              const newCache = new Map(prev);
+              const now = Date.now();
+              results.forEach(({ userId, user, error }) => {
+                if (userId) {
+                  newCache.set(userId, { user, error, timestamp: now });
+                }
+              });
+              setCacheSize(newCache.size);
+              return newCache;
+            });
+          })
+        );
+      } finally {
+        setLoadingUsers((prev) => {
+          const newSet = new Set(prev);
+          uniqueIds.forEach((id) => newSet.delete(id));
+          return newSet;
+        });
+      }
+    },
+    [usersCache, loadingUsers, role]
+  );
+
+  const queueUserFetch = useCallback(
+    (userId) => {
+      if (
+        !userId ||
+        usersCache.has(userId) ||
+        loadingUsers.has(userId) ||
+        !role
       )
-    );
+        return;
+
+      batchQueue.current.push(userId);
+
+      if (batchTimeoutRef.current) {
+        clearTimeout(batchTimeoutRef.current);
+      }
+
+      batchTimeoutRef.current = setTimeout(() => {
+        const idsToFetch = [...batchQueue.current];
+        batchQueue.current = [];
+        fetchUsersInBatch(idsToFetch);
+      }, DEBOUNCE_TIME);
+    },
+    [fetchUsersInBatch, usersCache, loadingUsers, role]
+  );
+
+  const getUser = useCallback(
+    (userId) => {
+      if (!userId) return null;
+      return usersCache.get(userId) || null;
+    },
+    [usersCache]
+  );
+
+  const isLoadingUser = useCallback(
+    (userId) => {
+      return loadingUsers.has(userId);
+    },
+    [loadingUsers]
+  );
+
+  // Datos filtrados y paginados
+  const filteredAndSortedData = useMemo(() => {
+    if (!data || data.length === 0) return [];
+
+    const result = searchQuery
+      ? data.filter((item) =>
+          Object.entries(item).some(([key, value]) => {
+            if (value === null || value === undefined) return false;
+            return String(value)
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase());
+          })
+        )
+      : [...data];
+
     if (sortBy) {
       result.sort((a, b) => {
-        if (a[sortBy] < b[sortBy]) return sortOrder === "ascending" ? -1 : 1;
-        if (a[sortBy] > b[sortBy]) return sortOrder === "ascending" ? 1 : -1;
+        const aVal = a[sortBy];
+        const bVal = b[sortBy];
+
+        if (aVal === null && bVal === null) return 0;
+        if (aVal === null) return sortOrder === "ascending" ? -1 : 1;
+        if (bVal === null) return sortOrder === "ascending" ? 1 : -1;
+
+        if (aVal < bVal) return sortOrder === "ascending" ? -1 : 1;
+        if (aVal > bVal) return sortOrder === "ascending" ? 1 : -1;
         return 0;
       });
     }
+
     return result;
   }, [data, searchQuery, sortBy, sortOrder]);
 
   const paginatedData = useMemo(() => {
+    if (!filteredAndSortedData.length) return [];
     const startIndex = page * itemsPerPage;
-    return filteredAndSortedData?.slice(startIndex, startIndex + itemsPerPage);
+    return filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredAndSortedData, page, itemsPerPage]);
 
+  // Precargar usuarios
+  useEffect(() => {
+    if (paginatedData && paginatedData.length > 0 && role) {
+      const userIds = [];
+      paginatedData.forEach((item) => {
+        USER_ID_FIELDS.forEach((field) => {
+          if (item[field]) {
+            userIds.push(item[field]);
+          }
+        });
+      });
+
+      if (userIds.length > 0) {
+        fetchUsersInBatch(userIds);
+      }
+    }
+  }, [paginatedData, fetchUsersInBatch, role]);
+
+  // Agregar este useEffect después del useEffect que precarga usuarios:
+  useEffect(() => {
+    // Resetear página cuando cambia itemsPerPage para evitar páginas vacías
+    const maxPage = Math.ceil(filteredAndSortedData.length / itemsPerPage) - 1;
+    if (page > maxPage && maxPage >= 0) {
+      setPage(Math.max(0, maxPage));
+    }
+  }, [itemsPerPage, filteredAndSortedData.length, page]);
+
+  // Handlers
   const handleSort = useCallback(
     (key) => {
       const isAsc = sortBy === key && sortOrder === "ascending";
@@ -124,262 +523,228 @@ const TablaComponente = ({
     [onSearch]
   );
 
-  const handleFilter = useCallback(
-    (key, value) => {
-      const newFilters = { ...filters, [key]: value };
-      setFilters(newFilters);
-      setPage(0);
-      if (onFilter) {
-        onFilter(newFilters);
-      }
+  // Función para obtener el ancho de columna
+  const getColumnWidth = useCallback(
+    (columnKey) => {
+      const key = columnKey.toLowerCase();
+      return columnWidths[key] || columnWidths.descripcion;
     },
-    [filters, onFilter]
+    [columnWidths]
   );
 
+  // Renderizado de celdas optimizado
+  const renderCell = useCallback(
+    (column, item) => {
+      const cellWidth = getColumnWidth(column.key);
+      const isCompact = deviceType === "mobile";
+
+      // Manejo de estados
+      if (column.key === "estado") {
+        return (
+          <StatusCell
+            status={item[column.key]}
+            colors={extendedTheme.colors}
+            compact={isCompact}
+          />
+        );
+      }
+
+      // Manejo de imágenes
+      if (
+        column.key === "imagenes" ||
+        column.key === "fotoppe" ||
+        column.key === "fotoRetorno"
+      ) {
+        let uri;
+        try {
+          uri = SrcImagen(
+            column.key === "imagenes"
+              ? item.imagenes[0]?.uri
+              : column.key === "fotoRetorno"
+              ? item.fotoRetorno
+              : item.fotoppe
+          );
+        } catch (e) {
+          return (
+            <Text
+              style={[styles.cellText, { width: cellWidth }]}
+              numberOfLines={1}
+            >
+              Error de imagen
+            </Text>
+          );
+        }
+
+        const imageSize = isCompact ? 60 : 80;
+        return (
+          <View style={{ width: cellWidth, alignItems: "center" }}>
+            <Image
+              source={{ uri }}
+              style={{ width: imageSize, height: imageSize, borderRadius: 4 }}
+            />
+          </View>
+        );
+      }
+
+      // Manejo de IDs de usuario
+      if (USER_ID_FIELDS.includes(column.key)) {
+        const userId = item[column.key];
+        return (
+          <View style={{ width: cellWidth }}>
+            <UserCell
+              userId={userId}
+              getUser={getUser}
+              isLoadingUser={isLoadingUser}
+              fetchUser={queueUserFetch}
+            />
+          </View>
+        );
+      }
+
+      // Manejo de valores nulos
+      if (item[column.key] === null || item[column.key] === undefined) {
+        return (
+          <Text
+            style={[styles.cellText, { width: cellWidth }]}
+            numberOfLines={1}
+          >
+            Sin datos
+          </Text>
+        );
+      }
+
+      // Renderizado personalizado si existe
+      if (column.render) {
+        return (
+          <View style={{ width: cellWidth }}>
+            {column.render(item[column.key], item)}
+          </View>
+        );
+      }
+
+      // Renderizado por defecto
+      return (
+        <Text
+          style={[styles.cellText, { width: cellWidth }]}
+          numberOfLines={isCompact ? 1 : 2}
+        >
+          {String(item[column.key])}
+        </Text>
+      );
+    },
+    [
+      extendedTheme.colors,
+      getUser,
+      isLoadingUser,
+      queueUserFetch,
+      getColumnWidth,
+      deviceType,
+    ]
+  );
+
+  const totalTableWidth = useMemo(() => {
+    return columns.reduce((total, column) => {
+      return total + getColumnWidth(column.key);
+    }, getColumnWidth("acciones"));
+  }, [columns, getColumnWidth]);
+
   const handleDeleteConfirm = useCallback(() => {
-    if (itemToDelete && onDelete) {
-      onDelete(itemToDelete)
-        .then(() => {
-          const updatedData = data.filter((item) => item !== itemToDelete);
-          onDataUpdate(updatedData);
-          setSnackbarMessage({
-            text: "Registro eliminado exitosamente",
-            type: "success",
-          });
-          setSnackbarVisible(true);
-        })
-        .catch((error) => {
-          setSnackbarMessage({
-            text: `Error al eliminar el registro: ${error.response.data.message}`,
-            type: "error",
-          });
-          setSnackbarVisible(true);
-        });
+    if (!itemToDelete || !onDelete) {
+      setDeleteConfirmVisible(false);
+      setItemToDelete(null);
+      return;
     }
-    setDeleteConfirmVisible(false);
-    setItemToDelete(null);
+
+    onDelete(itemToDelete)
+      .then(() => {
+        const updatedData = data.filter((item) => item !== itemToDelete);
+        onDataUpdate(updatedData);
+        setSnackbarMessage({
+          text: "Registro eliminado exitosamente",
+          type: "success",
+        });
+        setSnackbarVisible(true);
+      })
+      .catch((error) => {
+        setSnackbarMessage({
+          text: `Error al eliminar el registro: ${
+            error.response?.data?.message || error.message
+          }`,
+          type: "error",
+        });
+        setSnackbarVisible(true);
+      })
+      .finally(() => {
+        setDeleteConfirmVisible(false);
+        setItemToDelete(null);
+      });
   }, [itemToDelete, onDelete, data, onDataUpdate]);
 
   const handleToggleActiveConfirm = useCallback(() => {
-    if (itemToToggle && onToggleActive) {
-      onToggleActive(itemToToggle)
-        .then(() => {
-          const updatedData = data.map((item) =>
-            item === itemToToggle ? { ...item, estado: true } : item
-          );
-          onDataUpdate(updatedData);
-          setSnackbarMessage({
-            text: "Registro activado exitosamente",
-            type: "success",
-          });
-          setSnackbarVisible(true);
-        })
-        .catch((error) => {
-          setSnackbarMessage({
-            text: `Error al activar el registro: ${error.message}`,
-            type: "error",
-          });
-          setSnackbarVisible(true);
-        });
+    if (!itemToToggle || !onToggleActive) {
+      setToggleActiveConfirmVisible(false);
+      setItemToToggle(null);
+      return;
     }
-    setToggleActiveConfirmVisible(false);
-    setItemToToggle(null);
+
+    onToggleActive(itemToToggle)
+      .then(() => {
+        const updatedData = data.map((item) =>
+          item === itemToToggle ? { ...item, estado: true } : item
+        );
+        onDataUpdate(updatedData);
+        setSnackbarMessage({
+          text: "Registro activado exitosamente",
+          type: "success",
+        });
+        setSnackbarVisible(true);
+      })
+      .catch((error) => {
+        setSnackbarMessage({
+          text: `Error al activar el registro: ${error.message}`,
+          type: "error",
+        });
+        setSnackbarVisible(true);
+      })
+      .finally(() => {
+        setToggleActiveConfirmVisible(false);
+        setItemToToggle(null);
+      });
   }, [itemToToggle, onToggleActive, data, onDataUpdate]);
 
   const handleToggleInactiveConfirm = useCallback(() => {
-    if (itemToToggle && onToggleInactive) {
-      onToggleInactive(itemToToggle)
-        .then(() => {
-          const updatedData = data.map((item) =>
-            item === itemToToggle ? { ...item, estado: false } : item
-          );
-          onDataUpdate(updatedData);
-          setSnackbarMessage({
-            text: "Registro inactivado exitosamente",
-            type: "success",
-          });
-          setSnackbarVisible(true);
-        })
-        .catch((error) => {
-          setSnackbarMessage({
-            text: `Error al inactivar el registro: ${error.response.data.message}`,
-            type: "error",
-          });
-          setSnackbarVisible(true);
-        });
+    if (!itemToToggle || !onToggleInactive) {
+      setToggleInactiveConfirmVisible(false);
+      setItemToToggle(null);
+      return;
     }
-    setToggleInactiveConfirmVisible(false);
-    setItemToToggle(null);
-  }, [itemToToggle, onToggleInactive, data, onDataUpdate]);
 
-  const handleCreate = useCallback(() => {
-    if (onCreate) {
-      onCreate()
-        .then(() => {
-          setSnackbarMessage({
-            text: "Registro creado exitosamente",
-            type: "success",
-          });
-          setSnackbarVisible(true);
-        })
-        .catch((error) => {
-          setSnackbarMessage({
-            text: `Error al crear el registro: ${error.message}`,
-            type: "error",
-          });
-          setSnackbarVisible(true);
+    onToggleInactive(itemToToggle)
+      .then(() => {
+        const updatedData = data.map((item) =>
+          item === itemToToggle ? { ...item, estado: false } : item
+        );
+        onDataUpdate(updatedData);
+        setSnackbarMessage({
+          text: "Registro inactivado exitosamente",
+          type: "success",
         });
-    }
-  }, [onCreate]);
-  const handleGeneration = (success) => {
-    if (success) {
-      console.log("Excel generado con éxito");
-    } else {
-      console.log("Error al generar Excel");
-    }
-  };
-  const handleEdit = useCallback(
-    async (item) => {
-      if (onEdit) {
-        try {
-          await onEdit(item)
-            .then(() => {
-              setSnackbarMessage({
-                text: "Registro actualizado exitosamente",
-                type: "success",
-              });
-            })
-            .catch((error) => {
-              return;
-            });
-        } catch (error) {
-          return;
-        }
         setSnackbarVisible(true);
-      }
-    },
-    [onEdit]
-  );
-
-  const renderCell = useCallback(
-    (column, item) => {
-      if (column.key === "estado") {
-        const isActive = item[column.key];
-
-        return (
-          <Chip
-            style={{
-              backgroundColor:
-                isActive == true ||
-                isActive == "Aprobado" ||
-                isActive == "Resuelto" ||
-                isActive == "Contrato Firmado" ||
-                isActive == "Oferta Enviada" ||
-                isActive == "Confirmado"
-                  ? extendedTheme.colors.success
-                  : isActive == "Pendiente" ||
-                    isActive == "En Proceso" ||
-                    isActive == "Postulado" ||
-                    isActive == "Entrevista 1" ||
-                    isActive == "Entrevista 2" ||
-                    isActive == "Prueba Técnica" ||
-                    isActive == "Asignado"
-                  ? extendedTheme.colors.warning
-                  : extendedTheme.colors.error,
-              color: extendedTheme.colors.surface,
-            }}
-          >
-            {isActive === true
-              ? "Activo"
-              : isActive === false
-              ? "Inactivo"
-              : isActive === "Pendiente"
-              ? "Pendiente"
-              : isActive === "Aprobado"
-              ? "Aprobado"
-              : isActive === "Rechazado"
-              ? "Rechazado"
-              : isActive === "En Proceso"
-              ? "En Proceso"
-              : isActive === "Resuelto"
-              ? "Resuelto"
-              : isActive === "Postulado"
-              ? "Postulado"
-              : isActive === "CV Aprobado"
-              ? "CV Aprobado"
-              : isActive === "Entrevista 1"
-              ? "Entrevista 1"
-              : isActive === "Entrevista 2"
-              ? "Entrevista 2"
-              : isActive === "Prueba Técnica"
-              ? "Prueba Tecnica"
-              : isActive === "Oferta Enviada"
-              ? "Oferta Enviada"
-              : isActive === "Contrato Firmado"
-              ? "Contrato Firmado"
-              : isActive === "Asignado"
-              ? "Asignado"
-              : isActive === "Confirmado"
-              ? "Confirmado"
-              : isActive === "Devuelto"
-              ? "Devuelto"
-              : "Estado desconocido"}
-          </Chip>
-        );
-      }
-      if (
-        column.key === "imagenes" ||
-        column.key == "fotoppe" ||
-        column.key == "fotoRetorno"
-      ) {
-        return (
-          <>
-            <Image
-              source={{
-                uri: SrcImagen(
-                  column.key == "imagenes"
-                    ? item.imagenes[0].uri
-                    : column.key == "fotoRetorno"
-                    ? item.fotoRetorno
-                    : item.fotoppe
-                ),
-              }}
-              style={{ width: 100, height: 100 }}
-            />
-          </>
-        );
-      }
-
-      if (column.key== "asignadorId" || column.key== "userId" || column.key == "asignadoId" || column.key == "solicitanteId" || column.key == "aprobadorId" ) {
-        return <Text style={styles.cellText}>esto es un usuario</Text>;
-      }
-      if (item[column.key] === null) {
-        return <Text style={styles.cellText}>Sin datos</Text>;
-      }
-
-     
-
-
-      if (column.render) {
-        return column.render(item[column.key], item);
-      }
-      return String(item[column.key]);
-    },
-    [extendedTheme.colors]
-  );
-
-  const getColumnStyle = useCallback(
-    (column) => {
-      if (isSmallScreen) {
-        return { minWidth: column.width || 100, maxWidth: column.width || 150 };
-      }
-      if (isMediumScreen) {
-        return { minWidth: column.width || 120, maxWidth: column.width || 200 };
-      }
-      return { flex: 1, minWidth: column.width || 150 };
-    },
-    [isSmallScreen, isMediumScreen]
-  );
+      })
+      .catch((error) => {
+        setSnackbarMessage({
+          text: `Error al inactivar el registro: ${
+            error.response?.data?.message || error.message
+          }`,
+          type: "error",
+        });
+        setSnackbarVisible(true);
+      })
+      .finally(() => {
+        setToggleInactiveConfirmVisible(false);
+        setItemToToggle(null);
+      });
+  }, [itemToToggle, onToggleInactive, data, onDataUpdate]);
 
   if (!data || data.length === 0) {
     return (
@@ -390,168 +755,213 @@ const TablaComponente = ({
   }
 
   return (
-    <>
-      <View style={styles.outerContainer}>
-        <Animated.View
-          entering={FadeInUp}
-          style={[
-            styles.container,
-            { backgroundColor: extendedTheme.colors.background },
-          ]}
-        >
-          <View style={styles.actions}>
-            <Searchbar
-              placeholder="Buscar..."
-              onChangeText={handleSearch}
-              value={searchQuery}
-              style={styles.searchBar}
-              iconColor="#5bfff3"
-              inputStyle={{ color: "black" }}
-            />
-            <Menu
-              visible={filterMenuVisible}
-              onDismiss={() => setFilterMenuVisible(false)}
-              anchor={
-                <IconButton
-                  icon="filter-variant"
-                  onPress={() => setFilterMenuVisible(true)}
-                  color={extendedTheme.colors.primary}
-                />
-              }
+    <Surface
+      style={[styles.outerContainer, { height: tableHeight + 120 }]}
+      elevation={2}
+    >
+      <Animated.View
+        entering={FadeInUp}
+        style={[
+          styles.container,
+          { backgroundColor: extendedTheme.colors.background },
+        ]}
+      >
+    
+        <View style={styles.actions}>
+          <Searchbar
+            placeholder="Buscar..."
+            onChangeText={handleSearch}
+            value={searchQuery}
+            style={[styles.searchBar, { maxWidth: screenWidth * 0.7 }]}
+            iconColor="#5bfff3"
+            inputStyle={{
+              color: "black",
+              fontSize: deviceType === "mobile" ? 14 : 16,
+            }}
+          />
+          <Menu
+            visible={filterMenuVisible}
+            onDismiss={() => setFilterMenuVisible(false)}
+            anchor={
+              <IconButton
+                icon="filter-variant"
+                onPress={() => setFilterMenuVisible(true)}
+                color={extendedTheme.colors.primary}
+                size={deviceType === "mobile" ? 20 : 24}
+              />
+            }
+          >
+            {columns.map((column) => (
+              <Menu.Item
+                key={String(column.key)}
+                onPress={() => {
+                  setFilterMenuVisible(false);
+                }}
+                title={column.title}
+              />
+            ))}
+          </Menu>
+        </View>
+
+       
+        <View style={[styles.tableWrapper, { height: tableHeight }]}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={true}
+            style={styles.horizontalScroll}
+            contentContainerStyle={{
+              minWidth: Math.max(totalTableWidth, screenWidth),
+            }}
+          >
+            <View
+              style={[
+                styles.tableContainer,
+                { width: Math.max(totalTableWidth, screenWidth) },
+              ]}
             >
-              {columns.map((column) => (
-                <Menu.Item
-                  key={String(column.key)}
-                  onPress={() => {
-                    handleFilter(String(column.key), true);
-                    setFilterMenuVisible(false);
-                  }}
-                  title={column.title}
-                />
-              ))}
-            </Menu>
-          </View>
-          <ScrollView style={styles.tableWrapper}>
-            <ScrollView horizontal>
-              <View style={styles.tableContainer}>
-                <DataTable style={styles.table}>
-                  <DataTable.Header style={styles.header}>
-                    {columns.map((column) => (
-                      <DataTable.Title
-                        key={String(column.key)}
-                        sortDirection={
-                          sortBy === column.key ? sortOrder : "none"
-                        }
-                        onPress={() =>
-                          column.sortable && handleSort(column.key)
-                        }
-                        style={[styles.headerCell, getColumnStyle(column)]}
-                      >
-                        <View style={styles.columnHeader}>
-                          <Text style={styles.headerText}>{column.title}</Text>
-                          {column.sortable && (
-                            <MaterialCommunityIcons
-                              name={
-                                sortBy === column.key
-                                  ? sortOrder === "ascending"
-                                    ? "arrow-up"
-                                    : "arrow-down"
-                                  : "arrow-up-down"
-                              }
-                              size={16}
-                              color="#00ACE8"
-                            />
-                          )}
-                        </View>
-                      </DataTable.Title>
-                    ))}
+              <DataTable style={styles.table}>
+            
+                <DataTable.Header style={styles.header}>
+                  {columns.map((column) => (
                     <DataTable.Title
+                      key={String(column.key)}
+                      sortDirection={sortBy === column.key ? sortOrder : "none"}
+                      onPress={() => column.sortable && handleSort(column.key)}
                       style={[
                         styles.headerCell,
-                        getColumnStyle({ width: 120 }),
+                        { width: getColumnWidth(column.key) },
                       ]}
                     >
-                      <Text style={styles.headerText}>Acciones</Text>
+                      <View style={styles.columnHeader}>
+                        <Text
+                          style={[
+                            styles.headerText,
+                            { fontSize: deviceType === "mobile" ? 12 : 14 },
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {column.title}
+                        </Text>
+                        {column.sortable && (
+                          <MaterialCommunityIcons
+                            name={
+                              sortBy === column.key
+                                ? sortOrder === "ascending"
+                                  ? "arrow-up"
+                                  : "arrow-down"
+                                : "arrow-up-down"
+                            }
+                            size={deviceType === "mobile" ? 12 : 16}
+                            color="#00ACE8"
+                          />
+                        )}
+                      </View>
                     </DataTable.Title>
-                  </DataTable.Header>
+                  ))}
+                  <DataTable.Title
+                    style={[
+                      styles.headerCell,
+                      { width: getColumnWidth("acciones") },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.headerText,
+                        { fontSize: deviceType === "mobile" ? 12 : 14 },
+                      ]}
+                    >
+                      Acciones
+                    </Text>
+                  </DataTable.Title>
+                </DataTable.Header>
 
+               
+                <ScrollView
+                  style={styles.rowsContainer}
+                  showsVerticalScrollIndicator={false}
+                >
                   {isLoading ? (
-                    <ActivityIndicator
-                      style={styles.loading}
-                      color={extendedTheme.colors.primary}
-                      size="large"
-                    />
+                    <View style={styles.loadingContainer}>
+                      <ActivityIndicator
+                        style={styles.loading}
+                        color={extendedTheme.colors.primary}
+                        size="large"
+                      />
+                    </View>
                   ) : (
                     paginatedData.map((item, index) => (
                       <Animated.View
                         key={keyExtractor(item)}
-                        entering={FadeInUp.delay(index * 50)}
+                        entering={FadeInUp.delay(index * 20)}
                         layout={Layout.springify()}
                       >
-                        <DataTable.Row style={styles.row}>
+                        <DataTable.Row
+                          style={[
+                            styles.row,
+                            { height: deviceType === "mobile" ? 60 : 70 },
+                          ]}
+                        >
                           {columns.map((column) => (
                             <DataTable.Cell
                               key={String(column.key)}
-                              style={[styles.cell, getColumnStyle(column)]}
+                              style={[
+                                styles.cell,
+                                { width: getColumnWidth(column.key) },
+                              ]}
                             >
-                              <Text style={styles.cellText}>
-                                {renderCell(column, item)}
-                              </Text>
+                              {renderCell(column, item)}
                             </DataTable.Cell>
                           ))}
                           <DataTable.Cell
                             style={[
                               styles.cell,
-                              getColumnStyle({ width: 120 }),
+                              { width: getColumnWidth("acciones") },
                             ]}
                           >
                             <View style={styles.actionButtons}>
-                              {onDelete == null ? null : (
-                                <>
-                                  <IconButton
-                                    icon="delete-outline"
-                                    size={20}
-                                    iconColor="red"
-                                    onPress={() => {
-                                      setItemToDelete(item);
-                                      setDeleteConfirmVisible(true);
-                                    }}
-                                  />
-                                </>
+                              {onDelete && (
+                                <IconButton
+                                  icon="delete-outline"
+                                  size={deviceType === "mobile" ? 18 : 20}
+                                  iconColor="red"
+                                  onPress={() => {
+                                    setItemToDelete(item);
+                                    setDeleteConfirmVisible(true);
+                                  }}
+                                />
                               )}
 
                               <IconButton
                                 icon="pencil-outline"
-                                size={20}
+                                size={deviceType === "mobile" ? 18 : 20}
                                 iconColor="#00ACE8"
-                                onPress={() => handleEdit(item)}
+                                onPress={() => onEdit && onEdit(item)}
                               />
 
                               {item.informeNum != null ? (
                                 <ExcelApique id={item.id} />
                               ) : null}
 
-                              {item.estado === true || item.estado === false ? (
-                                <>
-                                  <IconButton
-                                    icon={
-                                      item.estado
-                                        ? "toggle-switch"
-                                        : "toggle-switch-off"
+                              {(item.estado === true ||
+                                item.estado === false) && (
+                                <IconButton
+                                  icon={
+                                    item.estado
+                                      ? "toggle-switch"
+                                      : "toggle-switch-off"
+                                  }
+                                  size={deviceType === "mobile" ? 18 : 20}
+                                  iconColor={item.estado ? "#00ACE8" : "#666"}
+                                  onPress={() => {
+                                    setItemToToggle(item);
+                                    if (item.estado) {
+                                      setToggleInactiveConfirmVisible(true);
+                                    } else {
+                                      setToggleActiveConfirmVisible(true);
                                     }
-                                    size={20}
-                                    iconColor={item.estado ? "#00ACE8" : "#666"}
-                                    onPress={() => {
-                                      setItemToToggle(item);
-                                      if (item.estado) {
-                                        setToggleInactiveConfirmVisible(true);
-                                      } else {
-                                        setToggleActiveConfirmVisible(true);
-                                      }
-                                    }}
-                                  />
-                                </>
-                              ) : null}
+                                  }}
+                                />
+                              )}
                             </View>
                           </DataTable.Cell>
                         </DataTable.Row>
@@ -559,197 +969,226 @@ const TablaComponente = ({
                       </Animated.View>
                     ))
                   )}
-                </DataTable>
-              </View>
-            </ScrollView>
+                </ScrollView>
+              </DataTable>
+            </View>
           </ScrollView>
-          <DataTable.Pagination
-            page={page}
-            numberOfPages={Math.ceil(
-              filteredAndSortedData.length / itemsPerPage
-            )}
-            onPageChange={setPage}
-            label={`${page + 1} de ${Math.ceil(
-              filteredAndSortedData.length / itemsPerPage
-            )}`}
-            showFastPaginationControls
-            numberOfItemsPerPageList={itemsPerPageOptions}
-            numberOfItemsPerPage={itemsPerPage}
-            onItemsPerPageChange={setItemsPerPage}
-            selectPageDropdownLabel={"Filas por página"}
-          />
-        </Animated.View>
-        <Portal>
-          <Dialog
-            visible={deleteConfirmVisible}
-            onDismiss={() => setDeleteConfirmVisible(false)}
-          >
-            <Dialog.Title>Confirmar eliminación</Dialog.Title>
-            <Dialog.Content>
-              <Text>¿Está seguro que desea eliminar este registro?</Text>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button
-                textColor="black"
-                mode="outlined"
-                onPress={() => setDeleteConfirmVisible(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                buttonColor="red"
-                mode="contained"
-                onPress={handleDeleteConfirm}
-              >
-                Eliminar
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
-          <Dialog
-            visible={toggleActiveConfirmVisible}
-            onDismiss={() => setToggleActiveConfirmVisible(false)}
-          >
-            <Dialog.Title>Confirmar activación</Dialog.Title>
-            <Dialog.Content>
-              <Text>¿Está seguro que desea activar este registro?</Text>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button
-                textColor="black"
-                mode="outlined"
-                onPress={() => setToggleActiveConfirmVisible(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                buttonColor="#00ACE8"
-                mode="contained"
-                onPress={handleToggleActiveConfirm}
-              >
-                Activar
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
-          <Dialog
-            visible={toggleInactiveConfirmVisible}
-            onDismiss={() => setToggleInactiveConfirmVisible(false)}
-          >
-            <Dialog.Title>Confirmar inactivación</Dialog.Title>
-            <Dialog.Content>
-              <Text>¿Está seguro que desea inactivar este registro?</Text>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button
-                textColor="black"
-                mode="outlined"
-                onPress={() => setToggleInactiveConfirmVisible(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                buttonColor="red"
-                mode="contained"
-                onPress={handleToggleInactiveConfirm}
-              >
-                Inactivar
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
+        </View>
 
-        <Snackbar
-          visible={snackbarVisible}
-          onDismiss={() => setSnackbarVisible(false)}
-          duration={3000}
-          style={{
-            backgroundColor:
-              snackbarMessage.type === "success"
-                ? extendedTheme.colors.success
-                : extendedTheme.colors.error,
+        
+        <DataTable.Pagination
+          page={page}
+          numberOfPages={Math.ceil(filteredAndSortedData.length / itemsPerPage)}
+          onPageChange={setPage}
+          label={`${page + 1} de ${Math.ceil(
+            filteredAndSortedData.length / itemsPerPage
+          )}`}
+          showFastPaginationControls
+          numberOfItemsPerPageList={itemsPerPageOptions}
+          numberOfItemsPerPage={itemsPerPage}
+          onItemsPerPageChange={(newItemsPerPage) => {
+            setItemsPerPage(newItemsPerPage);
+            setPage(0); // Resetear a la primera página cuando cambia items per page
           }}
-          action={{
-            label: "Cerrar",
-            color: "#ffffff",
-            onPress: () => setSnackbarVisible(false),
-          }}
+          selectPageDropdownLabel={"Filas por página"}
+          style={{ paddingHorizontal: 8 }}
+        />
+      </Animated.View>
+
+      
+      <Portal>
+        <Dialog
+          visible={deleteConfirmVisible}
+          onDismiss={() => setDeleteConfirmVisible(false)}
         >
-          <Text style={{ color: extendedTheme.colors.surface }}>
-            {snackbarMessage.text}
-          </Text>
-        </Snackbar>
-      </View>
-    </>
+          <Dialog.Title>Confirmar eliminación</Dialog.Title>
+          <Dialog.Content>
+            <Text>¿Está seguro que desea eliminar este registro?</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button
+              textColor="black"
+              mode="outlined"
+              onPress={() => setDeleteConfirmVisible(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              buttonColor="red"
+              mode="contained"
+              onPress={handleDeleteConfirm}
+            >
+              Eliminar
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+
+        <Dialog
+          visible={toggleActiveConfirmVisible}
+          onDismiss={() => setToggleActiveConfirmVisible(false)}
+        >
+          <Dialog.Title>Confirmar activación</Dialog.Title>
+          <Dialog.Content>
+            <Text>¿Está seguro que desea activar este registro?</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button
+              textColor="black"
+              mode="outlined"
+              onPress={() => setToggleActiveConfirmVisible(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              buttonColor="#00ACE8"
+              mode="contained"
+              onPress={handleToggleActiveConfirm}
+            >
+              Activar
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+
+        <Dialog
+          visible={toggleInactiveConfirmVisible}
+          onDismiss={() => setToggleInactiveConfirmVisible(false)}
+        >
+          <Dialog.Title>Confirmar inactivación</Dialog.Title>
+          <Dialog.Content>
+            <Text>¿Está seguro que desea inactivar este registro?</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button
+              textColor="black"
+              mode="outlined"
+              onPress={() => setToggleInactiveConfirmVisible(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              buttonColor="red"
+              mode="contained"
+              onPress={handleToggleInactiveConfirm}
+            >
+              Inactivar
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={3000}
+        style={{
+          backgroundColor:
+            snackbarMessage.type === "success"
+              ? extendedTheme.colors.success
+              : extendedTheme.colors.error,
+        }}
+      >
+        <Text style={{ color: extendedTheme.colors.surface }}>
+          {snackbarMessage.text}
+        </Text>
+      </Snackbar>
+    </Surface>
   );
 };
+
+// Estilos optimizados
+const userCellStyles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+  },
+  text: {
+    fontSize: 13,
+    marginLeft: 4,
+    flex: 1,
+  },
+});
 
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
     width: "100%",
-    maxWidth: "100%",
+    margin: 8,
+    borderRadius: 12,
   },
   container: {
     flex: 1,
-    width: "100%",
     padding: 16,
     borderRadius: 12,
-    ...Platform.select({
-      web: {
-        boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-      },
-      default: {
-        elevation: 4,
-      },
-    }),
   },
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
-    width: "100%",
+    paddingHorizontal: 4,
   },
   searchBar: {
     flex: 1,
-    marginRight: 16,
-    borderRadius: 20,
+    marginRight: 12,
+    borderRadius: 25,
     elevation: 0,
     backgroundColor: "transparent",
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.1)",
   },
+  debugText: {
+    fontSize: 10,
+    color: "#666",
+    marginLeft: 8,
+  },
   tableWrapper: {
-    width: "100%",
+    flex: 1,
+    borderRadius: 8,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.1)",
+  },
+  horizontalScroll: {
     flex: 1,
   },
   tableContainer: {
-    minWidth: "100%",
-    width: "100%",
+    flex: 1,
   },
   table: {
-    width: "100%",
-    minWidth: "100%",
+    flex: 1,
   },
   header: {
-    width: "100%",
-    paddingHorizontal: 0,
+    backgroundColor: "#f5f5f5",
     borderBottomWidth: 2,
     borderBottomColor: "rgba(0,0,0,0.1)",
   },
   headerCell: {
-    justifyContent: "flex-start",
-    paddingVertical: 16,
+    justifyContent: "center",
+    paddingVertical: 12,
     paddingHorizontal: 8,
+    borderRightWidth: 1,
+    borderRightColor: "rgba(0,0,0,0.05)",
   },
   columnHeader: {
     flexDirection: "row",
     alignItems: "center",
-    width: "100%",
+    justifyContent: "center",
   },
   headerText: {
     fontWeight: "bold",
     marginRight: 4,
-    fontSize: 16,
+    textAlign: "center",
+  },
+  rowsContainer: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 200,
   },
   loading: {
     padding: 20,
@@ -758,32 +1197,35 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    width: "100%",
-  },
-  errorText: {
-    marginTop: 8,
-    textAlign: "center",
+    padding: 20,
   },
   noDataText: {
     fontSize: 16,
     color: "rgba(0, 0, 0, 0.6)",
+    textAlign: "center",
   },
   row: {
-    minHeight: 60,
-    width: "100%",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.05)",
   },
   cell: {
-    justifyContent: "flex-start",
+    justifyContent: "center",
     paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRightWidth: 1,
+    borderRightColor: "rgba(0,0,0,0.05)",
   },
   cellText: {
-    fontSize: 14,
+    fontSize: 13,
+    textAlign: "center",
   },
   actionButtons: {
     flexDirection: "row",
-    justifyContent: "flex-start",
+    justifyContent: "center",
     alignItems: "center",
+    flexWrap: "wrap",
   },
 });
 
 export default TablaComponente;
+
