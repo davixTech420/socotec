@@ -341,30 +341,13 @@ export const getUsersCampoAD = async () => {
   return makeRequest("get", "/usersCampo");
 };
 
-
-export const createUser = async (user) => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-    const response = await axios.post(`${baseUrl}/users`, user, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.log("Error al crear usuario:", error);
-    throw error;
-  }
+export const createUser = async (data) => {
+  return makeRequest("post", "/users", data);
 };
 
 export const getUserById = async (id) => {
-  return makeRequest("get",`/userById/${id}`);
-}
+  return makeRequest("get", `/userById/${id}`);
+};
 
 export const activateUser = async (id) => {
   return makeRequest("put", `/users/${id}/active`);
@@ -378,86 +361,22 @@ export const deleteUser = async (id) => {
   return makeRequest("delete", `/users/${id}`);
 };
 
-export const updateUser = async (id, user) => {
-  try {
-    const token = await AsyncStorage.getItem("userToken");
-    const response = await axios.put(`${baseUrl}/users/${id}`, user, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.log("Error al actualizar usuario:", error);
-    throw error;
-  }
+export const updateUser = async (id, data) => {
+  return makeRequest("put", `/users/${id}`, data);
 };
 
-//end point para enviar el email recien se registra un usuario
 export const getUsers = async () => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-
-    const response = await axios.get(`${baseUrl}/users`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-  }
+  return makeRequest("get", "/users");
 };
 
 //end point para la funcionalidades de la tabla inventarios
+
 export const createInventory = async (data) => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-
-    const response = await axios.post(`${baseUrl}/inventory`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.log("Error al enviar inventario:", error);
-    throw error;
-  }
+  return makeRequest("post", "/inventory", data);
 };
 
 export const updateInventory = async (id, data) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-
-    if (!token) {
-      console.error("No se encontró el token");
-      return;
-    }
-    const response = await axios.put(`${baseUrl}/inventory/${id}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.log("Error al actualizar el inventario:", error);
-    throw error;
-  }
+  return makeRequest("put", `/inventory/${id}`, data);
 };
 
 export const getActiveInventory = async () => {
@@ -465,88 +384,19 @@ export const getActiveInventory = async () => {
 };
 
 export const getInventory = async () => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-
-    const response = await axios.get(`${baseUrl}/inventory`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.error("Error al obtener inventario:", error);
-  }
+  return makeRequest("get", "/inventory");
 };
 
 export const deleteInventory = async (id) => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-
-    const response = await axios.delete(`${baseUrl}/inventory/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.log("Error al eliminar inventario:", error);
-    throw error;
-  }
+  return makeRequest("delete", `/inventory/${id}`);
 };
 
 export const activeInventory = async (id) => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-
-    const response = await axios.put(`${baseUrl}/inventory/${id}/active`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.error("Error al activar inventario:", error);
-  }
+  return makeRequest("put", `${baseUrl}/inventory/${id}/active`);
 };
 
 export const inactiveInventory = async (id) => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-
-    const response = await axios.put(`${baseUrl}/inventory/${id}/inactive`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.error("Error al desactivar inventario:", error);
-  }
+  return makeRequest("put", `/inventory/${id}/inactive`);
 };
 
 /**
@@ -561,65 +411,30 @@ export const inactiveInventory = async (id) => {
  */
 
 export const getGroups = async () => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-    const response = await axios.get(`${baseUrl}/groups`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.error("Error al obtener los grupos:", error);
-  }
+  return makeRequest("get", "/groups");
 };
 
-
 export const createGroup = async (data) => {
-  return makeRequest("post","/groups",data);
-}
+  return makeRequest("post", "/groups", data);
+};
 
-export const updateGroup = async (id,data) => {
-  return makeRequest("put",`/groups/${id}`,data);
-}
-
+export const updateGroup = async (id, data) => {
+  return makeRequest("put", `/groups/${id}`, data);
+};
 
 export const deleteGroup = async (id) => {
-  return makeRequest("delete",`/groups/${id}`);
-}
+  return makeRequest("delete", `/groups/${id}`);
+};
 
 export const activateGroup = async (id) => {
-  return makeRequest("put",`/groups/${id}/active`);
-}
-
+  return makeRequest("put", `/groups/${id}/active`);
+};
 
 export const inactivateGroup = async (id) => {
-  return makeRequest("put",`/groups/${id}/inactive`);
-}
-
+  return makeRequest("put", `/groups/${id}/inactive`);
+};
 export const getGroupNotProyect = async () => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-    const response = await axios.get(`${baseUrl}/groupNotProyect`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-
-    return response.data;
-  } catch (error) {
-    return console.error("Error al obtener los grupos sin proyectos", error);
-  }
+  return makeRequest("get", "/groupNotProyect");
 };
 
 /**aca termina las funciones de los grupos de trabajo */
@@ -632,37 +447,21 @@ export const getGroupNotProyect = async () => {
  *
  */
 
-
 export const getUsersGroup = async (id) => {
-  return makeRequest("get",`/userGroup/${id}`);
-}
-
-export const createUsersGroup = async (data) => {
-  return makeRequest("post","/userGroup",data);
-}
-
-
-export const deleteUsersGroup = async (id) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    const response = await axios.delete(`${baseUrl}/userGroup/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.log("Error al eliminar el usuario del grupo:", error);
-  }
+  return makeRequest("get", `/userGroup/${id}`);
 };
 
+export const createUsersGroup = async (data) => {
+  return makeRequest("post", "/userGroup", data);
+};
+
+export const deleteUsersGroup = async (id) => {
+  return makeRequest("delete", `/userGroup/${id}`);
+};
 
 export const getUsersNotGroup = async () => {
-  return makeRequest("get","/userNotGroup");
-}
-
-
+  return makeRequest("get", "/userNotGroup");
+};
 
 /**
  *
@@ -678,93 +477,38 @@ export const getUsersNotGroup = async () => {
  *
  */
 
-
 export const createProyect = async (data) => {
-  return makeRequest("post","/proyects",data);
-}
-
+  return makeRequest("post", "/proyects", data);
+};
 
 export const getProyect = async () => {
-  return makeRequest("get","/proyects");
-}
-
+  return makeRequest("get", "/proyects");
+};
 
 export const deleteProyect = async (id) => {
-return makeRequest("delete",`/proyects/${id}`);
-}
-
-
+  return makeRequest("delete", `/proyects/${id}`);
+};
 
 export const updateProyect = async (id, data) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    const response = await axios.put(`${baseUrl}/proyects/${id}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.log("error al actualizar el proyecto: ", error);
-    throw error;
-  }
+  return makeRequest("put", `/proyects/${id}`, data);
 };
 
 export const activeProyect = async (id) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    const response = await axios.put(`${baseUrl}/proyects/${id}/active`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al activar el proyecto : ", error);
-  }
+  return makeRequest("put", `/proyects/${id}/active`);
 };
 
 export const inactiveProyect = async (id) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    const response = await axios.put(`${baseUrl}/proyects/${id}/inactive`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al inactivar el proyecto ", error);
-  }
+  return makeRequest("put", `/proyects/${id}/inactive`);
 };
 
 export const getGroupProyect = async (id) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    const response = await axios.get(`${baseUrl}/groupProyect/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.log("Error al obtener el grupo del proyecto", error);
-  }
+  return makeRequest("get", `/groupProyect/${id}`);
 };
 
 export const deleteGroupProyect = async (id) => {
-  try {
-    const token = localStorage.getItem("token");
-    const response = await axios.put(`deleteGroupProyect/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.log("Error al obtener el grupo del proyecto", error);
-  }
+  return makeRequest("put", `/deleteGroupProyect/${id}`);
 };
+
 /**
  *
  *
@@ -794,32 +538,13 @@ export const updatePermission = async (id, data) => {
 };
 
 export const activePermission = async (id) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    const response = await axios.put(`${baseUrl}/permissions/${id}/active`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al activar el permiso", error);
-  }
+  return makeRequest("put", `/permissions/${id}/active`);
 };
 
 export const inactivePermission = async (id) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    const response = await axios.put(`${baseUrl}/permissions/${id}/inactive`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al desactivar el permiso", error);
-  }
+  return makeRequest("put", `/permissions/${id}/inactive`);
 };
+
 /**
  *
  * aca termina la funcionalidad para los permisos y calendario
@@ -831,22 +556,7 @@ endpoint  para el portafolio
 */
 
 export const getPortfolio = async () => {
-  try {
-    const token = await AsyncStorage.getItem("userToken"); // Asegúrate de que el token no sea null
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-    const response = await axios.get(`${baseUrl}/portfolio`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Asegúrate de usar "Bearer" si es un JWT
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.error("Error al obtener el portafolio:", error);
-  }
+  return makeRequest("get", "/portfolio");
 };
 
 export const createPortfolio = async (data) => {
@@ -889,62 +599,17 @@ export const updatePortfolio = async (id, data) => {
 };
 
 export const deletePortfolio = async (id) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-    const response = await axios.delete(`${baseUrl}/portfolio/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.log("Error al eliminar el portafolio:", error);
-    throw error;
-  }
+  return makeRequest("delete", `/portfolio/${id}`);
 };
 
 export const inactivePortfolio = async (id) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-    const response = await axios.put(`${baseUrl}/portfolio/${id}/inactive`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.error("Error al desactivar el portafolio:", error);
-  }
+  return makeRequest("put", `/portfolio/${id}/inactive`);
 };
 
 export const activePortfolio = async (id) => {
-  try {
-    const token = AsyncStorage.getItem("userToken");
-    if (!token) {
-      console.error("No se encontró el token");
-      return; // O maneja el error como desees
-    }
-    const response = await axios.put(`${baseUrl}/portfolio/${id}/active`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data; // Retorna los datos de la respuesta
-  } catch (error) {
-    console.error("Error al activar el portafolio:", error);
-  }
+  return makeRequest("put", `/portfolio/${id}/active`);
 };
+
 /**a
  * aca termina las funcionalidades para el portafolio
  */

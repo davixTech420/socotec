@@ -551,9 +551,9 @@ export default function App() {
             >
               {(props) => (
                 <>
-                  {/* <AnimatedScreen style={animatedStyle}> */}
+                 
                   <Component {...props} />
-                  {/* </AnimatedScreen> */}
+                 
                 </>
 
               )}

@@ -41,7 +41,6 @@ import Inventario from "./inventario";
 import Proyects from "./Proyects";
 import Users from "./users";
 import Employee from "./Employee";
-import Model3D from "./Model3D";
 import CalendarComponent from "./Calendar";
 import Group from "./Groups";
 import Account from "./Account";
@@ -191,14 +190,6 @@ const DRAWER_SCREENS = [
     title: "Calendario",
     component: CalendarComponent,
     icon: "calendar",
-    iconFamily: "MaterialCommunityIcons",
-    useAnimatedScreen: false,
-  },
-  {
-    name: "models",
-    title: "Modelos 3D",
-    component: Model3D,
-    icon: "printer-3d",
     iconFamily: "MaterialCommunityIcons",
     useAnimatedScreen: false,
   },

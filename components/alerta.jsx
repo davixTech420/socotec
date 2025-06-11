@@ -1,6 +1,6 @@
-import React from 'react';
-import { Text, Dialog } from 'react-native-paper';
-import { ScrollView, Dimensions, StyleSheet } from 'react-native';
+import React from "react";
+import { Text, Dialog } from "react-native-paper";
+import { ScrollView, Dimensions, StyleSheet } from "react-native";
 
 export function AlertaIcono(props) {
   return (
@@ -14,9 +14,7 @@ export function AlertaIcono(props) {
       <Dialog.Content>
         <Text variant="bodyMedium">{props.text}</Text>
       </Dialog.Content>
-      <Dialog.Actions>
-        {props.actions}
-      </Dialog.Actions>
+      <Dialog.Actions>{props.actions}</Dialog.Actions>
     </Dialog>
   );
 }
@@ -37,20 +35,18 @@ export function AlertaScroll(props) {
           {props.content}
         </ScrollView>
       </Dialog.ScrollArea>
-      <Dialog.Actions>
-        {props.actions}
-      </Dialog.Actions>
+      <Dialog.Actions>{props.actions}</Dialog.Actions>
     </Dialog>
   );
 }
 
 // Estilos para hacer el modal responsive
-const windowHeight = Dimensions.get('window').height;
+const windowHeight = Dimensions.get("window").height;
 
 const styles = StyleSheet.create({
   dialogContainer: {
-    alignSelf: 'center', // Centra el modal horizontalmente
-    width: Dimensions.get('window').width > 600 ? '60%' : '90%', // Ancho adaptable
+    alignSelf: "center", // Centra el modal horizontalmente
+    width: Dimensions.get("window").width > 600 ? "60%" : "90%", // Ancho adaptable
     maxWidth: 600, // Ancho máximo para web
     maxHeight: windowHeight * 0.8, // Altura máxima (80% de la pantalla)
     borderRadius: 8, // Bordes redondeados
@@ -58,6 +54,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 24,
-    overflowY:"auto",
+    overflowY: "auto",
   },
 });

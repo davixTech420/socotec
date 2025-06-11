@@ -6,7 +6,6 @@ import {
   ScrollView,
   useWindowDimensions,
   Image,
-  Dimensions,
 } from "react-native";
 import {
   DataTable,
@@ -52,10 +51,9 @@ const CACHE_MAX_AGE = 10 * 60 * 1000;
 const BATCH_SIZE = 15;
 const DEBOUNCE_TIME = 30;
 
-// Hook personalizado para responsividad
-const useResponsiveLayout = () => {
+// Hook personalizado para responsividad - CORREGIDO COMPLETAMENTE
+const useResponsiveLayout = (itemsPerPage = 5) => {
   const { width, height } = useWindowDimensions();
-  const screenData = Dimensions.get("screen");
 
   const deviceType = useMemo(() => {
     if (width < BREAKPOINTS.mobile) return "mobile";
@@ -113,24 +111,32 @@ const useResponsiveLayout = () => {
     }
   }, [deviceType]);
 
+  // ALTURA DINÁMICA SIN RESTRICCIONES
+  const rowHeight = useMemo(() => {
+    return deviceType === "mobile" ? 60 : 70;
+  }, [deviceType]);
+
+  // Calculamos la altura exacta necesaria para mostrar todos los elementos
+  // Sin restricciones de altura máxima
   const tableHeight = useMemo(() => {
-    // Altura fija basada en el tipo de dispositivo
-    switch (deviceType) {
-      case "mobile":
-        return Math.min(height * 0.6, 400);
-      case "tablet":
-        return Math.min(height * 0.7, 500);
-      case "desktop":
-        return Math.min(height * 0.75, 600);
-      default:
-        return Math.min(height * 0.8, 700);
-    }
-  }, [deviceType, height]);
+    // Altura base del header
+    const headerHeight = 50;
+
+    // Altura adicional por bordes y espaciado
+    const borderAndPadding = 10;
+
+    // Buffer adicional para asegurar que la última fila se vea completa
+    const buffer = 20;
+
+    // Calculamos la altura exacta necesaria para mostrar todos los elementos
+    return headerHeight + rowHeight * itemsPerPage + borderAndPadding + buffer;
+  }, [rowHeight, itemsPerPage]);
 
   return {
     deviceType,
     columnWidths,
     tableHeight,
+    rowHeight,
     screenWidth: width,
     screenHeight: height,
     isLandscape: width > height,
@@ -281,8 +287,6 @@ const TablaComponente = ({
   };
 
   const { user } = useAuth();
-  const { deviceType, columnWidths, tableHeight, screenWidth } =
-    useResponsiveLayout();
 
   // Estados principales
   const [logueado, setLogueado] = useState(null);
@@ -294,6 +298,24 @@ const TablaComponente = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({});
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
+
+  // Debug state para mostrar información
+  const [debugInfo, setDebugInfo] = useState({
+    itemsPerPage: defaultItemsPerPage,
+    tableHeight: 0,
+  });
+
+  // HOOK CORREGIDO - Ahora recibe itemsPerPage actual
+  const { deviceType, columnWidths, tableHeight, rowHeight, screenWidth } =
+    useResponsiveLayout(itemsPerPage);
+
+  // Actualizar debug info cuando cambian valores relevantes
+  useEffect(() => {
+    setDebugInfo({
+      itemsPerPage,
+      tableHeight,
+    });
+  }, [itemsPerPage, tableHeight]);
 
   // Estados de diálogos
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
@@ -490,9 +512,8 @@ const TablaComponente = ({
     }
   }, [paginatedData, fetchUsersInBatch, role]);
 
-  // Agregar este useEffect después del useEffect que precarga usuarios:
+  // Resetear página cuando cambia itemsPerPage
   useEffect(() => {
-    // Resetear página cuando cambia itemsPerPage para evitar páginas vacías
     const maxPage = Math.ceil(filteredAndSortedData.length / itemsPerPage) - 1;
     if (page > maxPage && maxPage >= 0) {
       setPage(Math.max(0, maxPage));
@@ -755,10 +776,7 @@ const TablaComponente = ({
   }
 
   return (
-    <Surface
-      style={[styles.outerContainer, { height: tableHeight + 120 }]}
-      elevation={2}
-    >
+    <Surface style={[styles.outerContainer]} elevation={2}>
       <Animated.View
         entering={FadeInUp}
         style={[
@@ -766,7 +784,6 @@ const TablaComponente = ({
           { backgroundColor: extendedTheme.colors.background },
         ]}
       >
-    
         <View style={styles.actions}>
           <Searchbar
             placeholder="Buscar..."
@@ -803,7 +820,17 @@ const TablaComponente = ({
           </Menu>
         </View>
 
-       
+        {/* INFORMACIÓN DE DEPURACIÓN */}
+        {deviceType === "mobile" && (
+          <View style={styles.debugContainer}>
+            <Text style={styles.debugText}>
+              Items: {debugInfo.itemsPerPage} | Altura: {tableHeight}px | Filas
+              visibles: {Math.floor((tableHeight - 50 - 30) / rowHeight)}
+            </Text>
+          </View>
+        )}
+
+        {/* TABLA CON ALTURA DINÁMICA - ESTRUCTURA SIMPLIFICADA */}
         <View style={[styles.tableWrapper, { height: tableHeight }]}>
           <ScrollView
             horizontal
@@ -820,7 +847,6 @@ const TablaComponente = ({
               ]}
             >
               <DataTable style={styles.table}>
-            
                 <DataTable.Header style={styles.header}>
                   {columns.map((column) => (
                     <DataTable.Title
@@ -875,107 +901,99 @@ const TablaComponente = ({
                   </DataTable.Title>
                 </DataTable.Header>
 
-               
-                <ScrollView
-                  style={styles.rowsContainer}
-                  showsVerticalScrollIndicator={false}
-                >
-                  {isLoading ? (
-                    <View style={styles.loadingContainer}>
-                      <ActivityIndicator
-                        style={styles.loading}
-                        color={extendedTheme.colors.primary}
-                        size="large"
-                      />
-                    </View>
-                  ) : (
-                    paginatedData.map((item, index) => (
-                      <Animated.View
-                        key={keyExtractor(item)}
-                        entering={FadeInUp.delay(index * 20)}
-                        layout={Layout.springify()}
+                {/* FILAS DE DATOS - SIN SCROLLVIEW ANIDADO */}
+                {isLoading ? (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator
+                      style={styles.loading}
+                      color={extendedTheme.colors.primary}
+                      size="large"
+                    />
+                  </View>
+                ) : (
+                  paginatedData.map((item, index) => (
+                    <Animated.View
+                      key={keyExtractor(item)}
+                      entering={FadeInUp.delay(index * 20)}
+                      layout={Layout.springify()}
+                    >
+                      <DataTable.Row
+                        style={[styles.row, { height: rowHeight }]}
                       >
-                        <DataTable.Row
-                          style={[
-                            styles.row,
-                            { height: deviceType === "mobile" ? 60 : 70 },
-                          ]}
-                        >
-                          {columns.map((column) => (
-                            <DataTable.Cell
-                              key={String(column.key)}
-                              style={[
-                                styles.cell,
-                                { width: getColumnWidth(column.key) },
-                              ]}
-                            >
-                              {renderCell(column, item)}
-                            </DataTable.Cell>
-                          ))}
+                        {columns.map((column) => (
                           <DataTable.Cell
+                            key={String(column.key)}
                             style={[
                               styles.cell,
-                              { width: getColumnWidth("acciones") },
+                              { width: getColumnWidth(column.key) },
                             ]}
                           >
-                            <View style={styles.actionButtons}>
-                              {onDelete && (
-                                <IconButton
-                                  icon="delete-outline"
-                                  size={deviceType === "mobile" ? 18 : 20}
-                                  iconColor="red"
-                                  onPress={() => {
-                                    setItemToDelete(item);
-                                    setDeleteConfirmVisible(true);
-                                  }}
-                                />
-                              )}
-
-                              <IconButton
-                                icon="pencil-outline"
-                                size={deviceType === "mobile" ? 18 : 20}
-                                iconColor="#00ACE8"
-                                onPress={() => onEdit && onEdit(item)}
-                              />
-
-                              {item.informeNum != null ? (
-                                <ExcelApique id={item.id} />
-                              ) : null}
-
-                              {(item.estado === true ||
-                                item.estado === false) && (
-                                <IconButton
-                                  icon={
-                                    item.estado
-                                      ? "toggle-switch"
-                                      : "toggle-switch-off"
-                                  }
-                                  size={deviceType === "mobile" ? 18 : 20}
-                                  iconColor={item.estado ? "#00ACE8" : "#666"}
-                                  onPress={() => {
-                                    setItemToToggle(item);
-                                    if (item.estado) {
-                                      setToggleInactiveConfirmVisible(true);
-                                    } else {
-                                      setToggleActiveConfirmVisible(true);
-                                    }
-                                  }}
-                                />
-                              )}
-                            </View>
+                            {renderCell(column, item)}
                           </DataTable.Cell>
-                        </DataTable.Row>
-                        <Divider />
-                      </Animated.View>
-                    ))
-                  )}
-                </ScrollView>
+                        ))}
+                        <DataTable.Cell
+                          style={[
+                            styles.cell,
+                            { width: getColumnWidth("acciones") },
+                          ]}
+                        >
+                          <View style={styles.actionButtons}>
+                            {onDelete && (
+                              <IconButton
+                                icon="delete-outline"
+                                size={deviceType === "mobile" ? 18 : 20}
+                                iconColor="red"
+                                onPress={() => {
+                                  setItemToDelete(item);
+                                  setDeleteConfirmVisible(true);
+                                }}
+                              />
+                            )}
+
+                            <IconButton
+                              icon="pencil-outline"
+                              size={deviceType === "mobile" ? 18 : 20}
+                              iconColor="#00ACE8"
+                              onPress={() => onEdit && onEdit(item)}
+                              te
+                            />
+
+                            {item.informeNum != null ? (
+                              <ExcelApique id={item.id} />
+                            ) : null}
+
+                            {(item.estado === true ||
+                              item.estado === false) && (
+                              <IconButton
+                                icon={
+                                  item.estado
+                                    ? "toggle-switch"
+                                    : "toggle-switch-off"
+                                }
+                                size={deviceType === "mobile" ? 18 : 20}
+                                iconColor={item.estado ? "#00ACE8" : "#666"}
+                                onPress={() => {
+                                  setItemToToggle(item);
+                                  if (item.estado) {
+                                    setToggleInactiveConfirmVisible(true);
+                                  } else {
+                                    setToggleActiveConfirmVisible(true);
+                                  }
+                                }}
+                              />
+                            )}
+                          </View>
+                        </DataTable.Cell>
+                      </DataTable.Row>
+                      <Divider />
+                    </Animated.View>
+                  ))
+                )}
               </DataTable>
             </View>
           </ScrollView>
         </View>
 
-        
         <DataTable.Pagination
           page={page}
           numberOfPages={Math.ceil(filteredAndSortedData.length / itemsPerPage)}
@@ -988,14 +1006,13 @@ const TablaComponente = ({
           numberOfItemsPerPage={itemsPerPage}
           onItemsPerPageChange={(newItemsPerPage) => {
             setItemsPerPage(newItemsPerPage);
-            setPage(0); // Resetear a la primera página cuando cambia items per page
+            setPage(0);
           }}
           selectPageDropdownLabel={"Filas por página"}
           style={{ paddingHorizontal: 8 }}
         />
       </Animated.View>
 
-      
       <Portal>
         <Dialog
           visible={deleteConfirmVisible}
@@ -1098,6 +1115,7 @@ const TablaComponente = ({
 // Estilos optimizados
 const userCellStyles = StyleSheet.create({
   container: {
+    marginLeft: "20%",
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 2,
@@ -1105,7 +1123,7 @@ const userCellStyles = StyleSheet.create({
   },
   text: {
     fontSize: 13,
-    marginLeft: 4,
+    marginLeft: 3,
     flex: 1,
   },
 });
@@ -1138,13 +1156,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.1)",
   },
+  debugContainer: {
+    marginBottom: 8,
+    padding: 4,
+    backgroundColor: "rgba(0,0,0,0.05)",
+    borderRadius: 4,
+  },
   debugText: {
     fontSize: 10,
     color: "#666",
-    marginLeft: 8,
+    textAlign: "center",
   },
   tableWrapper: {
-    flex: 1,
     borderRadius: 8,
     overflow: "hidden",
     borderWidth: 1,
@@ -1180,9 +1203,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginRight: 4,
     textAlign: "center",
-  },
-  rowsContainer: {
-    flex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -1228,4 +1248,3 @@ const styles = StyleSheet.create({
 });
 
 export default TablaComponente;
-

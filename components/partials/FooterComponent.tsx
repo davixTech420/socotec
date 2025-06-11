@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -7,22 +7,24 @@ import {
   Linking,
   Platform,
   useWindowDimensions,
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
 
 const socialLinks = [
-  { icon: 'x', url: 'https://twitter.com/socotecspain' },
-  { icon: 'instagram', url: 'https://www.instagram.com/socotecspain/' },
-  { icon: 'linkedin', url: 'https://www.linkedin.com/company/socotec-espana' },
-  { icon: 'youtube', url: 'https://www.youtube.com/channel/UC4a-XvZDOaPJCglRJrcT76Q' },
-
+  { icon: "x", url: "https://twitter.com/socotecspain" },
+  { icon: "instagram", url: "https://www.instagram.com/socotecspain/" },
+  { icon: "linkedin", url: "https://www.linkedin.com/company/socotec-espana" },
+  {
+    icon: "youtube",
+    url: "https://www.youtube.com/channel/UC4a-XvZDOaPJCglRJrcT76Q",
+  },
 ];
 
 const footerLinks = [
-  { title: 'About', url: '/about' },
-  { title: 'Services', url: '/services' },
-  { title: 'Contact', url: '/contact' },
-  { title: 'Privacy Policy', url: '/privacy' },
+  { title: "About", url: "/about" },
+  { title: "Services", url: "/services" },
+  { title: "Contact", url: "/contact" },
+  { title: "Privacy Policy", url: "/privacy" },
 ];
 
 export default function MinimalistFooter() {
@@ -32,8 +34,8 @@ export default function MinimalistFooter() {
   const isMobile = width < 768;
 
   const handlePress = (url: string) => {
-    if (Platform.OS === 'web') {
-      window.open(url, '_blank');
+    if (Platform.OS === "web") {
+      window.open(url, "_blank");
     } else {
       Linking.openURL(url);
     }
@@ -47,15 +49,20 @@ export default function MinimalistFooter() {
     <View style={styles.container}>
       <View style={[styles.content, isMobile && styles.contentMobile]}>
         <View style={styles.section}>
-          <TouchableOpacity onPress={() => toggleSection('company')} style={styles.sectionHeader}>
+          <TouchableOpacity
+            onPress={() => toggleSection("company")}
+            style={styles.sectionHeader}
+          >
             <Text style={styles.sectionTitle}>Compañia</Text>
             <Feather
-              name={expandedSection === 'company' ? 'chevron-up' : 'chevron-down'}
+              name={
+                expandedSection === "company" ? "chevron-up" : "chevron-down"
+              }
               size={20}
               color="#333"
             />
           </TouchableOpacity>
-          {(!isMobile || expandedSection === 'company') && (
+          {(!isMobile || expandedSection === "company") && (
             <View style={styles.linkContainer}>
               {footerLinks.map((link, index) => (
                 <TouchableOpacity
@@ -71,15 +78,20 @@ export default function MinimalistFooter() {
         </View>
 
         <View style={styles.section}>
-          <TouchableOpacity onPress={() => toggleSection('social')} style={styles.sectionHeader}>
+          <TouchableOpacity
+            onPress={() => toggleSection("social")}
+            style={styles.sectionHeader}
+          >
             <Text style={styles.sectionTitle}>Redes Sociales</Text>
             <Feather
-              name={expandedSection === 'social' ? 'chevron-up' : 'chevron-down'}
+              name={
+                expandedSection === "social" ? "chevron-up" : "chevron-down"
+              }
               size={20}
               color="#333"
             />
           </TouchableOpacity>
-          {(!isMobile || expandedSection === 'social') && (
+          {(!isMobile || expandedSection === "social") && (
             <View style={styles.socialContainer}>
               {socialLinks.map((social, index) => (
                 <TouchableOpacity
@@ -95,7 +107,9 @@ export default function MinimalistFooter() {
         </View>
       </View>
       <View style={styles.bottomBar}>
-        <Text style={styles.copyright}>© {new Date().getFullYear()} Socotec. Derechos reservados.</Text>
+        <Text style={styles.copyright}>
+          © {new Date().getFullYear()} Socotec. Derechos reservados.
+        </Text>
       </View>
     </View>
   );
@@ -103,32 +117,32 @@ export default function MinimalistFooter() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#00ACE8',
+    backgroundColor: "#00ACE8",
     paddingTop: 20,
     paddingBottom: 10,
   },
   content: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
   contentMobile: {
-    flexDirection: 'column',
+    flexDirection: "column",
   },
   section: {
     marginBottom: 20,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   linkContainer: {
     marginTop: 10,
@@ -138,10 +152,10 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   socialContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 10,
   },
   socialLink: {
@@ -149,15 +163,14 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     borderTopWidth: 1,
-    color:"black",
-    
-    borderTopColor: '#e0e0e0',
+    color: "black",
+
+    borderTopColor: "#e0e0e0",
     paddingTop: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   copyright: {
     fontSize: 12,
-    color: 'black',
+    color: "black",
   },
 });
-
