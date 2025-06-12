@@ -561,10 +561,10 @@ export const getPortfolio = async () => {
 
 export const createPortfolio = async (data) => {
   try {
-    const token = AsyncStorage.getItem("userToken");
+    const token = await AsyncStorage.getItem("userToken");
     if (!token) {
       console.error("No se encontró el token");
-      return; // O maneja el error como desees
+      throw new Error("No se encontró el token");
     }
     const response = await axios.post(`${baseUrl}/portfolio`, data, {
       headers: {
@@ -580,10 +580,10 @@ export const createPortfolio = async (data) => {
 
 export const updatePortfolio = async (id, data) => {
   try {
-    const token = AsyncStorage.getItem("userToken");
+    const token = await AsyncStorage.getItem("userToken");
     if (!token) {
       console.error("No se encontró el token");
-      return; // O maneja el error como desees
+      throw new Error("No se encontró el token");
     }
     const response = await axios.put(`${baseUrl}/portfolio/${id}`, data, {
       headers: {
