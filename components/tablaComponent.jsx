@@ -299,23 +299,12 @@ const TablaComponente = ({
   const [filters, setFilters] = useState({});
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
 
-  // Debug state para mostrar información
-  const [debugInfo, setDebugInfo] = useState({
-    itemsPerPage: defaultItemsPerPage,
-    tableHeight: 0,
-  });
-
   // HOOK CORREGIDO - Ahora recibe itemsPerPage actual
   const { deviceType, columnWidths, tableHeight, rowHeight, screenWidth } =
     useResponsiveLayout(itemsPerPage);
 
-  // Actualizar debug info cuando cambian valores relevantes
-  useEffect(() => {
-    setDebugInfo({
-      itemsPerPage,
-      tableHeight,
-    });
-  }, [itemsPerPage, tableHeight]);
+ 
+ 
 
   // Estados de diálogos
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
@@ -820,16 +809,6 @@ const TablaComponente = ({
           </Menu>
         </View>
 
-        {/* INFORMACIÓN DE DEPURACIÓN */}
-        {deviceType === "mobile" && (
-          <View style={styles.debugContainer}>
-            <Text style={styles.debugText}>
-              Items: {debugInfo.itemsPerPage} | Altura: {tableHeight}px | Filas
-              visibles: {Math.floor((tableHeight - 50 - 30) / rowHeight)}
-            </Text>
-          </View>
-        )}
-
         {/* TABLA CON ALTURA DINÁMICA - ESTRUCTURA SIMPLIFICADA */}
         <View style={[styles.tableWrapper, { height: tableHeight }]}>
           <ScrollView
@@ -1156,17 +1135,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.1)",
   },
-  debugContainer: {
-    marginBottom: 8,
-    padding: 4,
-    backgroundColor: "rgba(0,0,0,0.05)",
-    borderRadius: 4,
-  },
-  debugText: {
-    fontSize: 10,
-    color: "#666",
-    textAlign: "center",
-  },
+
   tableWrapper: {
     borderRadius: 8,
     overflow: "hidden",

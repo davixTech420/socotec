@@ -6,7 +6,7 @@ import { Platform } from "react-native";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-/* const baseUrl = `http://192.168.130.221:${port}/api/employee`; */
+/* const baseUrl = `http://192.168.106.31:${port}/api/employee`; */
 const baseUrl = `https://socotecback.onrender.com/api/employee`;
 
 const makeRequest = async (method, url, data = null) => {

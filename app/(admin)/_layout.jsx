@@ -508,7 +508,7 @@ export default function AdminLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight: 0,
     height: Platform.OS === "web" ? "100vh" : "100%",
     overflow: Platform.OS === "web" ? "hidden" : "visible",
   },

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import  { useCallback, useState } from 'react';
 import { View, StyleSheet, ScrollView, useWindowDimensions, Platform } from 'react-native';
 import { PaperProvider, Text, Card, Button, ProgressBar, useTheme, Snackbar } from 'react-native-paper';
 import { useFocusEffect } from "@react-navigation/native"
@@ -8,7 +8,7 @@ import { router } from "expo-router";
 import AddComponent from '../../components/AddComponent';
 import { AlertaScroll } from '@/components/alerta';
 import InputComponent from "@/components/InputComponent";
-import { createInventory, getInventory, deleteInventory, activeInventory, inactiveInventory, updateInventory } from "@/services/employeeService";
+import { createInventory, getInventory,activeInventory, inactiveInventory, updateInventory } from "@/services/employeeService";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFViewComponent from '@/components/PdfViewComponent';
 
@@ -51,7 +51,7 @@ const Inventario = () => {
   const handleSubmit = useCallback(async () => {
     try {
       const requiredFields = isEditing ? ["nombreMaterial", "descripcion", "cantidad", "unidadMedida", "precioUnidad"] : ["nombreMaterial", "descripcion", "cantidad", "unidadMedida", "precioUnidad"];
-     /*  const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "") */
+     
      const emptyFields = requiredFields.filter((field) => {
       const value = formData[field];
       return !value || (typeof value === 'string' && value.trim() === "");
@@ -146,7 +146,7 @@ const Inventario = () => {
               items={[
                 {
                   label: 'Dashboard',
-                  onPress: () => router.navigate('/(employee)/DashboardE'),
+                  onPress: () => router.navigate('/(admin)/Dashboard'),
                 },
                 {
                   label: 'Inventario'
@@ -191,10 +191,6 @@ const Inventario = () => {
                 onSort={console.log}
                 onSearch={console.log}
                 onFilter={console.log}
-                /* onDelete={async (item) => {
-                  await deleteInventory(item.id)
-                  setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-                }} */
                 onToggleActive={(item) => handleAction(activeInventory, item)}
                 onToggleInactive={(item) => handleAction(inactiveInventory, item)}
                 onDataUpdate={setData}
@@ -213,6 +209,7 @@ const Inventario = () => {
         >
           <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
         </Snackbar>
+
         <AlertaScroll onOpen={openForm} onClose={resetForm} title={isEditing ? "Editar inventario" : "Nuevo inventario"} content={
           <View style={{
             flexDirection: isSmallScreen ? "column" : 'row',
@@ -228,12 +225,13 @@ const Inventario = () => {
                     : field === "descripcion"
                       ? "descripcion"
                       : field === "cantidad"
-                        ? "numberNum"
+                        ? "number"
                         : field === "unidadMedida"
                           ? "nombre"
                           : field === "precioUnidad"
                             ? "precio"
                             : "text"
+
                 }
                 value={formData[field]}
                 onChangeText={(text) => setFormData((prev) => ({ ...prev, [field]: text }))}
@@ -244,7 +242,7 @@ const Inventario = () => {
               />
             ))}
           </View>
-        } actions={[<Button onPress={resetForm} textColor='black' mode='outlined'>Cancelar</Button>, <Button style={{ backgroundColor:"#00ACE8"}}  mode='contained' onPress={handleSubmit}>{isEditing ? "Actualizar" : "Crear"}</Button>]} />
+        } actions={[<Button mode='outlined' textColor='black' onPress={resetForm}>Cancelar</Button>, <Button mode='contained' buttonColor='#00ACE8'  onPress={handleSubmit}>{isEditing ? "Actualizar" : "Crear"}</Button>]} />
       </PaperProvider>
       <AddComponent onOpen={() => setOpenForm(true)} />
     </>
@@ -257,12 +255,10 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent:"space-between",
+    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
     backgroundColor: 'white',
-    width:"100%",
-    flex:1,
     ...Platform.select({
       ios: {
         shadowColor: '#000',

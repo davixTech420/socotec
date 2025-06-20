@@ -3,11 +3,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
-import { measure, RotateOutDownRight } from "react-native-reanimated";
-
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-/* const baseUrl = `http://192.168.130.221:${port}/api/admin`; */
+/* const baseUrl = `http://192.168.106.31:${port}/api/admin`; */
 const baseUrl = `https://socotecback.onrender.com/api/admin`;
 
 const makeRequest = async (method, url, data = null) => {

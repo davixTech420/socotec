@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import  { useCallback, useState } from 'react';
 import { View, StyleSheet, ScrollView, useWindowDimensions, Platform } from 'react-native';
 import { PaperProvider, Text, Card, Button, ProgressBar, useTheme, Snackbar } from 'react-native-paper';
 import { useFocusEffect } from "@react-navigation/native"

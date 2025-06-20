@@ -120,12 +120,6 @@ const Task = () => {
 
   // para evitar problemas de precisión
   const totalItems = data.length;
- /*  const totalValue = data.reduce((sum, item) => {
-    // Multiplicamos la cantidad por el precio por unidad
-    const itemTotal = item.cantidad * item.precioUnidad;
-    // Sumamos el total de cada producto al acumulador
-    return sum + itemTotal;
-  }, 0); */
 
   // Calculamos los progress con valores seguros
   const calculateProgress = (value, max) => {
@@ -133,7 +127,7 @@ const Task = () => {
     return parseFloat(progress.toFixed(2));
   };
   const itemsProgress = calculateProgress(totalItems, 1000);
-/*   const valueProgress = calculateProgress(totalValue, 100000); */
+
   const isSmallScreen = width < 600;
 
 
@@ -174,17 +168,7 @@ const Task = () => {
                 />
               </Card.Content>
             </Card>
-           {/*  <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
-              <Card.Content>
-                <Text style={styles.cardTitle}>Valor del Inventario</Text>
-                <Text style={styles.cardValue}>${totalValue.toFixed(2)}</Text>
-                <ProgressBar
-                  progress={valueProgress}
-                  color="#00ACE8"
-                  style={styles.progressBar}
-                />
-              </Card.Content>
-            </Card> */}
+           
           </View>
           <Card style={styles.tableCard}>
             <Card.Content>
