@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -67,8 +67,8 @@ const Proyects = () => {
 
   useFocusEffect(
     useCallback(() => {
-      getProyect().then(setData).catch(console.error);
-      getGroupNotProyect().then(setGroupWhitProyect).catch(console.error);
+      getProyect().then(setData).catch(error => {throw error});
+      getGroupNotProyect().then(setGroupWhitProyect).catch(error => {throw error});
     }, [])
   );
 
@@ -132,7 +132,7 @@ const Proyects = () => {
         );
       } else {
         const newProyect = await createProyect(dataToSubmit);
-        console.log(dataToSubmit);
+       
 
         if (!newProyect) throw new Error("No se ha podido crear el proyecto");
         newData = [...data, newProyect];
@@ -184,12 +184,7 @@ const Proyects = () => {
         )
       );
     } catch (error) {
-      console.error(
-        `Error al ${
-          action === activeProyect ? "activar" : "desactivar"
-        } el usuario:`,
-        error
-      );
+     throw error; 
     }
   }, []);
 
@@ -203,7 +198,7 @@ const Proyects = () => {
       fechaEntrega: item.fechaEntrega,
     });
     setEditingProyectId(item.id);
-    getGroupProyect(item.groupId).then(setSelectedGroup).catch(console.error);
+    getGroupProyect(item.groupId).then(setSelectedGroup).catch(error => {throw error});
 
     setIsEditing(true);
     setOpenForm(true);
@@ -212,7 +207,7 @@ const Proyects = () => {
   const handleToggleGroup = useCallback(async (group) => {
     if (!group?.id) {
       // Verifica si group o group.id es undefined/null
-      console.error("Group ID is undefined");
+      throw error;
       return;
     }
     await deleteGroupProyect(group.id);

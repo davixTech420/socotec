@@ -1,15 +1,21 @@
-import React, { useState,useCallback } from "react"
-import { View, StyleSheet, ScrollView, Platform } from "react-native"
-import { Calendar } from "react-native-calendars"
+import { useState, useCallback } from "react";
+import { View, StyleSheet, ScrollView, Platform } from "react-native";
+import { Calendar } from "react-native-calendars";
 import {
-  Modal, Portal, Button, Text, useTheme, PaperProvider,
-  Card,Snackbar
-} from "react-native-paper"
-import Breadcrumb from "@/components/BreadcrumbComponent"
-import TablaComponente from "@/components/tablaComponent"
-import InputComponent from "@/components/InputComponent"
-import DropdownComponent from "@/components/DropdownComponent"
-import { router } from "expo-router"
+  Modal,
+  Portal,
+  Button,
+  Text,
+  useTheme,
+  PaperProvider,
+  Card,
+  Snackbar,
+} from "react-native-paper";
+import Breadcrumb from "@/components/BreadcrumbComponent";
+import TablaComponente from "@/components/tablaComponent";
+import InputComponent from "@/components/InputComponent";
+import DropdownComponent from "@/components/DropdownComponent";
+import { router } from "expo-router";
 import {
   getUsers,
   createPermission,
@@ -18,10 +24,10 @@ import {
   activePermission,
   inactivePermission,
   updatePermission,
-} from "@/services/adminServices"
+} from "@/services/adminServices";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
-import PDFViewComponent from "@/components/PdfViewComponent"
-import { useFocusEffect } from "@react-navigation/native"
+import PDFViewComponent from "@/components/PdfViewComponent";
+import { useFocusEffect } from "@react-navigation/native";
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
   { key: "solicitanteId", title: "Nombre Solicitante", sortable: true },
@@ -32,16 +38,16 @@ const columns = [
   { key: "estado", title: "Estado", sortable: true },
   { key: "createdAt", title: "Creado", sortable: true },
   { key: "updatedAt", title: "Modificado", sortable: true },
-]
+];
 
 export default function CalendarComponent() {
-  const [selectedDate, setSelectedDate] = useState("")
-  const [showForm, setShowForm] = useState(false)
-  const [data, setData] = useState([])
-  const [markedDates, setMarkedDates] = useState({})
-  const [isEditing, setIsEditing] = useState(false)
-  const [editingPermissionId, setEditingPermissionId] = useState(null)
-  const [snackbarVisible, setSnackbarVisible] = useState(false)
+  const [selectedDate, setSelectedDate] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [data, setData] = useState([]);
+  const [markedDates, setMarkedDates] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingPermissionId, setEditingPermissionId] = useState(null);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({
@@ -50,69 +56,88 @@ export default function CalendarComponent() {
     tipoPermiso: "",
     fechaInicio: "",
     fechaFin: "",
-  })
+  });
 
-  const theme = useTheme()
+  const theme = useTheme();
 
   const processPermissionsForCalendar = useCallback((permissions) => {
-    const marks = {}
+    const marks = {};
 
     permissions.forEach((permission) => {
-      const startDate = new Date(permission.fechaInicio)
-      const endDate = new Date(permission.fechaFin)
+      const startDate = new Date(permission.fechaInicio);
+      const endDate = new Date(permission.fechaFin);
 
-      let dotColor = "#0066FF" // default
-      if (permission.tipoPermiso === "Vacaciones") dotColor = "#00C853"
-      if (permission.tipoPermiso === "Medico") dotColor = "#FF4081"
-      if (permission.tipoPermiso === "Personal") dotColor = "#FF9100"
+      let dotColor = "#0066FF"; // default
+      if (permission.tipoPermiso === "Vacaciones") dotColor = "#00C853";
+      if (permission.tipoPermiso === "Medico") dotColor = "#FF4081";
+      if (permission.tipoPermiso === "Personal") dotColor = "#FF9100";
 
-      for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
-        const dateString = date.toISOString().split("T")[0]
+      for (
+        let date = startDate;
+        date <= endDate;
+        date.setDate(date.getDate() + 1)
+      ) {
+        const dateString = date.toISOString().split("T")[0];
 
         if (!marks[dateString]) {
-          marks[dateString] = { dots: [] }
+          marks[dateString] = { dots: [] };
         }
 
         marks[dateString].dots.push({
           key: permission.id,
           color: dotColor,
-        })
+        });
       }
-    })
+    });
 
-    return marks
-  }, [])
+    return marks;
+  }, []);
 
-  useFocusEffect(useCallback(() => {
-    const fetchData = async () => {
-      try {
-        await getUsers().then(setUsers).catch(console.error);
-        const response = await getPermissions()
-        setData(response)
-        const marks = processPermissionsForCalendar(response)
-        setMarkedDates(marks)
-      } catch (error) {
-        console.error("Error al obtener los datos:", error)
-      }
-    }
-    fetchData()
-
-
-  },[]),
- );
-
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          await getUsers()
+            .then(setUsers)
+            .catch((error) => {
+              throw error;
+            });
+          const response = await getPermissions();
+          setData(response);
+          const marks = processPermissionsForCalendar(response);
+          setMarkedDates(marks);
+        } catch (error) {
+          throw error;
+        }
+      };
+      fetchData();
+    }, [])
+  );
 
   const handleDayPress = (day) => {
-    setFormData({ ...formData, fechaInicio: day.dateString })
-    setSelectedDate(day.dateString)
-    setShowForm(true)
-  }
+    setFormData({ ...formData, fechaInicio: day.dateString });
+    setSelectedDate(day.dateString);
+    setShowForm(true);
+  };
   const handleSubmit = useCallback(async () => {
     try {
       // Definir los campos requeridos según si estamos editando o creando
-      const requiredFields = isEditing 
-        ? ["solicitanteId", "aprobadorId", "tipoPermiso", "fechaInicio", "fechaFin", "estado"] 
-        : ["solicitanteId", "aprobadorId", "tipoPermiso", "fechaInicio", "fechaFin"];
+      const requiredFields = isEditing
+        ? [
+            "solicitanteId",
+            "aprobadorId",
+            "tipoPermiso",
+            "fechaInicio",
+            "fechaFin",
+            "estado",
+          ]
+        : [
+            "solicitanteId",
+            "aprobadorId",
+            "tipoPermiso",
+            "fechaInicio",
+            "fechaFin",
+          ];
 
       // Verificar campos vacíos o inválidos
       const emptyFields = requiredFields.filter((field) => {
@@ -122,8 +147,10 @@ export default function CalendarComponent() {
 
       if (emptyFields.length > 0) {
         setShowForm(false);
-     
-        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
+
+        throw new Error(
+          `Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`
+        );
       }
 
       let newData;
@@ -131,7 +158,7 @@ export default function CalendarComponent() {
       if (isEditing) {
         // Actualizar permiso existente
         await updatePermission(editingPermissionId, formData);
-        newData = data.map((item) => 
+        newData = data.map((item) =>
           item.id === editingPermissionId ? { ...item, ...formData } : item
         );
         // Actualizar datos y marcas del calendario
@@ -152,24 +179,24 @@ export default function CalendarComponent() {
       }
 
       setData(newData);
-      setSnackbarMessage({ 
-        text: isEditing ? "Permiso actualizado" : "Permiso creado", 
-        type: "success" 
+      setSnackbarMessage({
+        text: isEditing ? "Permiso actualizado" : "Permiso creado",
+        type: "success",
       });
       resetForm();
     } catch (error) {
       resetForm();
-      setSnackbarMessage({ 
-        text: error.response?.data.message || error.response?.data.errors?.[0]?.msg || error.message, 
-        type: "error" 
+      setSnackbarMessage({
+        text:
+          error.response?.data.message ||
+          error.response?.data.errors?.[0]?.msg ||
+          error.message,
+        type: "error",
       });
-     
     } finally {
       setSnackbarVisible(true);
     }
   }, [formData, isEditing, editingPermissionId, data]);
-
-
 
   const handleEdit = useCallback((item) => {
     setFormData({
@@ -178,59 +205,68 @@ export default function CalendarComponent() {
       tipoPermiso: item.tipoPermiso,
       fechaInicio: item.fechaInicio,
       fechaFin: item.fechaFin,
-      estado: item.estado
-    })
-    setEditingPermissionId(item.id)
-    setIsEditing(true)
-    setShowForm(true)
+      estado: item.estado,
+    });
+    setEditingPermissionId(item.id);
+    setIsEditing(true);
+    setShowForm(true);
   }, []);
-
 
   const handleAction = useCallback(async (action, item) => {
     try {
-      await action(item.id)
+      await action(item.id);
       setData((prevData) => {
         prevData.map((itemData) => {
           if (itemData.id === item.id) {
-            return { ...itemData, estado: action === activePermission }
+            return { ...itemData, estado: action === activePermission };
           }
-        })
+        });
       });
-
     } catch (error) {
-      setSnackbarMessage({ text: "Error al " + action === activePermission ? "activar" : "desactivar" + " el permiso", type: "error" })
+      setSnackbarMessage({
+        text:
+          "Error al " + action === activePermission
+            ? "activar"
+            : "desactivar" + " el permiso",
+        type: "error",
+      });
       setSnackbarVisible(true);
     }
   }, []);
 
-
   const resetForm = () => {
-    setShowForm(false)
+    setShowForm(false);
     setIsEditing(false);
-    setFormData({ solicitanteId: "", aprobadorId: "", tipoPermiso: "", fechaInicio: "", fechaFin: "" })
-    setSelectedDate("")
-  }
+    setFormData({
+      solicitanteId: "",
+      aprobadorId: "",
+      tipoPermiso: "",
+      fechaInicio: "",
+      fechaFin: "",
+    });
+    setSelectedDate("");
+  };
 
   const handleDataUpdate = (updatedData) => {
-    setData(updatedData)
-    const updatedMarks = processPermissionsForCalendar(updatedData)
-    setMarkedDates(updatedMarks)
-  }
+    setData(updatedData);
+    const updatedMarks = processPermissionsForCalendar(updatedData);
+    setMarkedDates(updatedMarks);
+  };
 
   const usuarios = users
-    .filter(user => user.estado === true) // Filtra solo los usuarios con estado true
-    .map(user => ({ label: user.nombre, value: user.id }));
+    .filter((user) => user.estado === true) // Filtra solo los usuarios con estado true
+    .map((user) => ({ label: user.nombre, value: user.id }));
 
   const optionsTipoPermiso = [
     { label: "Vacaciones", value: "Vacaciones" },
     { label: "Medico", value: "Medico" },
     { label: "Personal", value: "Personal" },
-  ]
+  ];
   const opcionesEstado = [
     { label: "Pendiente", value: "Pendiente" },
     { label: "Aprobado", value: "Aprobado" },
     { label: "Rechazado", value: "Rechazado" },
-  ]
+  ];
 
   return (
     <PaperProvider theme={theme}>
@@ -248,8 +284,16 @@ export default function CalendarComponent() {
             ]}
           />
           <View style={styles.headerActions}>
-            <PDFViewComponent data={data} columns={columns} iconStyle={styles.icon} />
-            <ExcelPreviewButton data={data} columns={columns} iconStyle={styles.icon} />
+            <PDFViewComponent
+              data={data}
+              columns={columns}
+              iconStyle={styles.icon}
+            />
+            <ExcelPreviewButton
+              data={data}
+              columns={columns}
+              iconStyle={styles.icon}
+            />
           </View>
         </View>
         <Card style={styles.tableCard}>
@@ -314,32 +358,39 @@ export default function CalendarComponent() {
               onSearch={console.log}
               onFilter={console.log}
               onDelete={async (item) => {
-                await deletePermission(item.id)
-                setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
+                await deletePermission(item.id);
+                setData((prevData) =>
+                  prevData.filter((dataItem) => dataItem.id !== item.id)
+                );
               }}
               onToggleActive={(item) => handleAction(activePermission, item)}
-              onToggleInactive={(item) => handleAction(inactivePermission, item)}
+              onToggleInactive={(item) =>
+                handleAction(inactivePermission, item)
+              }
               onDataUpdate={handleDataUpdate}
               onEdit={handleEdit}
-
             />
           </Card.Content>
         </Card>
 
-
         <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
-        duration={3000}
-        style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
-        action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
-      >
-        <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
-      </Snackbar>
-
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={3000}
+          style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
+          action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
+        >
+          <Text style={{ color: theme.colors.surface }}>
+            {snackbarMessage.text}
+          </Text>
+        </Snackbar>
 
         <Portal>
-          <Modal visible={showForm} onDismiss={() => setShowForm(false)} contentContainerStyle={styles.modalContainer}>
+          <Modal
+            visible={showForm}
+            onDismiss={() => setShowForm(false)}
+            contentContainerStyle={styles.modalContainer}
+          >
             <ScrollView>
               <View style={styles.modalContent}>
                 <View style={styles.headerCalendar}>
@@ -354,7 +405,7 @@ export default function CalendarComponent() {
                   <DropdownComponent
                     options={usuarios}
                     onSelect={(value) => {
-                      setFormData({ ...formData, solicitanteId: value })
+                      setFormData({ ...formData, solicitanteId: value });
                     }}
                     value={formData.solicitanteId}
                     placeholder="Usuario Solicitante"
@@ -362,7 +413,7 @@ export default function CalendarComponent() {
                   <DropdownComponent
                     options={usuarios}
                     onSelect={(value) => {
-                      setFormData({ ...formData, aprobadorId: value })
+                      setFormData({ ...formData, aprobadorId: value });
                     }}
                     value={formData.aprobadorId}
                     placeholder="Usuario Aprobador"
@@ -370,7 +421,7 @@ export default function CalendarComponent() {
                   <DropdownComponent
                     options={optionsTipoPermiso}
                     onSelect={(value) => {
-                      setFormData({ ...formData, tipoPermiso: value })
+                      setFormData({ ...formData, tipoPermiso: value });
                     }}
                     value={formData.tipoPermiso}
                     placeholder="Tipo de permiso"
@@ -386,32 +437,43 @@ export default function CalendarComponent() {
                       <InputComponent
                         type="date"
                         value={formData.fechaFin}
-                        onChangeText={(text) => setFormData({ ...formData, fechaFin: text })}
+                        onChangeText={(text) =>
+                          setFormData({ ...formData, fechaFin: text })
+                        }
                         label="Fecha Fin"
                         placeholder="Introduce la fecha de fin"
                         validationRules={{ required: true }}
                         errorMessage="Por favor, introduce una fecha válida"
                         style={styles.input}
                       />
-
                     </View>
 
-                    {isEditing ? (<DropdownComponent
-                      options={opcionesEstado}
-                      onSelect={(value) => {
-                        setFormData({ ...formData, estado: value })
-                      }}
-                      value={formData.estado}
-                      placeholder="Estado"
-                    />) : null}
-
+                    {isEditing ? (
+                      <DropdownComponent
+                        options={opcionesEstado}
+                        onSelect={(value) => {
+                          setFormData({ ...formData, estado: value });
+                        }}
+                        value={formData.estado}
+                        placeholder="Estado"
+                      />
+                    ) : null}
                   </View>
                 </View>
                 <View style={styles.actions}>
-                  <Button mode="outlined" textColor="black" onPress={resetForm} style={styles.cancelButton}>
+                  <Button
+                    mode="outlined"
+                    textColor="black"
+                    onPress={resetForm}
+                    style={styles.cancelButton}
+                  >
                     Cancel
                   </Button>
-                  <Button mode="contained"  onPress={handleSubmit} style={styles.submitButton}>
+                  <Button
+                    mode="contained"
+                    onPress={handleSubmit}
+                    style={styles.submitButton}
+                  >
                     Continue
                   </Button>
                 </View>
@@ -421,7 +483,7 @@ export default function CalendarComponent() {
         </Portal>
       </ScrollView>
     </PaperProvider>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -549,4 +611,4 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginRight: 8,
   },
-})
+});

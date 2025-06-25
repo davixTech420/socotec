@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
-import { View, StyleSheet, ScrollView } from "react-native"
+import { useState, useEffect } from "react";
+import { View, StyleSheet, ScrollView } from "react-native";
 import {
   Card,
   Title,
@@ -14,64 +14,64 @@ import {
   List,
   Searchbar,
   IconButton,
-} from "react-native-paper"
-import { Calendar } from "react-native-calendars"
-import { PieChart } from "react-native-chart-kit"
+} from "react-native-paper";
+import { Calendar } from "react-native-calendars";
+import { PieChart } from "react-native-chart-kit";
 
 // Types
 interface Task {
-  id: string
-  title: string
-  description: string
-  status: "todo" | "in-progress" | "review" | "done"
-  priority: "low" | "medium" | "high"
-  assignee: string
-  dueDate: string
-  comments: Comment[]
-  attachments: Attachment[]
+  id: string;
+  title: string;
+  description: string;
+  status: "todo" | "in-progress" | "review" | "done";
+  priority: "low" | "medium" | "high";
+  assignee: string;
+  dueDate: string;
+  comments: Comment[];
+  attachments: Attachment[];
 }
 
 interface Comment {
-  id: string
-  author: string
-  text: string
-  timestamp: string
+  id: string;
+  author: string;
+  text: string;
+  timestamp: string;
 }
 
 interface Attachment {
-  id: string
-  name: string
-  url: string
-  type: "image" | "document" | "other"
+  id: string;
+  name: string;
+  url: string;
+  type: "image" | "document" | "other";
 }
 
 interface TeamMember {
-  id: string
-  name: string
-  role: string
-  avatar: string
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
 }
 
 interface ProjectUpdate {
-  id: string
-  title: string
-  description: string
-  author: string
-  timestamp: string
-  attachments: Attachment[]
+  id: string;
+  title: string;
+  description: string;
+  author: string;
+  timestamp: string;
+  attachments: Attachment[];
 }
 
 interface Project {
-  id: string
-  name: string
-  description: string
-  startDate: string
-  endDate: string
-  status: "active" | "completed" | "on-hold"
-  progress: number
-  tasks: Task[]
-  team: TeamMember[]
-  updates: ProjectUpdate[]
+  id: string;
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  status: "active" | "completed" | "on-hold";
+  progress: number;
+  tasks: Task[];
+  team: TeamMember[];
+  updates: ProjectUpdate[];
 }
 
 // Sample data
@@ -119,21 +119,37 @@ const sampleProject: Project = {
     },
   ],
   team: [
-    { id: "1", name: "Sarah Williams", role: "Designer", avatar: "https://i.pravatar.cc/150?img=47" },
-    { id: "2", name: "Alex Johnson", role: "Frontend Developer", avatar: "https://i.pravatar.cc/150?img=68" },
-    { id: "3", name: "Michael Chen", role: "Backend Developer", avatar: "https://i.pravatar.cc/150?img=12" },
+    {
+      id: "1",
+      name: "Sarah Williams",
+      role: "Designer",
+      avatar: "https://i.pravatar.cc/150?img=47",
+    },
+    {
+      id: "2",
+      name: "Alex Johnson",
+      role: "Frontend Developer",
+      avatar: "https://i.pravatar.cc/150?img=68",
+    },
+    {
+      id: "3",
+      name: "Michael Chen",
+      role: "Backend Developer",
+      avatar: "https://i.pravatar.cc/150?img=12",
+    },
   ],
   updates: [
     {
       id: "1",
       title: "Design phase completed",
-      description: "All wireframes and mockups have been approved by the client",
+      description:
+        "All wireframes and mockups have been approved by the client",
       author: "Sarah Williams",
       timestamp: "2023-06-20T10:30:00Z",
       attachments: [],
     },
   ],
-}
+};
 
 // Components
 const TaskCard = ({ task, onPress }: { task: Task; onPress: () => void }) => {
@@ -141,7 +157,7 @@ const TaskCard = ({ task, onPress }: { task: Task; onPress: () => void }) => {
     low: "#4CAF50",
     medium: "#FFC107",
     high: "#F44336",
-  }
+  };
 
   return (
     <Card style={styles.taskCard} onPress={onPress}>
@@ -157,35 +173,38 @@ const TaskCard = ({ task, onPress }: { task: Task; onPress: () => void }) => {
         </View>
       </Card.Content>
     </Card>
-  )
-}
+  );
+};
 
 const ProjectDashboard = ({ project }: { project: Project }) => {
-  const [activeTab, setActiveTab] = useState("overview")
+  const [activeTab, setActiveTab] = useState("overview");
 
   const renderTabContent = () => {
     switch (activeTab) {
       case "overview":
-        return <ProjectOverview project={project} />
+        return <ProjectOverview project={project} />;
       case "tasks":
-        return <TaskList tasks={project.tasks} />
+        return <TaskList tasks={project.tasks} />;
       case "team":
-        return <TeamList team={project.team} />
+        return <TeamList team={project.team} />;
       case "updates":
-        return <UpdatesList updates={project.updates} />
+        return <UpdatesList updates={project.updates} />;
       case "calendar":
-        return <ProjectCalendar project={project} />
+        return <ProjectCalendar project={project} />;
       case "files":
-        return <FileManager />
+        return <FileManager />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
       <Appbar.Header>
-        <Appbar.Content title={project.name} subtitle={`Progress: ${project.progress}%`} />
+        <Appbar.Content
+          title={project.name}
+          subtitle={`Progress: ${project.progress}%`}
+        />
         <Appbar.Action icon="bell" onPress={() => {}} />
         <Appbar.Action icon="dots-vertical" onPress={() => {}} />
       </Appbar.Header>
@@ -238,8 +257,8 @@ const ProjectDashboard = ({ project }: { project: Project }) => {
       <ScrollView style={styles.content}>{renderTabContent()}</ScrollView>
       <FAB style={styles.fab} icon="plus" onPress={() => {}} label="Add Task" />
     </View>
-  )
-}
+  );
+};
 
 const ProjectOverview = ({ project }: { project: Project }) => {
   return (
@@ -248,7 +267,11 @@ const ProjectOverview = ({ project }: { project: Project }) => {
         <Card.Content>
           <Title>Project Status</Title>
           <Paragraph>{project.status}</Paragraph>
-          <ProgressBar progress={project.progress / 100} color="#6200ee" style={styles.progressBar} />
+          <ProgressBar
+            progress={project.progress / 100}
+            color="#6200ee"
+            style={styles.progressBar}
+          />
           <Paragraph>Start Date: {project.startDate}</Paragraph>
           <Paragraph>End Date: {project.endDate}</Paragraph>
         </Card.Content>
@@ -260,28 +283,33 @@ const ProjectOverview = ({ project }: { project: Project }) => {
             data={[
               {
                 name: "To Do",
-                population: project.tasks.filter((t) => t.status === "todo").length,
+                population: project.tasks.filter((t) => t.status === "todo")
+                  .length,
                 color: "#F44336",
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 12,
               },
               {
                 name: "In Progress",
-                population: project.tasks.filter((t) => t.status === "in-progress").length,
+                population: project.tasks.filter(
+                  (t) => t.status === "in-progress"
+                ).length,
                 color: "#2196F3",
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 12,
               },
               {
                 name: "Review",
-                population: project.tasks.filter((t) => t.status === "review").length,
+                population: project.tasks.filter((t) => t.status === "review")
+                  .length,
                 color: "#FFEB3B",
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 12,
               },
               {
                 name: "Done",
-                population: project.tasks.filter((t) => t.status === "done").length,
+                population: project.tasks.filter((t) => t.status === "done")
+                  .length,
                 color: "#4CAF50",
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 12,
@@ -307,21 +335,21 @@ const ProjectOverview = ({ project }: { project: Project }) => {
         </Card.Content>
       </Card>
     </View>
-  )
-}
+  );
+};
 
 const TaskList = ({ tasks }: { tasks: Task[] }) => {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filteredTasks, setFilteredTasks] = useState(tasks)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredTasks, setFilteredTasks] = useState(tasks);
 
   useEffect(() => {
     const filtered = tasks.filter(
       (task) =>
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.description.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
-    setFilteredTasks(filtered)
-  }, [searchQuery, tasks])
+        task.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredTasks(filtered);
+  }, [searchQuery, tasks]);
 
   return (
     <View>
@@ -335,8 +363,8 @@ const TaskList = ({ tasks }: { tasks: Task[] }) => {
         <TaskCard key={task.id} task={task} onPress={() => {}} />
       ))}
     </View>
-  )
-}
+  );
+};
 
 const TeamList = ({ team }: { team: TeamMember[] }) => {
   return (
@@ -346,13 +374,17 @@ const TeamList = ({ team }: { team: TeamMember[] }) => {
           key={member.id}
           title={member.name}
           description={member.role}
-          left={(props) => <Avatar.Image {...props} source={{ uri: member.avatar }} />}
-          right={(props) => <IconButton {...props} icon="dots-vertical" onPress={() => {}} />}
+          left={(props) => (
+            <Avatar.Image {...props} source={{ uri: member.avatar }} />
+          )}
+          right={(props) => (
+            <IconButton {...props} icon="dots-vertical" onPress={() => {}} />
+          )}
         />
       ))}
     </View>
-  )
-}
+  );
+};
 
 const UpdatesList = ({ updates }: { updates: ProjectUpdate[] }) => {
   return (
@@ -364,20 +396,22 @@ const UpdatesList = ({ updates }: { updates: ProjectUpdate[] }) => {
             <Paragraph>{update.description}</Paragraph>
             <View style={styles.updateCardFooter}>
               <Chip icon="account">{update.author}</Chip>
-              <Chip icon="clock-outline">{new Date(update.timestamp).toLocaleString()}</Chip>
+              <Chip icon="clock-outline">
+                {new Date(update.timestamp).toLocaleString()}
+              </Chip>
             </View>
           </Card.Content>
         </Card>
       ))}
     </View>
-  )
-}
+  );
+};
 
 const ProjectCalendar = ({ project }: { project: Project }) => {
   const markedDates = project.tasks.reduce((acc, task) => {
-    acc[task.dueDate] = { marked: true, dotColor: "#6200ee" }
-    return acc
-  }, {})
+    acc[task.dueDate] = { marked: true, dotColor: "#6200ee" };
+    return acc;
+  }, {});
 
   return (
     <View>
@@ -411,26 +445,26 @@ const ProjectCalendar = ({ project }: { project: Project }) => {
         }}
       />
     </View>
-  )
-}
+  );
+};
 
 const FileManager = () => {
   const [files, setFiles] = useState([
     { id: "1", name: "Project Proposal.pdf", type: "document" },
     { id: "2", name: "Design Mockups.zip", type: "other" },
     { id: "3", name: "Team Photo.jpg", type: "image" },
-  ])
+  ]);
 
   const getFileIcon = (type) => {
     switch (type) {
       case "document":
-        return "file-document-outline"
+        return "file-document-outline";
       case "image":
-        return "file-image-outline"
+        return "file-image-outline";
       default:
-        return "file-outline"
+        return "file-outline";
     }
-  }
+  };
 
   return (
     <View>
@@ -438,24 +472,33 @@ const FileManager = () => {
         <List.Item
           key={file.id}
           title={file.name}
-          left={(props) => <List.Icon {...props} icon={getFileIcon(file.type)} />}
-          right={(props) => <IconButton {...props} icon="download" onPress={() => {}} />}
+          left={(props) => (
+            <List.Icon {...props} icon={getFileIcon(file.type)} />
+          )}
+          right={(props) => (
+            <IconButton {...props} icon="download" onPress={() => {}} />
+          )}
         />
       ))}
-      <Button icon="upload" mode="contained" onPress={() => {}} style={styles.uploadButton}>
+      <Button
+        icon="upload"
+        mode="contained"
+        onPress={() => {}}
+        style={styles.uploadButton}
+      >
         Upload File
       </Button>
     </View>
-  )
-}
+  );
+};
 
 const Proyect = () => {
   return (
     <PaperProvider>
       <ProjectDashboard project={sampleProject} />
     </PaperProvider>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -509,7 +552,6 @@ const styles = StyleSheet.create({
   uploadButton: {
     marginTop: 10,
   },
-})
+});
 
-export default Proyect
-
+export default Proyect;

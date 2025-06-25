@@ -103,7 +103,7 @@ export default function AnalyticsDashboardPro() {
         stiffness: 90,
       });
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+      throw error;
     } finally {
       setIsLoading(false);
     }

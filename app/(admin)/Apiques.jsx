@@ -723,7 +723,6 @@ const Apiques = () => {
               }))
             : [];
         } catch (error) {
-          console.error("Error al cargar las muestras:", error);
           showMessage("Error al cargar las muestras del apique", "error");
         }
 
@@ -812,7 +811,6 @@ const Apiques = () => {
         });
       }
     } catch (error) {
-      console.error("Error seleccionando imágenes:", error);
       showMessage(
         `Error al seleccionar imágenes: ${
           error.message || "Error desconocido"

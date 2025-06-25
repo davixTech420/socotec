@@ -155,15 +155,11 @@ export default function Hiring() {
       };
 
       // Lanzar la cámara
-      console.log("Abriendo cámara...");
+
       showMessage("Abriendo cámara...", "info");
 
       // Usar launchCameraAsync en lugar de launchImageLibraryAsync
       const result = await ImagePicker.launchCameraAsync(options);
-      console.log(
-        "Resultado de la cámara:",
-        result.canceled ? "Cancelado" : "Foto tomada"
-      );
 
       // Verificar si se canceló la operación
       if (result.canceled) {
@@ -182,7 +178,6 @@ export default function Hiring() {
 
       showMessage("Foto tomada correctamente", "success");
     } catch (error) {
-      console.error("Error al tomar la foto:", error);
       showMessage(
         `Error al tomar la foto: ${error.message || "Error desconocido"}`,
         "error"
@@ -266,7 +261,6 @@ export default function Hiring() {
 
       showMessage("Foto tomada correctamente", "success");
     } catch (error) {
-      console.error("Error en método alternativo web:", error);
       showMessage(`No se pudo acceder a la cámara: ${error.message}`, "error");
     }
   };
@@ -295,7 +289,7 @@ export default function Hiring() {
             setData(allAssignments);
           }
         } catch (error) {
-          console.error("Error loading data:", error);
+          throw error;
         }
       };
 
@@ -389,7 +383,6 @@ export default function Hiring() {
 
       let response;
       if (isEditing && editingUserId) {
-        console.log("data", formDataToSend);
         response = await updateAssignment(editingUserId, formDataToSend);
         response = data.map((item) =>
           item.id === editingUserId ? { ...item, ...formData } : item
@@ -510,12 +503,6 @@ export default function Hiring() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-              /* onDelete={async (item) => {
-                await deleteAssignment(item.id);
-                setData((prevData) =>
-                  prevData.filter((dataItem) => dataItem.id !== item.id)
-                );
-              }} */
               onDataUpdate={setData}
               onCreate={handleSubmit}
               onEdit={handleEdit}

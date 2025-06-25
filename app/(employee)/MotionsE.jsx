@@ -1,18 +1,38 @@
-import { useState, useCallback } from "react"
-import { View, StyleSheet, ScrollView, Platform, useWindowDimensions } from "react-native"
-import { Text, Card, Button, useTheme, Snackbar, ProgressBar } from "react-native-paper"
-import TablaComponente from "@/components/tablaComponent"
-import Breadcrumb from "@/components/BreadcrumbComponent"
-import AddComponent from "@/components/AddComponent"
-import { AlertaScroll } from "@/components/alerta"
-import InputComponent from "@/components/InputComponent"
-import {getAccounts, getMotions, deleteMotion, activeMotion, inactiveMotion, updateMotion, createMotion } from "@/services/adminServices"
-import { useFocusEffect } from "@react-navigation/native"
-import { router } from "expo-router"
-import DropdownComponent from "@/components/DropdownComponent"
+import { useState, useCallback } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Platform,
+  useWindowDimensions,
+} from "react-native";
+import {
+  Text,
+  Card,
+  Button,
+  useTheme,
+  Snackbar,
+  ProgressBar,
+} from "react-native-paper";
+import TablaComponente from "@/components/tablaComponent";
+import Breadcrumb from "@/components/BreadcrumbComponent";
+import AddComponent from "@/components/AddComponent";
+import { AlertaScroll } from "@/components/alerta";
+import InputComponent from "@/components/InputComponent";
+import {
+  getAccounts,
+  getMotions,
+  deleteMotion,
+  activeMotion,
+  inactiveMotion,
+  updateMotion,
+  createMotion,
+} from "@/services/adminServices";
+import { useFocusEffect } from "@react-navigation/native";
+import { router } from "expo-router";
+import DropdownComponent from "@/components/DropdownComponent";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFPreviewButton from "@/components/PdfViewComponent";
-
 
 const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
@@ -22,101 +42,151 @@ const columns = [
   { key: "descripcion", title: "Descripcion", sortable: true },
   { key: "cuentaEmisoraId", title: "Emisor", sortable: true },
   { key: "cuentaReceptoraId", title: "Receptor", sortable: true },
-  {key: "estado", title: "Estado", sortable: true},
+  { key: "estado", title: "Estado", sortable: true },
   { key: "createdAt", title: "Creado", sortable: true },
   { key: "updatedAt", title: "Modificado", sortable: true },
 ];
 
 export default function MotionsE() {
-  const [data, setData] = useState([])
-  const [accounts,setAccounts]=useState([]);
-  const [openForm, setOpenForm] = useState(false)
-  const [formData, setFormData] = useState({ tipoMovimiento: "", fecha: "", monto: "", descripcion: "",cuentaEmisoraId : "", cuentaReceptoraId: "" })
-  const [isEditing, setIsEditing] = useState(false)
-  const [editingUserId, setEditingUserId] = useState(null)
-  const [snackbarVisible, setSnackbarVisible] = useState(false)
-  const [snackbarMessage, setSnackbarMessage] = useState({ text: "", type: "success" })
-  const theme = useTheme()
-  const { width } = useWindowDimensions()
+  const [data, setData] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [openForm, setOpenForm] = useState(false);
+  const [formData, setFormData] = useState({
+    tipoMovimiento: "",
+    fecha: "",
+    monto: "",
+    descripcion: "",
+    cuentaEmisoraId: "",
+    cuentaReceptoraId: "",
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState({
+    text: "",
+    type: "success",
+  });
+  const theme = useTheme();
+  const { width } = useWindowDimensions();
   const optionsTipoMovimiento = [
     { label: "Transacción", value: "transaccion" },
     { label: "Presupuesto", value: "presupuesto" },
     { label: "Proyecto", value: "proyecto" },
-  ]
+  ];
 
+  const optionsEmisor = accounts.map((account) => ({
+    label: account.nombreCuenta,
+    value: account.id,
+  }));
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const [groupsData, usersData] = await Promise.all([
+            getMotions(),
+            getAccounts(),
+          ]);
+          setData(groupsData);
+          setAccounts(usersData.filter((account) => account.estado === true));
+        } catch (error) {
+          setSnackbarMessage({
+            text: "Error al cargar los datos",
+            type: "error",
+          });
+          setSnackbarVisible(true);
+        }
+      };
 
-  const optionsEmisor = accounts.map(account => ({ label: account.nombreCuenta, value: account.id }));
-     useFocusEffect(
-        useCallback(() => {
-          const fetchData = async () => {
-            try {
-              const [groupsData, usersData] = await Promise.all([getMotions(), getAccounts()]);
-              setData(groupsData);
-              setAccounts(usersData.filter(account => account.estado === true));
-            } catch (error) {
-              console.error("Error fetching data:", error);
-              setSnackbarMessage({ text: "Error al cargar los datos", type: "error" });
-              setSnackbarVisible(true);
-            }
-          };
-    
-          fetchData();
-        }, [])
-      );
-
-      
+      fetchData();
+    }, [])
+  );
 
   const handleSubmit = useCallback(async () => {
     try {
-      const requiredFields = isEditing ? ["tipoMovimiento", "fecha", "monto", "descripcion", "cuentaEmisoraId","cuentaReceptoraId"] : ["tipoMovimiento", "fecha", "monto", "descripcion", "cuentaEmisoraId","cuentaReceptoraId"]
-      const emptyFields = requiredFields.filter((field) => !formData[field] || formData[field].trim() === "")
+      const requiredFields = isEditing
+        ? [
+            "tipoMovimiento",
+            "fecha",
+            "monto",
+            "descripcion",
+            "cuentaEmisoraId",
+            "cuentaReceptoraId",
+          ]
+        : [
+            "tipoMovimiento",
+            "fecha",
+            "monto",
+            "descripcion",
+            "cuentaEmisoraId",
+            "cuentaReceptoraId",
+          ];
+      const emptyFields = requiredFields.filter(
+        (field) => !formData[field] || formData[field].trim() === ""
+      );
 
       if (emptyFields.length > 0) {
         setOpenForm(false);
-        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`);
-
+        throw new Error(
+          `Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`
+        );
       }
 
-      let newData
+      let newData;
       if (isEditing) {
-        await updateMotion(editingUserId, formData)
-        newData = data.map((item) => (item.id === editingUserId ? { ...item, ...formData } : item))
+        await updateMotion(editingUserId, formData);
+        newData = data.map((item) =>
+          item.id === editingUserId ? { ...item, ...formData } : item
+        );
       } else {
-        const newUser = await createMotion(formData)
-        if (!newUser) throw new Error("Error al crear el movimiento")
-        newData = [...data, newUser.motion]
+        const newUser = await createMotion(formData);
+        if (!newUser) throw new Error("Error al crear el movimiento");
+        newData = [...data, newUser.motion];
       }
-      setData(newData)
+      setData(newData);
       setSnackbarMessage({
         text: `Movimiento ${isEditing ? "actualizado" : "creado"} exitosamente`,
         type: "success",
-      })
-      resetForm()
+      });
+      resetForm();
     } catch (error) {
-      resetForm()
-      setSnackbarMessage({ text: error.response?.data.message ||  error.response?.data.errors[0].msg  || error.message , type: "error" })
+      resetForm();
+      setSnackbarMessage({
+        text:
+          error.response?.data.message ||
+          error.response?.data.errors[0].msg ||
+          error.message,
+        type: "error",
+      });
     } finally {
-      setSnackbarVisible(true)
+      setSnackbarVisible(true);
     }
-  }, [formData, isEditing, editingUserId, data])
+  }, [formData, isEditing, editingUserId, data]);
 
   const resetForm = () => {
-    setOpenForm(false)
-    setIsEditing(false)
-    setEditingUserId(null)
-    setFormData({ tipoMovimiento: "", fecha: "", monto: "", descripcion: "",  cuentaEmisoraId: "", cuentaReceptoraId: "" })
-  }
+    setOpenForm(false);
+    setIsEditing(false);
+    setEditingUserId(null);
+    setFormData({
+      tipoMovimiento: "",
+      fecha: "",
+      monto: "",
+      descripcion: "",
+      cuentaEmisoraId: "",
+      cuentaReceptoraId: "",
+    });
+  };
 
   const handleAction = useCallback(async (action, item) => {
     try {
-     await action(item.id)
+      await action(item.id);
       setData((prevData) =>
         prevData.map((dataItem) =>
-          dataItem.id === item.id ? { ...dataItem, estado: action === activeMotion } : dataItem,
-        ),
-      )
+          dataItem.id === item.id
+            ? { ...dataItem, estado: action === activeMotion }
+            : dataItem
+        )
+      );
     } catch (error) {
-      console.log(`Error al ${action === activeMotion ? "activar" : "desactivar"} el usuario:`, error)
       throw error;
     }
   }, []);
@@ -128,36 +198,56 @@ export default function MotionsE() {
       monto: item.monto,
       descripcion: item.descripcion,
       cuentaEmisoraId: item.cuentaEmisoraId,
-      cuentaReceptoraId: item.cuentaReceptoraId
-    })
-    setEditingUserId(item.id)
-    setIsEditing(true)
-    setOpenForm(true)
-  }, [])
+      cuentaReceptoraId: item.cuentaReceptoraId,
+    });
+    setEditingUserId(item.id);
+    setIsEditing(true);
+    setOpenForm(true);
+  }, []);
 
-  const isSmallScreen = width < 600
- 
+  const isSmallScreen = width < 600;
+
   return (
     <>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <Breadcrumb
             items={[
-              { label: "Dashboard", onPress: () => router.navigate("/(admin)/Dashboard") },
+              {
+                label: "Dashboard",
+                onPress: () => router.navigate("/(admin)/Dashboard"),
+              },
               { label: "Movimientos De Cuentas" },
             ]}
           />
           <View style={styles.headerActions}>
-            <PDFPreviewButton data={data} columns={columns} iconStyle={styles.icon} />
-            <ExcelPreviewButton columns={columns} data={data} iconStyle={styles.icon} />
+            <PDFPreviewButton
+              data={data}
+              columns={columns}
+              iconStyle={styles.icon}
+            />
+            <ExcelPreviewButton
+              columns={columns}
+              data={data}
+              iconStyle={styles.icon}
+            />
           </View>
         </View>
-        <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
+        <View
+          style={[
+            styles.cardContainer,
+            isSmallScreen && styles.cardContainerSmall,
+          ]}
+        >
           <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
             <Card.Content>
               <Text style={styles.cardTitle}>Total de movimientos</Text>
               <Text style={styles.cardValue}>{data.length}</Text>
-              <ProgressBar progress={data.length * 0.01} color="#00ACE8" style={styles.progressBar} />
+              <ProgressBar
+                progress={data.length * 0.01}
+                color="#00ACE8"
+                style={styles.progressBar}
+              />
             </Card.Content>
           </Card>
         </View>
@@ -170,10 +260,6 @@ export default function MotionsE() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-              /* onDelete={async (item) => {
-                await deleteMotion(item.id)
-                setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-              }} */
               onToggleActive={(item) => handleAction(activeMotion, item)}
               onToggleInactive={(item) => handleAction(inactiveMotion, item)}
               onDataUpdate={setData}
@@ -190,7 +276,9 @@ export default function MotionsE() {
         style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
         action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
       >
-        <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
+        <Text style={{ color: theme.colors.surface }}>
+          {snackbarMessage.text}
+        </Text>
       </Snackbar>
       <AlertaScroll
         onOpen={openForm}
@@ -198,39 +286,43 @@ export default function MotionsE() {
         title={isEditing ? "Editar movimiento" : "Nuevo movimiento"}
         content={
           <View style={styles.formContainer}>
-
-<DropdownComponent
+            <DropdownComponent
               options={optionsTipoMovimiento}
               onSelect={(value) => {
-                setFormData({ ...formData, tipoMovimiento: value })
+                setFormData({ ...formData, tipoMovimiento: value });
               }}
               placeholder="Tipo Movimiento"
               value={formData.tipoMovimiento}
             />
-            {[ "fecha", "monto", "descripcion"].map((field) => (
+            {["fecha", "monto", "descripcion"].map((field) => (
               <InputComponent
                 key={field}
                 type={
                   field === "fecha"
                     ? "date"
                     : field === "monto"
-                      ? "precio"
-                      : field === "descripcion"
-                        ? "descripcion"
-                          : "text"
+                    ? "precio"
+                    : field === "descripcion"
+                    ? "descripcion"
+                    : "text"
                 }
                 value={formData[field]}
-                onChangeText={(text) => setFormData((prev) => ({ ...prev, [field]: text }))}
+                onChangeText={(text) =>
+                  setFormData((prev) => ({ ...prev, [field]: text }))
+                }
                 label={field.charAt(0).toUpperCase() + field.slice(1)}
                 placeholder={`Introduce el ${field}`}
-                validationRules={{ required: field !== "role", ...(field === "email" && { email: true }) }}
+                validationRules={{
+                  required: field !== "role",
+                  ...(field === "email" && { email: true }),
+                }}
                 errorMessage={`Por favor, introduce un ${field} válido`}
               />
             ))}
             <DropdownComponent
               options={optionsEmisor}
               onSelect={(value) => {
-                setFormData({ ...formData, cuentaEmisoraId: value })
+                setFormData({ ...formData, cuentaEmisoraId: value });
               }}
               placeholder="Cuenta Emisora"
               value={formData.cuentaEmisoraId}
@@ -238,7 +330,7 @@ export default function MotionsE() {
             <DropdownComponent
               options={optionsEmisor}
               onSelect={(value) => {
-                setFormData({ ...formData, cuentaReceptoraId: value })
+                setFormData({ ...formData, cuentaReceptoraId: value });
               }}
               placeholder="Cuenta Receptora"
               value={formData.cuentaReceptoraId}
@@ -246,17 +338,27 @@ export default function MotionsE() {
           </View>
         }
         actions={[
-          <Button key="cancel" mode="outlined" textColor="black" onPress={resetForm}>
+          <Button
+            key="cancel"
+            mode="outlined"
+            textColor="black"
+            onPress={resetForm}
+          >
             Cancelar
           </Button>,
-          <Button key="submit" mode="contained" buttonColor="#00ACE8" onPress={handleSubmit}>
+          <Button
+            key="submit"
+            mode="contained"
+            buttonColor="#00ACE8"
+            onPress={handleSubmit}
+          >
             {isEditing ? "Actualizar" : "Crear"}
           </Button>,
         ]}
       />
       <AddComponent onOpen={() => setOpenForm(true)} />
     </>
-  )
+  );
 }
 const styles = StyleSheet.create({
   container: {
@@ -344,4 +446,4 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "space-between",
   },
-})
+});

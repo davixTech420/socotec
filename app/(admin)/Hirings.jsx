@@ -102,7 +102,11 @@ export default function Hirings() {
   ];
   useFocusEffect(
     useCallback(() => {
-      getHiring().then(setData).catch(console.error);
+      getHiring()
+        .then(setData)
+        .catch((error) => {
+          throw error;
+        });
     }, [])
   );
 
@@ -110,26 +114,26 @@ export default function Hirings() {
     try {
       const requiredFields = isEditing
         ? [
-          "nombre",
-          "email",
-          "telefono",
-          "cargo",
-          "estado",
-          "tipoContrato",
-          "salario",
-          "cita",
-          "nota",
-        ]
+            "nombre",
+            "email",
+            "telefono",
+            "cargo",
+            "estado",
+            "tipoContrato",
+            "salario",
+            "cita",
+            "nota",
+          ]
         : [
-          "nombre",
-          "email",
-          "telefono",
-          "cargo",
-          "estado",
-          "tipoContrato",
-          "salario",
-          "nota",
-        ];
+            "nombre",
+            "email",
+            "telefono",
+            "cargo",
+            "estado",
+            "tipoContrato",
+            "salario",
+            "nota",
+          ];
       const emptyFields = requiredFields.filter(
         (field) => !formData[field] /* || formData[field].trim() === "" */
       );
@@ -188,8 +192,6 @@ export default function Hirings() {
       nota: "",
     });
   };
-
-
 
   const handleEdit = useCallback((item) => {
     setFormData({
@@ -268,7 +270,6 @@ export default function Hirings() {
                   prevData.filter((dataItem) => dataItem.id !== item.id)
                 );
               }}
-
               onDataUpdate={setData}
               onCreate={handleSubmit}
               onEdit={handleEdit}
@@ -308,16 +309,16 @@ export default function Hirings() {
                   field === "nombre"
                     ? "nombre"
                     : field === "email"
-                      ? "emailCan"
-                      : field === "telefono"
-                        ? "number"
-                        : field === "salario"
-                          ? "precio"
-                          : field === "cita"
-                            ? "date"
-                            : field === "nota"
-                              ? "descripcion"
-                              : "text"
+                    ? "emailCan"
+                    : field === "telefono"
+                    ? "number"
+                    : field === "salario"
+                    ? "precio"
+                    : field === "cita"
+                    ? "date"
+                    : field === "nota"
+                    ? "descripcion"
+                    : "text"
                 }
                 value={formData[field]}
                 onChangeText={(text) =>
@@ -359,10 +360,20 @@ export default function Hirings() {
           </View>
         }
         actions={[
-          <Button key="cancel" mode="outlined" textColor="black" onPress={resetForm}>
+          <Button
+            key="cancel"
+            mode="outlined"
+            textColor="black"
+            onPress={resetForm}
+          >
             Cancelar
           </Button>,
-          <Button key="submit" mode="contained" style={{ backgroundColor: "#00ACE8" }} onPress={handleSubmit}>
+          <Button
+            key="submit"
+            mode="contained"
+            style={{ backgroundColor: "#00ACE8" }}
+            onPress={handleSubmit}
+          >
             {isEditing ? "Actualizar" : "Crear"}
           </Button>,
         ]}

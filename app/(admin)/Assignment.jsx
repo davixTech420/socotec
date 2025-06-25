@@ -81,12 +81,26 @@ export default function Hiring() {
   ];
   useFocusEffect(
     useCallback(() => {
-      getAssignment().then(setData).catch(console.error);
-      getActiveInventory().then(setInventario).catch(console.error);
-      getUsersCampoAD().then(setUsuarios).catch(console.error);
+      getAssignment()
+        .then(setData)
+        .catch((error) => {
+          throw error;
+        });
+      getActiveInventory()
+        .then(setInventario)
+        .catch((error) => {
+          throw error;
+        });
+      getUsersCampoAD()
+        .then(setUsuarios)
+        .catch((error) => {
+          throw error;
+        });
       user()
         .then(setProfileData)
-        .catch((error) => console.log("Error user data:", error));
+        .catch((error) => {
+          throw error;
+        });
     }, [])
   );
 
@@ -179,7 +193,6 @@ export default function Hiring() {
   }, []);
 
   const isSmallScreen = width < 600;
-  console.log(data);
 
   return (
     <>

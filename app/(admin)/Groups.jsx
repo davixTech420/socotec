@@ -1,5 +1,11 @@
-import { useState, useCallback } from "react"
-import { View, StyleSheet, ScrollView, useWindowDimensions, Platform } from "react-native"
+import { useState, useCallback } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  useWindowDimensions,
+  Platform,
+} from "react-native";
 import {
   PaperProvider,
   Text,
@@ -11,14 +17,14 @@ import {
   Searchbar,
   Chip,
   Avatar,
-} from "react-native-paper"
-import { useFocusEffect } from "@react-navigation/native"
-import TablaComponente from "@/components/tablaComponent"
-import Breadcrumb from "@/components/BreadcrumbComponent"
-import { router } from "expo-router"
-import AddComponent from "../../components/AddComponent"
-import { AlertaScroll } from "@/components/alerta"
-import InputComponent from "@/components/InputComponent"
+} from "react-native-paper";
+import { useFocusEffect } from "@react-navigation/native";
+import TablaComponente from "@/components/tablaComponent";
+import Breadcrumb from "@/components/BreadcrumbComponent";
+import { router } from "expo-router";
+import AddComponent from "../../components/AddComponent";
+import { AlertaScroll } from "@/components/alerta";
+import InputComponent from "@/components/InputComponent";
 import {
   createGroup,
   updateGroup,
@@ -29,7 +35,7 @@ import {
   getUsersNotGroup,
   getUsersGroup,
   deleteUsersGroup,
-} from "@/services/adminServices"
+} from "@/services/adminServices";
 import ExcelPreviewButton from "@/components/ExcelViewComponent";
 import PDFPreviewButton from "@/components/PdfViewComponent";
 
@@ -40,35 +46,42 @@ const columns = [
   { key: "estado", title: "Estado", sortable: true },
   { key: "createdAt", title: "Creado", sortable: true },
   { key: "updatedAt", title: "Modificado", sortable: true },
-]
+];
 
 const Groups = () => {
-  const theme = useTheme()
-  const { width } = useWindowDimensions()
-  const isSmallScreen = width < 600
+  const theme = useTheme();
+  const { width } = useWindowDimensions();
+  const isSmallScreen = width < 600;
 
-  const [data, setData] = useState([])
-  const [editingGroupId, setEditingGroupId] = useState(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [snackbarVisible, setSnackbarVisible] = useState(false)
-  const [snackbarMessage, setSnackbarMessage] = useState({ text: "", type: "success" })
-  const [openForm, setOpenForm] = useState(false)
-  const [formData, setFormData] = useState({ nombre: "", descripcion: "" })
-  const [users, setUsers] = useState([])
-  const [selectedUsers, setSelectedUsers] = useState([])
-  const [searchQuery, setSearchQuery] = useState("")
-
+  const [data, setData] = useState([]);
+  const [editingGroupId, setEditingGroupId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState({
+    text: "",
+    type: "success",
+  });
+  const [openForm, setOpenForm] = useState(false);
+  const [formData, setFormData] = useState({ nombre: "", descripcion: "" });
+  const [users, setUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
         try {
-          const [groupsData, usersData] = await Promise.all([getGroups(), getUsersNotGroup()]);
+          const [groupsData, usersData] = await Promise.all([
+            getGroups(),
+            getUsersNotGroup(),
+          ]);
           setData(groupsData);
           setUsers(usersData);
         } catch (error) {
-          console.error("Error fetching data:", error);
-          setSnackbarMessage({ text: "Error al cargar los datos", type: "error" });
+          setSnackbarMessage({
+            text: "Error al cargar los datos",
+            type: "error",
+          });
           setSnackbarVisible(true);
         }
       };
@@ -78,69 +91,79 @@ const Groups = () => {
   );
   const handleSubmit = useCallback(async () => {
     try {
-      const requiredFields = ["nombre", "descripcion"]
-      const emptyFields = requiredFields.filter((field) => !formData[field]?.trim())
+      const requiredFields = ["nombre", "descripcion"];
+      const emptyFields = requiredFields.filter(
+        (field) => !formData[field]?.trim()
+      );
 
       if (emptyFields.length > 0) {
-        throw new Error(`Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`)
+        throw new Error(
+          `Por favor, rellene los siguientes campos: ${emptyFields.join(", ")}`
+        );
       }
 
       const dataToSubmit = {
         ...formData,
         usuarios: selectedUsers.map((user) => user.id),
-      }
+      };
 
-
-let newData
+      let newData;
       if (isEditing) {
-        await updateGroup(editingGroupId, dataToSubmit)
-        newData = data.map((item) => (item.id === editingGroupId ? { ...item, ...dataToSubmit } : item))
+        await updateGroup(editingGroupId, dataToSubmit);
+        newData = data.map((item) =>
+          item.id === editingGroupId ? { ...item, ...dataToSubmit } : item
+        );
       } else {
-        const newGroup = await createGroup(dataToSubmit)
-        if (!newGroup) throw new Error("Error al crear el grupo")
-          newData = [...data, newGroup.group]
+        const newGroup = await createGroup(dataToSubmit);
+        if (!newGroup) throw new Error("Error al crear el grupo");
+        newData = [...data, newGroup.group];
       }
-      setData(newData)
+      setData(newData);
       setSnackbarMessage({
         text: `Grupo ${isEditing ? "actualizado" : "creado"} exitosamente`,
         type: "success",
-      })
-      resetForm()
+      });
+      resetForm();
     } catch (error) {
       resetForm();
-      setSnackbarMessage({ text: error.response?.data.message || error.message, type: "error" })
-     
+      setSnackbarMessage({
+        text: error.response?.data.message || error.message,
+        type: "error",
+      });
     } finally {
-      setSnackbarVisible(true)
+      setSnackbarVisible(true);
     }
-  }, [formData, isEditing, editingGroupId, selectedUsers])
+  }, [formData, isEditing, editingGroupId, selectedUsers]);
 
   const resetForm = useCallback(() => {
-    setOpenForm(false)
-    setIsEditing(false)
-    setEditingGroupId(null)
-    setFormData({ nombre: "", descripcion: "" })
-    setSelectedUsers([])
-    setSearchQuery("")
-  }, [])
+    setOpenForm(false);
+    setIsEditing(false);
+    setEditingGroupId(null);
+    setFormData({ nombre: "", descripcion: "" });
+    setSelectedUsers([]);
+    setSearchQuery("");
+  }, []);
 
   const handleAction = useCallback(async (action, item) => {
     try {
-      await action(item.id)
+      await action(item.id);
       setData((prevData) =>
         prevData.map((dataItem) =>
-          dataItem.id === item.id ? { ...dataItem, estado: action === activateGroup } : dataItem,
-        ),
-      )
+          dataItem.id === item.id
+            ? { ...dataItem, estado: action === activateGroup }
+            : dataItem
+        )
+      );
     } catch (error) {
-      console.log(`Error al ${action === activateGroup ? "activar" : "desactivar"} el grupo:`, error)
       setSnackbarMessage({
-        text: `Error al ${action === activateGroup ? "activar" : "desactivar"} el grupo`,
+        text: `Error al ${
+          action === activateGroup ? "activar" : "desactivar"
+        } el grupo`,
         type: "error",
-      })
+      });
       throw error;
     }
-  }, [])
+  }, []);
 
   const handleEdit = useCallback((item) => {
     setFormData({
@@ -151,56 +174,80 @@ let newData
     setIsEditing(true);
     setOpenForm(true);
     getUsersGroup(item.id)
-      .then(usersGroup => {
+      .then((usersGroup) => {
         setSelectedUsers(usersGroup.map((item) => item.User));
       })
-      .catch(error => {
-        console.error("Error al obtener usuarios del grupo:", error);
+      .catch((error) => {
+        throw error;
         setSelectedUsers([]);
       });
   }, []);
-  
 
   const toggleUserSelection = useCallback(async (user) => {
     if (!user?.id) {
-      console.error('User ID is undefined');
+      throw new Error("Usuario no definido");
       return;
     }
     await deleteUsersGroup(user.id);
 
     setSelectedUsers((prevUsers) =>
-      prevUsers.some((u) => u.id === user.id) ? prevUsers.filter((u) => u.id !== user.id) : [...prevUsers, user],
-    )
-  }, [])
+      prevUsers.some((u) => u.id === user.id)
+        ? prevUsers.filter((u) => u.id !== user.id)
+        : [...prevUsers, user]
+    );
+  }, []);
 
   const filteredUsers = users.filter(
-    (user) => 
+    (user) =>
       user.estado === true &&
       user.nombre.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !selectedUsers.some((selectedUser) => selectedUser.id === user.id),
-  )
+      !selectedUsers.some((selectedUser) => selectedUser.id === user.id)
+  );
 
-  const totalItems = data.length
-  const itemsProgress = Math.min(totalItems / 1000, 1).toFixed(2)
+  const totalItems = data.length;
+  const itemsProgress = Math.min(totalItems / 1000, 1).toFixed(2);
 
   return (
     <PaperProvider theme={theme}>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <Breadcrumb
-            items={[{ label: "Dashboard", onPress: () => router.navigate("/(admin)/Dashboard") }, { label: "Grupos" }]}
+            items={[
+              {
+                label: "Dashboard",
+                onPress: () => router.navigate("/(admin)/Dashboard"),
+              },
+              { label: "Grupos" },
+            ]}
           />
           <View style={styles.headerActions}>
-            <PDFPreviewButton data={data} columns={columns} iconStyle={styles.icon} />
-            <ExcelPreviewButton data={data} columns={columns} iconStyle={styles.icon} />
+            <PDFPreviewButton
+              data={data}
+              columns={columns}
+              iconStyle={styles.icon}
+            />
+            <ExcelPreviewButton
+              data={data}
+              columns={columns}
+              iconStyle={styles.icon}
+            />
           </View>
         </View>
-        <View style={[styles.cardContainer, isSmallScreen && styles.cardContainerSmall]}>
+        <View
+          style={[
+            styles.cardContainer,
+            isSmallScreen && styles.cardContainerSmall,
+          ]}
+        >
           <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
             <Card.Content>
               <Text style={styles.cardTitle}>Total de grupos</Text>
               <Text style={styles.cardValue}>{totalItems}</Text>
-              <ProgressBar progress={Number.parseFloat(itemsProgress)} color="#00ACE8" style={styles.progressBar} />
+              <ProgressBar
+                progress={Number.parseFloat(itemsProgress)}
+                color="#00ACE8"
+                style={styles.progressBar}
+              />
             </Card.Content>
           </Card>
         </View>
@@ -212,8 +259,10 @@ let newData
               columns={columns}
               keyExtractor={(item) => String(item.id)}
               onDelete={async (item) => {
-                await deleteGroup(item.id)
-                setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
+                await deleteGroup(item.id);
+                setData((prevData) =>
+                  prevData.filter((dataItem) => dataItem.id !== item.id)
+                );
               }}
               onToggleActive={(item) => handleAction(activateGroup, item)}
               onToggleInactive={(item) => handleAction(inactivateGroup, item)}
@@ -233,7 +282,9 @@ let newData
             <InputComponent
               type="nombre"
               value={formData.nombre}
-              onChangeText={(text) => setFormData((prev) => ({ ...prev, nombre: text }))}
+              onChangeText={(text) =>
+                setFormData((prev) => ({ ...prev, nombre: text }))
+              }
               label="Nombre"
               placeholder="Introduce el nombre del grupo"
               validationRules={{ required: true }}
@@ -242,7 +293,9 @@ let newData
             <InputComponent
               type="descripcion"
               value={formData.descripcion}
-              onChangeText={(text) => setFormData((prev) => ({ ...prev, descripcion: text }))}
+              onChangeText={(text) =>
+                setFormData((prev) => ({ ...prev, descripcion: text }))
+              }
               label="Descripción"
               placeholder="Introduce la descripción del grupo"
               validationRules={{ required: true }}
@@ -250,7 +303,9 @@ let newData
             />
 
             <View style={styles.selectedUsersContainer}>
-              <Text style={styles.label}>Usuarios del grupo seleccionados:</Text>
+              <Text style={styles.label}>
+                Usuarios del grupo seleccionados:
+              </Text>
               <ScrollView horizontal style={styles.selectedUsers}>
                 {selectedUsers.map((user) => (
                   <Chip
@@ -287,10 +342,20 @@ let newData
           </View>
         }
         actions={[
-          <Button key="cancel" mode="outlined" textColor="black" onPress={resetForm}>
+          <Button
+            key="cancel"
+            mode="outlined"
+            textColor="black"
+            onPress={resetForm}
+          >
             Cancelar
           </Button>,
-          <Button key="submit" mode="contained" style={{backgroundColor:"#00ACE8"}} onPress={handleSubmit}>
+          <Button
+            key="submit"
+            mode="contained"
+            style={{ backgroundColor: "#00ACE8" }}
+            onPress={handleSubmit}
+          >
             {isEditing ? "Actualizar" : "Crear"}
           </Button>,
         ]}
@@ -302,12 +367,14 @@ let newData
         style={{ backgroundColor: theme.colors[snackbarMessage.type] }}
         action={{ label: "Cerrar", onPress: () => setSnackbarVisible(false) }}
       >
-        <Text style={{ color: theme.colors.surface }}>{snackbarMessage.text}</Text>
+        <Text style={{ color: theme.colors.surface }}>
+          {snackbarMessage.text}
+        </Text>
       </Snackbar>
       <AddComponent onOpen={() => setOpenForm(true)} />
     </PaperProvider>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -420,7 +487,6 @@ const styles = StyleSheet.create({
     margin: 4,
     backgroundColor: "#e0e0e0",
   },
-})
+});
 
-export default Groups
-
+export default Groups;

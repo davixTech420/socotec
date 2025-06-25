@@ -77,7 +77,11 @@ export default function Account() {
   ];
   useFocusEffect(
     useCallback(() => {
-      getAccounts().then(setData).catch(console.error);
+      getAccounts()
+        .then(setData)
+        .catch((error) => {
+          throw error;
+        });
     }, [])
   );
 
@@ -146,12 +150,6 @@ export default function Account() {
         )
       );
     } catch (error) {
-      console.log(
-        `Error al ${
-          action === activeAccount ? "activar" : "desactivar"
-        } la cuenta :`,
-        error
-      );
       throw error;
     }
   }, []);
@@ -296,10 +294,20 @@ export default function Account() {
           </View>
         }
         actions={[
-          <Button key="cancel" mode="outlined" textColor="black" onPress={resetForm}>
+          <Button
+            key="cancel"
+            mode="outlined"
+            textColor="black"
+            onPress={resetForm}
+          >
             Cancelar
           </Button>,
-          <Button key="submit" mode="contained" buttonColor="#00ACE8" onPress={handleSubmit}>
+          <Button
+            key="submit"
+            mode="contained"
+            buttonColor="#00ACE8"
+            onPress={handleSubmit}
+          >
             {isEditing ? "Actualizar" : "Crear"}
           </Button>,
         ]}

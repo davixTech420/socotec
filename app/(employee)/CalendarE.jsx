@@ -2,8 +2,6 @@ import { useState, useCallback } from "react";
 import { View, StyleSheet, ScrollView, Platform } from "react-native";
 import { Calendar } from "react-native-calendars";
 import {
-  Modal,
-  Portal,
   Button,
   Text,
   useTheme,
@@ -22,7 +20,6 @@ import {
   getPermissions,
   getPermissionsMyGroup,
   createPermission,
-  deletePermission,
   updatePermission,
 } from "@/services/employeeService";
 import { useFocusEffect } from "@react-navigation/native";
@@ -186,9 +183,9 @@ export default function CalendarComponent() {
 
       // Actualizar datos y marcas del calendario
       const updatedData = await (logueado.cargo === "TeamLider" ||
-        logueado.cargo === "DirectorContable" ||
-        logueado.cargo === "Directorsset" ||
-        logueado.cargo === "DirectorTalento"
+      logueado.cargo === "DirectorContable" ||
+      logueado.cargo === "Directorsset" ||
+      logueado.cargo === "DirectorTalento"
         ? getPermissionsMyGroup(logueado.id)
         : getMyPermissions(logueado.id));
 
@@ -202,8 +199,8 @@ export default function CalendarComponent() {
       console.error("Error al enviar el formulario:", error);
       showSnackbar(
         error.response?.data.message ||
-        error.response?.data.errors?.[0]?.msg ||
-        error.message,
+          error.response?.data.errors?.[0]?.msg ||
+          error.message,
         "error"
       );
     }
@@ -234,10 +231,10 @@ export default function CalendarComponent() {
       solicitanteId: item.solicitanteId,
       aprobadorId:
         logueado &&
-          (logueado.cargo === "TeamLider" ||
-            logueado.cargo === "DirectorContable" ||
-            logueado.cargo === "Directorsset" ||
-            logueado.cargo === "DirectorTalento")
+        (logueado.cargo === "TeamLider" ||
+          logueado.cargo === "DirectorContable" ||
+          logueado.cargo === "Directorsset" ||
+          logueado.cargo === "DirectorTalento")
           ? logueado.id
           : item.aprobadorId,
       tipoPermiso: item.tipoPermiso,
@@ -414,7 +411,6 @@ export default function CalendarComponent() {
         content={
           <>
             <View style={styles.modalContent}>
-
               <View style={styles.form}>
                 {/* Tipo de permiso */}
                 <DropdownComponent
@@ -485,8 +481,6 @@ export default function CalendarComponent() {
                   )}
                 </View>
               </View>
-
-
             </View>
           </>
         }
@@ -507,9 +501,8 @@ export default function CalendarComponent() {
             >
               {isEditing ? "Actualizar" : "Crear"}
             </Button>
-          </>
+          </>,
         ]}
-
       />
     </PaperProvider>
   );

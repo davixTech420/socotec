@@ -40,7 +40,7 @@ export default function Users() {
   ]
   useFocusEffect(
     useCallback(() => {
-      getUsers().then(setData).catch(console.error)
+      getUsers().then(setData).catch(error => {throw error})
     }, []),
   )
 
@@ -102,7 +102,6 @@ export default function Users() {
       )
       await getUsers();
     } catch (error) {
-      console.log(`Error al ${action === activateUser ? "activar" : "desactivar"} el usuario:`, error)
       throw error;
     }
   }, []);
@@ -154,10 +153,6 @@ export default function Users() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-             /*  onDelete={async (item) => {
-                await deleteUser(item.id)
-                setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-              }} */
               onToggleActive={(item) => handleAction(activateUser, item)}
               onToggleInactive={(item) => handleAction(inactivateUser, item)}
               onDataUpdate={setData}

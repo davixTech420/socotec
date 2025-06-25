@@ -77,7 +77,11 @@ export default function AccountE() {
   ];
   useFocusEffect(
     useCallback(() => {
-      getAccounts().then(setData).catch(console.error);
+      getAccounts()
+        .then(setData)
+        .catch((error) => {
+          throw error;
+        });
     }, [])
   );
 
@@ -146,12 +150,6 @@ export default function AccountE() {
         )
       );
     } catch (error) {
-      console.log(
-        `Error al ${
-          action === activeAccount ? "activar" : "desactivar"
-        } la cuenta :`,
-        error
-      );
       throw error;
     }
   }, []);
@@ -222,10 +220,6 @@ export default function AccountE() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-              /* onDelete={async (item) => {
-                await deleteAccount(item.id)
-                setData((prevData) => prevData.filter((dataItem) => dataItem.id !== item.id))
-              }} */
               onToggleActive={(item) => handleAction(activeAccount, item)}
               onToggleInactive={(item) => handleAction(inactiveAccount, item)}
               onDataUpdate={setData}

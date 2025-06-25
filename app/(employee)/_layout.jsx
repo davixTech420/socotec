@@ -290,7 +290,7 @@ const AnimatedScreen = ({ children, style }) => (
       contentContainerStyle={styles.screenContent}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
-      removeClippedSubviews={Platform.OS === 'android'}
+      removeClippedSubviews={Platform.OS === "android"}
       maxToRenderPerBatch={10}
       windowSize={10}
     >
@@ -314,8 +314,8 @@ const CustomDrawerContent = ({ state, descriptors, navigation }) => {
       const data = await user();
       setUserData(data);
     } catch (error) {
-      console.error("Error fetching user data:", error);
       Alert.alert("Error", "No se pudieron cargar los datos del usuario");
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -324,7 +324,6 @@ const CustomDrawerContent = ({ state, descriptors, navigation }) => {
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
-
 
   const renderDrawerItem = useCallback(
     (route, index) => {
@@ -356,7 +355,9 @@ const CustomDrawerContent = ({ state, descriptors, navigation }) => {
   );
 
   return (
-    <SafeAreaView style={[styles.drawerContent, { backgroundColor: theme.colors.surface }]}>
+    <SafeAreaView
+      style={[styles.drawerContent, { backgroundColor: theme.colors.surface }]}
+    >
       <View style={styles.userInfoSection}>
         <Avatar.Image
           source={require("../../assets/images/favicon.png")}
@@ -369,7 +370,9 @@ const CustomDrawerContent = ({ state, descriptors, navigation }) => {
         <Text style={[styles.caption, { color: theme.colors.secondary }]}>
           {userData?.email || "usuario@socotec.com"}
         </Text>
-        {loading && <ActivityIndicator size="small" style={{ marginTop: 10 }} />}
+        {loading && (
+          <ActivityIndicator size="small" style={{ marginTop: 10 }} />
+        )}
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -397,18 +400,21 @@ const CustomDrawerContent = ({ state, descriptors, navigation }) => {
 const CustomAppBar = ({ title, navigation, drawerProgress }) => {
   const theme = useTheme();
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        rotate: `${interpolate(
-          drawerProgress.value,
-          [0, 1],
-          [0, 180],
-          Extrapolate.CLAMP
-        )}deg`,
-      },
-    ],
-  }), []);
+  const animatedStyle = useAnimatedStyle(
+    () => ({
+      transform: [
+        {
+          rotate: `${interpolate(
+            drawerProgress.value,
+            [0, 1],
+            [0, 180],
+            Extrapolate.CLAMP
+          )}deg`,
+        },
+      ],
+    }),
+    []
+  );
   return (
     <Appbar.Header style={{ backgroundColor: "#00ACE8" }}>
       <Animated.View style={animatedStyle}>
@@ -419,7 +425,10 @@ const CustomAppBar = ({ title, navigation, drawerProgress }) => {
           onPress={navigation.toggleDrawer}
         />
       </Animated.View>
-      <Appbar.Content title={title} titleStyle={{ color: theme.colors.surface }} />
+      <Appbar.Content
+        title={title}
+        titleStyle={{ color: theme.colors.surface }}
+      />
     </Appbar.Header>
   );
 };
@@ -453,7 +462,6 @@ export default function App() {
         router.replace("/(admin)/Dashboard");
       }
     } catch (err) {
-      console.error("Error getting user role:", err);
       setError("Error al cargar los datos del usuario");
     } finally {
       setIsLoading(false);
@@ -468,13 +476,19 @@ export default function App() {
 
   // Memoized animated style
   const animatedStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(drawerProgress.value, [0, 1], [0, DRAWER_WIDTH]);
+    const translateX = interpolate(
+      drawerProgress.value,
+      [0, 1],
+      [0, DRAWER_WIDTH]
+    );
     const borderRadius = interpolate(drawerProgress.value, [0, 1], [0, 20]);
     const scale = interpolate(drawerProgress.value, [0, 1], [1, 0.8]);
 
     return {
       transform: [
-        { translateX: withTiming(translateX, { duration: ANIMATION_DURATION }) },
+        {
+          translateX: withTiming(translateX, { duration: ANIMATION_DURATION }),
+        },
         { scale: withTiming(scale, { duration: ANIMATION_DURATION }) },
       ],
       borderRadius: withTiming(borderRadius, { duration: ANIMATION_DURATION }),
@@ -483,14 +497,18 @@ export default function App() {
   }, []);
 
   // Handle drawer state change
-  const handleDrawerStateChange = useCallback((state) => {
-    if (state?.history?.length > 0) {
-      const isOpen = state.history[state.history.length - 1].type === "drawer";
-      drawerProgress.value = withTiming(isOpen ? 1 : 0, {
-        duration: ANIMATION_DURATION,
-      });
-    }
-  }, [drawerProgress]);
+  const handleDrawerStateChange = useCallback(
+    (state) => {
+      if (state?.history?.length > 0) {
+        const isOpen =
+          state.history[state.history.length - 1].type === "drawer";
+        drawerProgress.value = withTiming(isOpen ? 1 : 0, {
+          duration: ANIMATION_DURATION,
+        });
+      }
+    },
+    [drawerProgress]
+  );
 
   // Render loading state
   if (!isAuthenticated || isLoading) {
@@ -538,27 +556,32 @@ export default function App() {
           }}
           onStateChange={handleDrawerStateChange}
         >
-          {screensConfig.map(({ name, component: Component, title, icon, iconFamily: IconComponent }) => (
-            <Drawer.Screen
-              key={name}
-              name={name}
-              options={{
-                title,
-                drawerIcon: ({ color, size }) => (
-                  <IconComponent name={icon} size={size} color={color} />
-                ),
-              }}
-            >
-              {(props) => (
-                <>
-                 
-                  <Component {...props} />
-                 
-                </>
-
-              )}
-            </Drawer.Screen>
-          ))}
+          {screensConfig.map(
+            ({
+              name,
+              component: Component,
+              title,
+              icon,
+              iconFamily: IconComponent,
+            }) => (
+              <Drawer.Screen
+                key={name}
+                name={name}
+                options={{
+                  title,
+                  drawerIcon: ({ color, size }) => (
+                    <IconComponent name={icon} size={size} color={color} />
+                  ),
+                }}
+              >
+                {(props) => (
+                  <>
+                    <Component {...props} />
+                  </>
+                )}
+              </Drawer.Screen>
+            )
+          )}
         </Drawer.Navigator>
       </SafeAreaView>
     </PaperProvider>

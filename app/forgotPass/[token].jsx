@@ -1,15 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { TextInput, Button, Text, useTheme, HelperText } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
+import {
+  TextInput,
+  Button,
+  Text,
+  useTheme,
+  HelperText,
+} from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { router, useLocalSearchParams } from "expo-router";
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 import { changePassword } from "@/services/publicServices";
 
 const PasswordResetScreen = () => {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,24 +31,29 @@ const PasswordResetScreen = () => {
   //validamos si el otken es valido y si existe
   useEffect(() => {
     if (!token) {
-      router.replace('/');
+      router.replace("/");
       return;
     }
     try {
       const decodedToken = jwtDecode(token);
       if (!decodedToken || Date.now() >= decodedToken.exp * 1000) {
-        router.navigate('/');
+        router.navigate("/");
       }
     } catch (error) {
-      router.navigate('/');
+      router.navigate("/");
     }
   }, [token, router]);
 
   const handleResetPassword = async () => {
     setIsSubmitting(true);
-    await changePassword({ password, token }).then((response) => {
-      response == true ? router.navigate("/singIn") : setIsSubmitting(false);
-    }).catch((error) => { console.log(error); setIsSubmitting(false); });
+    await changePassword({ password, token })
+      .then((response) => {
+        response == true ? router.navigate("/singIn") : setIsSubmitting(false);
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        throw error;
+      });
     // Aquí iría la lógica para cambiar la contraseña
     setTimeout(() => {
       setIsSubmitting(false);
@@ -65,14 +82,16 @@ const PasswordResetScreen = () => {
           style={styles.formContainer}
         >
           <Text style={styles.title}>Restablecer Contraseña</Text>
-          <Text style={styles.subtitle}>Crea una nueva contraseña segura para tu cuenta</Text>
+          <Text style={styles.subtitle}>
+            Crea una nueva contraseña segura para tu cuenta
+          </Text>
 
           <TextInput
             label="Nueva Contraseña"
-            underlineColor='#00ACE8'
-            outlineColor='#00ACE8'
-            cursorColor='#00ACE8'
-            activeUnderlineColor='#00ACE8'
+            underlineColor="#00ACE8"
+            outlineColor="#00ACE8"
+            cursorColor="#00ACE8"
+            activeUnderlineColor="#00ACE8"
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
@@ -92,11 +111,10 @@ const PasswordResetScreen = () => {
 
           <TextInput
             label="Confirmar Nueva Contraseña"
-
-            underlineColor='#00ACE8'
-            outlineColor='#00ACE8'
-            cursorColor='#00ACE8'
-            activeUnderlineColor='#00ACE8'
+            underlineColor="#00ACE8"
+            outlineColor="#00ACE8"
+            cursorColor="#00ACE8"
+            activeUnderlineColor="#00ACE8"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry={!showConfirmPassword}
@@ -110,14 +128,16 @@ const PasswordResetScreen = () => {
             }
             style={styles.input}
           />
-          <HelperText type="error" visible={!passwordsMatch && confirmPassword !== ''}>
+          <HelperText
+            type="error"
+            visible={!passwordsMatch && confirmPassword !== ""}
+          >
             Las contraseñas no coinciden
           </HelperText>
 
           <Button
             mode="contained"
-            buttonColor='#00ACE8'
-
+            buttonColor="#00ACE8"
             onPress={handleResetPassword}
             loading={isSubmitting}
             disabled={isSubmitting || !passwordsMatch || !isPasswordValid}
@@ -144,19 +164,19 @@ const PasswordResetScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   iconContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
   },
   formContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
     shadowColor: "#000",
@@ -170,15 +190,15 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   input: {
     marginBottom: 5,
@@ -189,7 +209,7 @@ const styles = StyleSheet.create({
   },
   securityInfo: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 20,
     marginBottom: 10,
   },
@@ -198,10 +218,9 @@ const styles = StyleSheet.create({
   },
   securityItem: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 5,
   },
 });
 
 export default PasswordResetScreen;
-

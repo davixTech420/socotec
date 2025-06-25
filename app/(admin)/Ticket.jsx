@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -27,8 +27,6 @@ import {
   createTicket,
   getTickets,
   deleteTicket,
-  activeInventory,
-  inactiveInventory,
   updateTicket,
 } from "@/services/adminServices";
 import { useAuth } from "@/context/userContext";
@@ -73,7 +71,7 @@ const Ticket = () => {
   const { user } = useAuth();
 
   const [formData, setFormData] = useState({
-    userId:null,
+    userId: null,
     sitio: "",
     remoto: "",
     descripcion: "",
@@ -85,19 +83,20 @@ const Ticket = () => {
         try {
           const userData = await user();
           setProfileData(userData);
-          setFormData(prevFormData => ({
+          setFormData((prevFormData) => ({
             ...prevFormData,
             userId: userData?.id,
           }));
           setData(await getTickets());
-        } catch (e) { console.error(e); }
+        } catch (e) {
+          throw e;
+        }
       })();
     }, [])
   );
-  console.log(formData);
+ 
   const handleSubmit = useCallback(async () => {
     try {
-      
       const requiredFields = isEditing
         ? ["sitio", "remoto", "descripcion"]
         : ["sitio", "remoto", "descripcion"];
@@ -115,7 +114,6 @@ const Ticket = () => {
 
       let newData;
       if (isEditing) {
-        console.log("actulizacion",formData); 
         await updateTicket(editingInventoryId, formData);
         newData = data.map((item) =>
           item.id === editingInventoryId ? { ...item, ...formData } : item
@@ -142,9 +140,6 @@ const Ticket = () => {
     }
   }, [formData, isEditing, editingInventoryId, data]);
 
-
-  
-
   const resetForm = () => {
     setOpenForm(false);
     setIsEditing(false);
@@ -158,7 +153,7 @@ const Ticket = () => {
     });
   };
 
-  const handleAction = useCallback(async (action, item) => {
+ /*  const handleAction = useCallback(async (action, item) => {
     try {
       await action(item.id);
       setData((prevData) =>
@@ -169,15 +164,9 @@ const Ticket = () => {
         )
       );
     } catch (error) {
-      console.log(
-        `Error al ${
-          action === activeInventory ? "activar" : "desactivar"
-        } el material:`,
-        error
-      );
       throw error;
     }
-  }, []);
+  }, []); */
 
   const handleEdit = useCallback((item) => {
     setFormData({
@@ -249,17 +238,6 @@ const Ticket = () => {
                 />
               </Card.Content>
             </Card>
-             {/* <Card style={[styles.card, isSmallScreen && styles.cardSmall]}>
-              <Card.Content>
-                <Text style={styles.cardTitle}>Valor del Inventario</Text>
-                <Text style={styles.cardValue}>${totalValue.toFixed(2)}</Text>
-                <ProgressBar
-                  progress={valueProgress}
-                  color="#00ACE8"
-                  style={styles.progressBar}
-                />
-              </Card.Content>
-            </Card> */}
           </View>
           <Card style={styles.tableCard}>
             <Card.Content>
@@ -276,10 +254,6 @@ const Ticket = () => {
                     prevData.filter((dataItem) => dataItem.id !== item.id)
                   );
                 }}
-                onToggleActive={(item) => handleAction(activeInventory, item)}
-                onToggleInactive={(item) =>
-                  handleAction(inactiveInventory, item)
-                }
                 onDataUpdate={setData}
                 onCreate={handleSubmit}
                 onEdit={handleEdit}
@@ -314,9 +288,7 @@ const Ticket = () => {
               <DropdownComponent
                 options={optionSitio}
                 onSelect={(value) => {
-                 
-                    setFormData({ ...formData, sitio: value });
-
+                  setFormData({ ...formData, sitio: value });
                 }}
                 value={formData.sitio}
                 placeholder="Sitio"
@@ -357,8 +329,14 @@ const Ticket = () => {
             </View>
           }
           actions={[
-            <Button mode="outlined" textColor="black" onPress={resetForm}>Cancelar</Button>,
-            <Button onPress={handleSubmit} mode="contained" style={{backgroundColor:"#00ACE8"}}>
+            <Button mode="outlined" textColor="black" onPress={resetForm}>
+              Cancelar
+            </Button>,
+            <Button
+              onPress={handleSubmit}
+              mode="contained"
+              style={{ backgroundColor: "#00ACE8" }}
+            >
               {isEditing ? "Actualizar" : "Crear"}
             </Button>,
           ]}

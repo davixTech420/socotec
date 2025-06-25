@@ -12,7 +12,6 @@ const makeRequest = async (method, url, data = null) => {
   try {
     const token = await AsyncStorage.getItem("userToken");
     if (!token) {
-      console.error("No se encontró el token");
       throw new Error("No se encontró el token");
     }
 
@@ -32,7 +31,6 @@ const makeRequest = async (method, url, data = null) => {
     const response = await axios(config);
     return response.data;
   } catch (error) {
-    console.error(`Error en la petición ${method} a ${url}:`, error);
     throw error;
   }
 };
@@ -47,7 +45,6 @@ export const generateApique = async (id) => {
   try {
     const token = await AsyncStorage.getItem("userToken");
     if (!token) {
-      console.error("No se encontró el token");
       throw new Error("No se encontró el token");
     }
 
@@ -102,7 +99,6 @@ export const generateApique = async (id) => {
 
     return true;
   } catch (error) {
-    console.error("Error al descargar el archivo:", error.message || error);
     throw error;
   }
 };
@@ -203,9 +199,10 @@ export const createTicket = async (data) => {
   return makeRequest("post", "/ticket", data);
 };
 
-export const updateTicket = async (id) => {
+export const updateTicket = async (id,data) => {
   return makeRequest("put", `/ticket/${id}`, data);
 };
+
 
 export const deleteTicket = async (id) => {
   return makeRequest("delete", `/ticket/${id}`);
@@ -561,7 +558,6 @@ export const createPortfolio = async (data) => {
   try {
     const token = await AsyncStorage.getItem("userToken");
     if (!token) {
-      console.error("No se encontró el token");
       throw new Error("No se encontró el token");
     }
     const response = await axios.post(`${baseUrl}/portfolio`, data, {
@@ -580,7 +576,6 @@ export const updatePortfolio = async (id, data) => {
   try {
     const token = await AsyncStorage.getItem("userToken");
     if (!token) {
-      console.error("No se encontró el token");
       throw new Error("No se encontró el token");
     }
     const response = await axios.put(`${baseUrl}/portfolio/${id}`, data, {
@@ -591,7 +586,6 @@ export const updatePortfolio = async (id, data) => {
     });
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
-    console.error("Error al actualizar el portafolio:", error);
     throw error;
   }
 };

@@ -20,7 +20,6 @@ export const emailRegistro = async (user) => {
     const response = await axios.post(`${baseUrl}/emailRegistro`, user);
     return response;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -53,15 +52,11 @@ export const forgotPassword = async (user) => {
   try {
     await axios
       .post(`${baseUrl}/emailPassword`, user)
-      .then((response) => {
-        console.log(response);
-      })
+      .then((response) => {})
       .catch((error) => {
-        console.log(error);
         throw error;
       });
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -74,11 +69,9 @@ export const changePassword = async (user) => {
         router.replace("/singIn");
       })
       .catch((error) => {
-        console.log(error);
         throw error;
       });
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -89,6 +82,6 @@ export const getPortfolioActive = async () => {
     const response = await axios.get(`${baseUrl}/portfolio`);
     return response.data;
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 };

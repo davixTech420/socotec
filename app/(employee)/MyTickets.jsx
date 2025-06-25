@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -38,10 +38,10 @@ const columns = [
   { key: "id", title: "ID", sortable: true, width: 50 },
   { key: "sitio", title: "Sitio", sortable: true, width: 120 },
   { key: "remoto", title: "Remoto", sortable: true, width: 80 },
-  { key: "descripcion", title: "Descripcion", sortable: true,width: 150 },
-  { key: "estado", title: "Estado", sortable: true,width: 100 },
-  { key: "createdAt", title: "Creado", sortable: true,width: 150 },
-  { key: "updatedAt", title: "Modificado", sortable: true,width: 150 },
+  { key: "descripcion", title: "Descripcion", sortable: true, width: 150 },
+  { key: "estado", title: "Estado", sortable: true, width: 100 },
+  { key: "createdAt", title: "Creado", sortable: true, width: 150 },
+  { key: "updatedAt", title: "Modificado", sortable: true, width: 150 },
 ];
 
 const MyTickets = () => {
@@ -78,7 +78,7 @@ const MyTickets = () => {
           if (!isActive) return;
           setData(tickets);
         } catch (error) {
-          console.error("Error fetching data:", error);
+          throw error;
         }
       };
       fetchData();
@@ -94,7 +94,7 @@ const MyTickets = () => {
     remoto: "",
     descripcion: "",
   });
-  console.log(formData);
+
   const handleSubmit = useCallback(async () => {
     try {
       const requiredFields = isEditing
@@ -121,7 +121,6 @@ const MyTickets = () => {
       } else {
         const newUser = await createTicket(formData);
         if (!newUser) throw new Error("Error al crear el ticket");
-        console.log("ticket creado", newUser.ticket);
 
         newData = [...data, newUser.ticket];
       }
@@ -165,12 +164,6 @@ const MyTickets = () => {
         )
       );
     } catch (error) {
-      console.log(
-        `Error al ${
-          action === activeInventory ? "activar" : "desactivar"
-        } el material:`,
-        error
-      );
       throw error;
     }
   }, []);

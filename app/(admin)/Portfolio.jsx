@@ -143,7 +143,7 @@ const Portfolio = () => {
 
       // Crear FormData para enviar al backend
       const formDataToSend = new FormData();
-      
+
       Object.keys(formData).forEach((key) => {
         if (key !== "imagenes" && formData[key]) {
           formDataToSend.append(key, formData[key]);
@@ -208,7 +208,6 @@ const Portfolio = () => {
           item.id === editingInventoryId ? { ...item, ...formData } : item
         );
       } else {
-        console.log(formDataToSend);
         const newUser = await createPortfolio(formDataToSend);
         if (!newUser) throw new Error("Error al crear el proyecto");
         newData = [...data, newUser.proyect];
@@ -222,7 +221,7 @@ const Portfolio = () => {
 
       resetForm();
     } catch (error) {
-      console.error("Error en handleSubmit:", error);
+      
       setSnackbarMessage({
         text: error.message || "Error al procesar el formulario",
         type: "error",
@@ -261,12 +260,7 @@ const Portfolio = () => {
         )
       );
     } catch (error) {
-      console.error(
-        `Error al ${
-          action === activePortfolio ? "activar" : "desactivar"
-        } el proyecto:`,
-        error
-      );
+      
       setSnackbarMessage({
         text: `Error al ${
           action === activePortfolio ? "activar" : "desactivar"
@@ -307,7 +301,7 @@ const Portfolio = () => {
       setIsEditing(true);
       setOpenForm(true);
     } catch (error) {
-      console.error("Error in handleEdit:", error);
+      
       setSnackbarMessage({
         text: "Error al editar el proyecto",
         type: "error",
@@ -354,7 +348,7 @@ const Portfolio = () => {
         }));
       }
     } catch (error) {
-      console.error("Error seleccionando imágenes:", error);
+     
       setSnackbarMessage({
         text: "Error al seleccionar imágenes",
         type: "error",
@@ -390,13 +384,8 @@ const Portfolio = () => {
   };
 
   const handleImageError = (index, error) => {
-    console.log(`Error loading image at index ${index}:`, error);
     setImageLoading((prev) => ({ ...prev, [index]: false }));
   };
-
-
-
-
 
   return (
     <>
@@ -500,11 +489,13 @@ const Portfolio = () => {
           }
           content={
             <>
-              <View style={{
-                flexDirection: isSmallScreen ? "column" : "row",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-              }}>
+              <View
+                style={{
+                  flexDirection: isSmallScreen ? "column" : "row",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                }}
+              >
                 {[
                   "nombre",
                   "cliente",
@@ -520,7 +511,7 @@ const Portfolio = () => {
                       field === "nombre"
                         ? "nombre"
                         : field === "cliente"
-                        ? "descripcion"
+                        ? "nombre"
                         : field === "ubicacion"
                         ? "ubicacion"
                         : field === "presupuesto"

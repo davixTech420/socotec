@@ -6,6 +6,7 @@ import {
   ScrollView,
   useWindowDimensions,
   Image,
+  Platform,
 } from "react-native";
 import {
   DataTable,
@@ -303,9 +304,6 @@ const TablaComponente = ({
   const { deviceType, columnWidths, tableHeight, rowHeight, screenWidth } =
     useResponsiveLayout(itemsPerPage);
 
- 
- 
-
   // Estados de diálogos
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [toggleActiveConfirmVisible, setToggleActiveConfirmVisible] =
@@ -336,7 +334,6 @@ const TablaComponente = ({
         setLogueado(result);
         setRole(result?.role || "guest");
       } catch (error) {
-        console.error("Error fetching user:", error);
         setRole("guest");
       }
     }
@@ -1209,7 +1206,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   actionButtons: {
-    flexDirection: "row",
+    flexDirection: Platform.OS == "android" ? "collumn" : "row",
     justifyContent: "center",
     alignItems: "center",
     flexWrap: "wrap",

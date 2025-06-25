@@ -89,7 +89,6 @@ export default function Users() {
           setData(groupsData);
           setAccounts(usersData.filter((account) => account.estado === true));
         } catch (error) {
-          console.error("Error fetching data:", error);
           setSnackbarMessage({
             text: "Error al cargar los datos",
             type: "error",
@@ -188,12 +187,6 @@ export default function Users() {
         )
       );
     } catch (error) {
-      console.log(
-        `Error al ${
-          action === activeMotion ? "activar" : "desactivar"
-        } el usuario:`,
-        error
-      );
       throw error;
     }
   }, []);
@@ -351,10 +344,20 @@ export default function Users() {
           </View>
         }
         actions={[
-          <Button mode="outlined" textColor="black" key="cancel" onPress={resetForm}>
+          <Button
+            mode="outlined"
+            textColor="black"
+            key="cancel"
+            onPress={resetForm}
+          >
             Cancelar
           </Button>,
-          <Button key="submit" mode="contained" buttonColor="#00ACE8" onPress={handleSubmit}>
+          <Button
+            key="submit"
+            mode="contained"
+            buttonColor="#00ACE8"
+            onPress={handleSubmit}
+          >
             {isEditing ? "Actualizar" : "Crear"}
           </Button>,
         ]}

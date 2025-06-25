@@ -1,12 +1,17 @@
 import React, { useState } from "react";
 import {
-  View, StyleSheet, TouchableOpacity, Modal, Platform, ScrollView
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Platform,
+  ScrollView,
 } from "react-native";
 import { Text } from "react-native-paper";
 import { AntDesign } from "@expo/vector-icons";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import { Picker } from '@react-native-picker/picker';
+import { Picker } from "@react-native-picker/picker";
 
 interface Column {
   key: string;
@@ -20,7 +25,12 @@ interface PDFViewComponentProps {
   customContent?: string; // Contenido HTML personalizado
 }
 
-const PDFViewComponent: React.FC<PDFViewComponentProps> = ({ columns, data, iconStyle, customContent }) => {
+const PDFViewComponent: React.FC<PDFViewComponentProps> = ({
+  columns,
+  data,
+  iconStyle,
+  customContent,
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [filter, setFilter] = useState("all"); // Estado para el filtro
 
@@ -48,14 +58,22 @@ const PDFViewComponent: React.FC<PDFViewComponentProps> = ({ columns, data, icon
           ${customContent || ""}
           <table>
             <thead>
-              <tr>${columns.map((column) => `<th>${column.title}</th>`).join("")}</tr>
+              <tr>${columns
+                .map((column) => `<th>${column.title}</th>`)
+                .join("")}</tr>
             </thead>
             <tbody>
-              ${filteredData.map(row => `
+              ${filteredData
+                .map(
+                  (row) => `
                 <tr>
-                  ${columns.map(column =>`<td>${row[column.key]}</td>`).join("")}
+                  ${columns
+                    .map((column) => `<td>${row[column.key]}</td>`)
+                    .join("")}
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </tbody>
           </table>
         </body>
@@ -74,7 +92,7 @@ const PDFViewComponent: React.FC<PDFViewComponentProps> = ({ columns, data, icon
         const { uri } = await Print.printToFileAsync({ html: htmlContent });
         await Sharing.shareAsync(uri);
       } catch (error) {
-        console.error("Error al generar o compartir el PDF:", error);
+        throw new Error("Error al generar el PDF");
       }
     }
   };
@@ -82,9 +100,9 @@ const PDFViewComponent: React.FC<PDFViewComponentProps> = ({ columns, data, icon
   const filterData = (data: any[], filter: string) => {
     switch (filter) {
       case "true":
-        return data.filter(item => item.estado === true);
+        return data.filter((item) => item.estado === true);
       case "false":
-        return data.filter(item => item.estado === false);
+        return data.filter((item) => item.estado === false);
       default:
         return data;
     }
@@ -93,9 +111,19 @@ const PDFViewComponent: React.FC<PDFViewComponentProps> = ({ columns, data, icon
   return (
     <View>
       <TouchableOpacity onPress={toggleModal}>
-        <AntDesign name="pdffile1" size={24} color="red" style={[styles.icon, iconStyle]} />
+        <AntDesign
+          name="pdffile1"
+          size={24}
+          color="red"
+          style={[styles.icon, iconStyle]}
+        />
       </TouchableOpacity>
-      <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={toggleModal}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={toggleModal}
+      >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalTitle}>Previsualización de Datos</Text>
@@ -105,8 +133,8 @@ const PDFViewComponent: React.FC<PDFViewComponentProps> = ({ columns, data, icon
               onValueChange={(itemValue) => setFilter(itemValue)}
             >
               <Picker.Item label="Todos" value="all" />
-              <Picker.Item label="Activos" value={true}/>
-              <Picker.Item label="Inactivos" value={false}/>
+              <Picker.Item label="Activos" value={true} />
+              <Picker.Item label="Inactivos" value={false} />
             </Picker>
             <ScrollView style={styles.scrollContainer} horizontal>
               <ScrollView style={styles.innerScroll}>
@@ -120,9 +148,12 @@ const PDFViewComponent: React.FC<PDFViewComponentProps> = ({ columns, data, icon
                   </View>
                   {filterData(data, filter).map((item, index) => (
                     <View key={index} style={styles.row}>
-                      {columns.map((column) =>(
+                      {columns.map((column) => (
                         <View key={column.key} style={styles.cell}>
-                          <Text style={styles.cellText}> {item[column.key]}</Text>
+                          <Text style={styles.cellText}>
+                            {" "}
+                            {item[column.key]}
+                          </Text>
                         </View>
                       ))}
                     </View>

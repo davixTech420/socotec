@@ -14,7 +14,9 @@ const ExcelApique = ({ id }) => {
         const userData = await user(); // Obtiene los datos del usuario
         setUserRole(userData?.role); // Guarda el rol del usuario
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        throw error; 
+      
+        
       }
     };
     fetchUserData();

@@ -51,7 +51,7 @@ export default function Employee() {
     ]
     useFocusEffect(
         useCallback(() => {
-            getEmployees().then(setData).catch(console.error)
+            getEmployees().then(setData).catch(error => {throw error})
         }, []),
     )
 
@@ -105,7 +105,7 @@ export default function Employee() {
                 ),
             )
         } catch (error) {
-            console.log(`Error al ${action === activateUser ? "activar" : "desactivar"} el empleado:`, error)
+           
             throw error;
         }
     }, []);

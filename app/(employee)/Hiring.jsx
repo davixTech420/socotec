@@ -102,7 +102,11 @@ export default function Hiring() {
   ];
   useFocusEffect(
     useCallback(() => {
-      getHiring().then(setData).catch(console.error);
+      getHiring()
+        .then(setData)
+        .catch((error) => {
+          throw error;
+        });
     }, [])
   );
 

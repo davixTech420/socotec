@@ -40,7 +40,7 @@ export default function Users() {
   ]
   useFocusEffect(
     useCallback(() => {
-      getUsers().then(setData).catch(console.error)
+      getUsers().then(setData).catch(error => {throw error})
     }, []),
   )
 
@@ -102,7 +102,7 @@ export default function Users() {
       )
       await getUsers();
     } catch (error) {
-      console.log(`Error al ${action === activateUser ? "activar" : "desactivar"} el usuario:`, error)
+      
       throw error;
     }
   }, []);

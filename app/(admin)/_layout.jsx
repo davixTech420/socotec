@@ -65,11 +65,12 @@ const isMobileWeb = () => {
 };
 
 // Calcular el ancho del drawer una sola vez
-const DRAWER_WIDTH = Platform.OS === "web"
-  ? isMobileWeb()
-    ? SCREEN_WIDTH * 0.5
-    : SCREEN_WIDTH * 0.2
-  : SCREEN_WIDTH * 0.7;
+const DRAWER_WIDTH =
+  Platform.OS === "web"
+    ? isMobileWeb()
+      ? SCREEN_WIDTH * 0.5
+      : SCREEN_WIDTH * 0.2
+    : SCREEN_WIDTH * 0.7;
 
 // Configuración de rutas del drawer
 const DRAWER_SCREENS = [
@@ -183,7 +184,7 @@ const DRAWER_SCREENS = [
     component: Apiques,
     icon: "files-o",
     iconFamily: "FontAwesome",
-    useAnimatedScreen:false, // Sin AnimatedScreen para evitar conflictos
+    useAnimatedScreen: false, // Sin AnimatedScreen para evitar conflictos
   },
   {
     name: "Calendar",
@@ -254,7 +255,7 @@ const CustomDrawerContent = React.memo((props) => {
           setUserData(data);
         }
       } catch (error) {
-        console.log("Error user data:", error);
+        throw error;
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -323,9 +324,7 @@ const CustomDrawerContent = React.memo((props) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ flexGrow: 1 }}
       >
-        <View style={styles.drawerSection}>
-          {drawerItems}
-        </View>
+        <View style={styles.drawerSection}>{drawerItems}</View>
       </ScrollView>
 
       <Button
@@ -373,7 +372,10 @@ const CustomAppBar = React.memo(({ title, navigation, drawerProgress }) => {
           onPress={handleToggleDrawer}
         />
       </Animated.View>
-      <Appbar.Content title={title} titleStyle={{ color: theme.colors.surface }} />
+      <Appbar.Content
+        title={title}
+        titleStyle={{ color: theme.colors.surface }}
+      />
     </Appbar.Header>
   );
 });
@@ -400,7 +402,7 @@ export default function AdminLayout() {
           }
         }
       } catch (error) {
-        console.log("Error obteniendo el rol:", error);
+        throw error;
       }
     };
 
@@ -434,10 +436,13 @@ export default function AdminLayout() {
   }, []);
 
   // Callback para cambios de estado del drawer
-  const handleDrawerStateChange = useCallback((state) => {
-    const isOpen = state.history[state.history.length - 1].type === "drawer";
-    drawerProgress.value = withTiming(isOpen ? 1 : 0, { duration: 300 });
-  }, [drawerProgress]);
+  const handleDrawerStateChange = useCallback(
+    (state) => {
+      const isOpen = state.history[state.history.length - 1].type === "drawer";
+      drawerProgress.value = withTiming(isOpen ? 1 : 0, { duration: 300 });
+    },
+    [drawerProgress]
+  );
 
   // Renderizar pantallas del drawer
   const renderDrawerScreens = useMemo(() => {
@@ -508,7 +513,7 @@ export default function AdminLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight: 0,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     height: Platform.OS === "web" ? "100vh" : "100%",
     overflow: Platform.OS === "web" ? "hidden" : "visible",
   },

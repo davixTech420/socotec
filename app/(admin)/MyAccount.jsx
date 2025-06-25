@@ -1,67 +1,107 @@
-import { useState, useEffect } from "react"
-import { StyleSheet, View, ScrollView, Platform, useWindowDimensions } from "react-native"
-import { TextInput, Avatar, Text, useTheme, Surface, Chip, IconButton } from "react-native-paper"
-import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Platform,
+  useWindowDimensions,
+} from "react-native";
+import {
+  TextInput,
+  Avatar,
+  Text,
+  useTheme,
+  Surface,
+  Chip,
+  IconButton,
+} from "react-native-paper";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAuth } from "@/context/userContext";
 import { updateUser } from "@/services/adminServices";
 
-
-const AnimatedSurface = Animated.createAnimatedComponent(Surface)
+const AnimatedSurface = Animated.createAnimatedComponent(Surface);
 
 const ProfileScreen = () => {
-  const theme = useTheme()
-  const { width } = useWindowDimensions()
-  const { user } = useAuth()
-  const [isEditing, setIsEditing] = useState(false)
+  const theme = useTheme();
+  const { width } = useWindowDimensions();
+  const { user } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     nombre: "",
     email: "",
     telefono: "",
     role: "",
-    password:"",
+    password: "",
     skills: ["React Native", "Node.js", "AWS", "Python", "Docker"],
     languages: ["English", "Spanish", "French"],
-  })
+  });
   const [editedData, setEditedData] = useState(profileData);
 
   useEffect(() => {
-    user().then(setProfileData).catch(error => console.log('Error user data:', error));
+    user()
+      .then(setProfileData)
+      .catch((error) => {
+        throw error;
+      });
   }, []);
 
-
   const handleSave = async () => {
-
-
-    try{
-      await updateUser(profileData.id,profileData).then((response) => console.log("Response:", response)).catch(error => console.log("Error:", error));
-      setIsEditing(false)
-
-
-    } catch(error){
-      console.log("Error updating user:", error);
+    try {
+      await updateUser(profileData.id, profileData)
+        .then((response) => console.log("Response:", response))
+        .catch((error) => {
+          throw error;
+        });
+      setIsEditing(false);
+    } catch (error) {
+      throw error;
     }
-
-
-  }
+  };
 
   const stats = [
-    { icon: "folder-open", label: "Proyectos Activos", value: "12", color: "#4CAF50" },
-    { icon: "clock-outline", label: "Horas Registradas", value: "180h", color: "#2196F3" },
-    { icon: "file-document-outline", label: "Permisos Pendientes", value: "3", color: "#FF9800" },
-    { icon: "check-circle-outline", label: "Tareas Completadas", value: "45", color: "#9C27B0" },
-  ]
+    {
+      icon: "folder-open",
+      label: "Proyectos Activos",
+      value: "12",
+      color: "#4CAF50",
+    },
+    {
+      icon: "clock-outline",
+      label: "Horas Registradas",
+      value: "180h",
+      color: "#2196F3",
+    },
+    {
+      icon: "file-document-outline",
+      label: "Permisos Pendientes",
+      value: "3",
+      color: "#FF9800",
+    },
+    {
+      icon: "check-circle-outline",
+      label: "Tareas Completadas",
+      value: "45",
+      color: "#9C27B0",
+    },
+  ];
 
-  const isSmallScreen = width < 600
-  const isMediumScreen = width >= 600 && width < 1024
-
- 
+  const isSmallScreen = width < 600;
+  const isMediumScreen = width >= 600 && width < 1024;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+    >
       {/* Header Section */}
       <Animated.View entering={FadeInUp} style={styles.header}>
-        <View style={[styles.headerContent, isSmallScreen && styles.headerContentSmall]}>
+        <View
+          style={[
+            styles.headerContent,
+            isSmallScreen && styles.headerContentSmall,
+          ]}
+        >
           <View style={styles.avatarSection}>
             <Avatar.Image
               size={isSmallScreen ? 80 : 120}
@@ -71,9 +111,11 @@ const ProfileScreen = () => {
             <View style={styles.onlineIndicator} />
           </View>
           <View style={styles.headerInfo}>
-            <Text style={[styles.name, isSmallScreen && styles.nameSmall]}>{profileData?.nombre}</Text>
+            <Text style={[styles.name, isSmallScreen && styles.nameSmall]}>
+              {profileData?.nombre}
+            </Text>
             <Text style={styles.role}>{profileData.role}</Text>
-            <Chip icon="badge-account"  style={styles.idChip}>
+            <Chip icon="badge-account" style={styles.idChip}>
               ID: {profileData?.id}
             </Chip>
           </View>
@@ -93,15 +135,30 @@ const ProfileScreen = () => {
             ]}
             entering={FadeInDown.delay(index * 100)}
           >
-            <MaterialCommunityIcons name={stat.icon} size={isSmallScreen ? 24 : 32} color={stat.color} />
-            <Text style={[styles.statValue, isSmallScreen && styles.statValueSmall]}>{stat.value}</Text>
-            <Text style={[styles.statLabel, isSmallScreen && styles.statLabelSmall]}>{stat.label}</Text>
+            <MaterialCommunityIcons
+              name={stat.icon}
+              size={isSmallScreen ? 24 : 32}
+              color={stat.color}
+            />
+            <Text
+              style={[styles.statValue, isSmallScreen && styles.statValueSmall]}
+            >
+              {stat.value}
+            </Text>
+            <Text
+              style={[styles.statLabel, isSmallScreen && styles.statLabelSmall]}
+            >
+              {stat.label}
+            </Text>
           </AnimatedSurface>
         ))}
       </Animated.View>
 
       {/* Profile Form */}
-      <Animated.View entering={FadeInUp.delay(400)} style={styles.formContainer}>
+      <Animated.View
+        entering={FadeInUp.delay(400)}
+        style={styles.formContainer}
+      >
         <AnimatedSurface elevation={1} style={styles.form}>
           <View style={styles.formHeader}>
             <Text style={styles.formTitle}>Información de la Cuenta</Text>
@@ -112,68 +169,98 @@ const ProfileScreen = () => {
               onPress={isEditing ? handleSave : () => setIsEditing(true)}
             />
           </View>
-          <View style={[styles.formFields, !isSmallScreen && styles.formFieldsRow]}>
-          <View style={styles.formField}>
-      <MaterialCommunityIcons name="account" size={24} color="#00ACE8" style={styles.formIcon} />
-      <TextInput
-        label="Nombre"
-        value={profileData?.nombre}
-        onChangeText={(text) => setProfileData({ ...profileData, nombre: text })}
-        mode="outlined"
-        editable={false}
-        style={styles.formInput}
-        disabled={!isEditing}
-      />
-    </View>
-    <View style={styles.formField}>
-      <MaterialCommunityIcons name="email" size={24} color="#00ACE8" style={styles.formIcon} />
-      <TextInput
-        label="Email"
-        editable={false}
-        value={profileData?.email}
-        onChangeText={(text) => setProfileData({ ...profileData, email: text })}
-        mode="outlined"
-        style={styles.formInput}
-        disabled={!isEditing}
-      />
-    </View>
+          <View
+            style={[styles.formFields, !isSmallScreen && styles.formFieldsRow]}
+          >
+            <View style={styles.formField}>
+              <MaterialCommunityIcons
+                name="account"
+                size={24}
+                color="#00ACE8"
+                style={styles.formIcon}
+              />
+              <TextInput
+                label="Nombre"
+                value={profileData?.nombre}
+                onChangeText={(text) =>
+                  setProfileData({ ...profileData, nombre: text })
+                }
+                mode="outlined"
+                editable={false}
+                style={styles.formInput}
+                disabled={!isEditing}
+              />
+            </View>
+            <View style={styles.formField}>
+              <MaterialCommunityIcons
+                name="email"
+                size={24}
+                color="#00ACE8"
+                style={styles.formIcon}
+              />
+              <TextInput
+                label="Email"
+                editable={false}
+                value={profileData?.email}
+                onChangeText={(text) =>
+                  setProfileData({ ...profileData, email: text })
+                }
+                mode="outlined"
+                style={styles.formInput}
+                disabled={!isEditing}
+              />
+            </View>
           </View>
-          <View style={[styles.formFields, !isSmallScreen && styles.formFieldsRow]}>
-          <View style={styles.formField}>
-      <MaterialCommunityIcons name="phone" size={24} color="#00ACE8" style={styles.formIcon} />
-      <TextInput
-        value={profileData?.telefono}
-        label="Telefono"
-        onChangeText={(text) => {
-          // Elimina todos los caracteres que no sean números
-          const validText = text.replace(/[^0-9]/g, "").slice(0, 10);
-          if (validText !== profileData.telefono) {
-            setProfileData({ ...profileData, telefono: validText });
-          }
-        }}
-        mode="outlined"
-        style={styles.formInput}
-        disabled={!isEditing}
-      />
-    </View>
-    <View style={styles.formField}>
-      <MaterialCommunityIcons name="briefcase" size={24} color="#00ACE8" style={styles.formIcon} />
-      <TextInput
-        value={profileData?.role}
-        label="Rol"
-        editable={false}
-        onChangeText={(text) => setProfileData({ ...profileData, role: text })}
-        mode="outlined"
-        style={styles.formInput}
-        disabled={!isEditing}
-      />
-    </View>
+          <View
+            style={[styles.formFields, !isSmallScreen && styles.formFieldsRow]}
+          >
+            <View style={styles.formField}>
+              <MaterialCommunityIcons
+                name="phone"
+                size={24}
+                color="#00ACE8"
+                style={styles.formIcon}
+              />
+              <TextInput
+                value={profileData?.telefono}
+                label="Telefono"
+                onChangeText={(text) => {
+                  // Elimina todos los caracteres que no sean números
+                  const validText = text.replace(/[^0-9]/g, "").slice(0, 10);
+                  if (validText !== profileData.telefono) {
+                    setProfileData({ ...profileData, telefono: validText });
+                  }
+                }}
+                mode="outlined"
+                style={styles.formInput}
+                disabled={!isEditing}
+              />
+            </View>
+            <View style={styles.formField}>
+              <MaterialCommunityIcons
+                name="briefcase"
+                size={24}
+                color="#00ACE8"
+                style={styles.formIcon}
+              />
+              <TextInput
+                value={profileData?.role}
+                label="Rol"
+                editable={false}
+                onChangeText={(text) =>
+                  setProfileData({ ...profileData, role: text })
+                }
+                mode="outlined"
+                style={styles.formInput}
+                disabled={!isEditing}
+              />
+            </View>
           </View>
         </AnimatedSurface>
       </Animated.View>
     </ScrollView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -218,7 +305,7 @@ const styles = StyleSheet.create({
   avatar: {
     borderWidth: 4,
     borderColor: "#fff",
-    backgroundColor:"transparent",
+    backgroundColor: "transparent",
   },
   onlineIndicator: {
     position: "absolute",
@@ -251,8 +338,8 @@ const styles = StyleSheet.create({
   },
   idChip: {
     alignSelf: "flex-start",
-    backgroundColor:"#7ed8f7",
-    color:"black",
+    backgroundColor: "#7ed8f7",
+    color: "black",
   },
   statsGrid: {
     flexDirection: "row",
@@ -358,7 +445,6 @@ const styles = StyleSheet.create({
   languageChip: {
     backgroundColor: "#f5f5f5",
   },
-})
+});
 
-export default ProfileScreen
-
+export default ProfileScreen;

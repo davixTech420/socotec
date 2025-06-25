@@ -13,7 +13,6 @@ const makeRequest = async (method, url, data = null) => {
   try {
     const token = await AsyncStorage.getItem("userToken");
     if (!token) {
-      console.error("No se encontró el token");
       throw new Error("No se encontró el token");
     }
 
@@ -33,7 +32,6 @@ const makeRequest = async (method, url, data = null) => {
     const response = await axios(config);
     return response.data;
   } catch (error) {
-    console.error(`Error en la petición ${method} a ${url}:`, error);
     throw error;
   }
 };
@@ -42,14 +40,11 @@ const makeRequest = async (method, url, data = null) => {
 
 export const generateApique = async (id) => {
   try {
-
-    
-const token = await AsyncStorage.getItem("userToken");
-if (!token) {
-  console.error("No se encontró el token");
-  throw new Error("No se encontró el token");
-}
-
+    const token = await AsyncStorage.getItem("userToken");
+    if (!token) {
+     
+      throw new Error("No se encontró el token");
+    }
 
     const apiUrl = `${baseUrl}/generateApique/${id}`;
 
@@ -102,7 +97,6 @@ if (!token) {
 
     return true;
   } catch (error) {
-    console.error("Error al descargar el archivo:", error.message || error);
     throw error;
   }
 };
@@ -120,10 +114,9 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-
 export const getSampleApiqueId = async (id) => {
-  return makeRequest("get",`/sampleApique/${id}`);
-}
+  return makeRequest("get", `/sampleApique/${id}`);
+};
 
 export const getApique = async () => {
   return makeRequest("get", "/apique");
@@ -164,33 +157,31 @@ export const deleteApique = async (id) => {
 
 //routes for users active
 export const getUsers = async () => {
-  return makeRequest("get","/users");
-}
+  return makeRequest("get", "/users");
+};
 
 export const createUser = async (data) => {
-  return makeRequest("post","/users",data);
-}
+  return makeRequest("post", "/users", data);
+};
 
 export const getUserById = async (id) => {
-  return makeRequest("get",`/userById/${id}`);
-}
+  return makeRequest("get", `/userById/${id}`);
+};
 
-export const updateUser = async (id,data) => {
-  return makeRequest("put",`/users/${id}`,data);
-}
-export const deleteUser = async(id) => {
-  return makeRequest("delete",`/users/${id}`);
-}
+export const updateUser = async (id, data) => {
+  return makeRequest("put", `/users/${id}`, data);
+};
+export const deleteUser = async (id) => {
+  return makeRequest("delete", `/users/${id}`);
+};
 
-export const activateUser = async(id) => {
-  return makeRequest("put",`/users/${id}/active`);
-}
+export const activateUser = async (id) => {
+  return makeRequest("put", `/users/${id}/active`);
+};
 
-export const inactivateUser = async(id) => {
-  return makeRequest("put",`/users/${id}/inactive`);
-}
-
-
+export const inactivateUser = async (id) => {
+  return makeRequest("put", `/users/${id}/inactive`);
+};
 
 export const getActiveUsers = async () => {
   return makeRequest("get", "/activeUsers");
@@ -250,7 +241,6 @@ export const updateAssignment = async (id, data) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error al obtener los permisos", error);
     throw error;
   }
 };
@@ -303,7 +293,6 @@ export const getMyPermissions = async (id) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error al obtener los permisos", error);
     throw error;
   }
 };
