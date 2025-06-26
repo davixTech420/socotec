@@ -42,7 +42,6 @@ export const generateApique = async (id) => {
   try {
     const token = await AsyncStorage.getItem("userToken");
     if (!token) {
-     
       throw new Error("No se encontró el token");
     }
 
@@ -328,3 +327,69 @@ export const createTask = async (data) => {
 export const getTaskMyGroup = async (id) => {
   return makeRequest("get", `/taskMyGroup/${id}`);
 };
+
+/**
+ *
+ * endpoints para los movimientos
+ */
+
+export const createMotion = async (data) => {
+  return makeRequest("post", "/motions", data);
+};
+
+export const updateMotion = async (id, data) => {
+  return makeRequest("put", `/motions/${id}`, data);
+};
+
+export const deleteMotion = async (id) => {
+  return makeRequest("delete", `/motions/${id}`);
+};
+
+export const getMotions = async () => {
+  return makeRequest("get", "/motions");
+};
+
+export const inactiveMotion = async (id) => {
+  return makeRequest("put", `/motions/${id}/inactive`);
+};
+
+export const activeMotion = async (id) => {
+  return makeRequest("put", `/motions/${id}/active`);
+};
+
+/**
+ * aca temrina endpoint de los movimientos
+ */
+
+/**
+ *
+ * endpoint de cuentas
+ */
+
+export const getAccounts = async () => {
+  return makeRequest("get", "/accounts");
+};
+
+export const createAccount = async (account) => {
+  return makeRequest("post", "/accounts", account);
+};
+
+export const updateAccount = async (id, account) => {
+  return makeRequest("put", `/accounts/${id}`, account);
+};
+
+export const deleteAccount = async (id) => {
+  return makeRequest("delete", `/accounts/${id}`);
+};
+
+export const activeAccount = async (id) => {
+  return makeRequest("put", `/accounts/${id}/active`);
+};
+
+export const inactiveAccount = async (id) => {
+  return makeRequest("put", `/accounts/${id}/inactive`);
+};
+
+/**
+ * aca termina endpoints de cuentas
+ */

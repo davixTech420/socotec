@@ -38,7 +38,6 @@ import {
   updateApique,
   getApique,
   createApique,
-  deleteApique,
   getSampleApiqueId,
 } from "@/services/employeeService";
 import * as ImagePicker from "expo-image-picker";
@@ -960,10 +959,6 @@ const Apique = () => {
                 onSort={console.log}
                 onSearch={console.log}
                 onFilter={console.log}
-                onDelete={async (item) => {
-                  await deleteApique(item.id);
-                  updateState({ data: data.filter((p) => p.id !== item.id) });
-                }}
                 onDataUpdate={(newData) => updateState({ data: newData })}
                 onCreate={() => updateState({ openForm: true })}
                 onEdit={handleEdit}
@@ -971,7 +966,7 @@ const Apique = () => {
             </Card.Content>
           </Card>
         </ScrollView>
-
+        <AddComponent onOpen={() => updateState({ openForm: true })} />
         <Snackbar
           visible={snackbarVisible}
           onDismiss={() => updateState({ snackbarVisible: false })}
@@ -1174,7 +1169,6 @@ const Apique = () => {
           isEditing={isEditingSample}
         />
       </PaperProvider>
-      <AddComponent onOpen={() => updateState({ openForm: true })} />
     </>
   );
 };

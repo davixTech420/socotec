@@ -303,7 +303,6 @@ const ProjectDetailsModal = React.memo(({ visible, project, onDismiss }) => {
       hardwareAccelerated={true} // Mejora rendimiento en Android
     >
       <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.95)" }}>
-        {/* Indicador de carga mientras se prepara el modal */}
         {!isImageLoaded && IS_MOBILE && (
           <View
             style={{
@@ -402,7 +401,6 @@ const ProjectDetailsModal = React.memo(({ visible, project, onDismiss }) => {
               </Animated.View>
 
               <View style={{ padding: 16 }}>
-                {/* Simplificar animaciones en móviles */}
                 <View>
                   <Text variant="headlineMedium" style={{ fontWeight: "bold" }}>
                     {project.nombre}
@@ -871,7 +869,6 @@ export default function Portafolio() {
         removeClippedSubviews={true}
       />
 
-      {/* Modal de detalles del proyecto */}
       {selectedProject && (
         <ProjectDetailsModal
           visible={isModalVisible}

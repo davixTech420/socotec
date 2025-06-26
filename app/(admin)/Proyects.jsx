@@ -67,8 +67,16 @@ const Proyects = () => {
 
   useFocusEffect(
     useCallback(() => {
-      getProyect().then(setData).catch(error => {throw error});
-      getGroupNotProyect().then(setGroupWhitProyect).catch(error => {throw error});
+      getProyect()
+        .then(setData)
+        .catch((error) => {
+          throw error;
+        });
+      getGroupNotProyect()
+        .then(setGroupWhitProyect)
+        .catch((error) => {
+          throw error;
+        });
     }, [])
   );
 
@@ -122,9 +130,7 @@ const Proyects = () => {
         ...formData,
         grupo: selectedGroup.map((group) => group[0].id),
       };
-
       let newData;
-
       if (isEditing) {
         await updateProyect(editingProyectId, dataToSubmit);
         newData = data.map((item) =>
@@ -132,8 +138,6 @@ const Proyects = () => {
         );
       } else {
         const newProyect = await createProyect(dataToSubmit);
-       
-
         if (!newProyect) throw new Error("No se ha podido crear el proyecto");
         newData = [...data, newProyect];
       }
@@ -184,7 +188,7 @@ const Proyects = () => {
         )
       );
     } catch (error) {
-     throw error; 
+      throw error;
     }
   }, []);
 
@@ -198,7 +202,11 @@ const Proyects = () => {
       fechaEntrega: item.fechaEntrega,
     });
     setEditingProyectId(item.id);
-    getGroupProyect(item.groupId).then(setSelectedGroup).catch(error => {throw error});
+    getGroupProyect(item.groupId)
+      .then(setSelectedGroup)
+      .catch((error) => {
+        throw error;
+      });
 
     setIsEditing(true);
     setOpenForm(true);
@@ -319,6 +327,7 @@ const Proyects = () => {
             </Card.Content>
           </Card>
         </ScrollView>
+         <AddComponent onOpen={() => setOpenForm(true)} />
         <Snackbar
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
@@ -404,7 +413,7 @@ const Proyects = () => {
                   onChangeText={setSearchQuery}
                   value={searchQuery}
                 />
-                <ScrollView horizontal style={styles.selectedGroup}>
+                <ScrollView horizontal>
                   {filteredGroup.map((group) => (
                     <Chip
                       key={group.id}
@@ -420,16 +429,26 @@ const Proyects = () => {
             </View>
           }
           actions={[
-            <Button mode="outlined" textColor="black" onPress={resetForm}>
+            <Button
+              key="cancelar"
+              mode="outlined"
+              textColor="black"
+              onPress={resetForm}
+            >
               Cancelar
             </Button>,
-            <Button mode="contained" buttonColor="#00ACE8" onPress={handleSubmit}>
+            <Button
+              key="aceptar"
+              mode="contained"
+              buttonColor="#00ACE8"
+              onPress={handleSubmit}
+            >
               {isEditing ? "Actualizar" : "Crear"}
             </Button>,
           ]}
         />
       </PaperProvider>
-      <AddComponent onOpen={() => setOpenForm(true)} />
+     
     </>
   );
 };
@@ -524,6 +543,7 @@ const styles = StyleSheet.create({
   },
   groupList: {
     maxHeight: 200,
+    maxWidth: "100%",
     marginBottom: 10,
   },
 });

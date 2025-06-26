@@ -277,6 +277,7 @@ export default function Hirings() {
           </Card.Content>
         </Card>
       </ScrollView>
+         <AddComponent onOpen={() => setOpenForm(true)} />
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
@@ -378,7 +379,7 @@ export default function Hirings() {
           </Button>,
         ]}
       />
-      <AddComponent onOpen={() => setOpenForm(true)} />
+   
     </>
   );
 }

@@ -255,7 +255,7 @@ const CustomDrawerContent = React.memo((props) => {
           setUserData(data);
         }
       } catch (error) {
-        throw error;
+        router.replace("/singIn");
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -402,7 +402,7 @@ export default function AdminLayout() {
           }
         }
       } catch (error) {
-        throw error;
+        router.replace("/singIn");
       }
     };
 

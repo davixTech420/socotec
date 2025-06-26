@@ -48,7 +48,7 @@ const USER_ID_FIELDS = [
   "solicitanteId",
   "aprobadorId",
 ];
-const CACHE_MAX_AGE = 10 * 60 * 1000;
+
 const BATCH_SIZE = 15;
 const DEBOUNCE_TIME = 30;
 
@@ -320,9 +320,8 @@ const TablaComponente = ({
 
   // Sistema de cache optimizado
   const [usersCache, setUsersCache] = useState(new Map());
+    const [cacheSize, setCacheSize] = useState(0);
   const [loadingUsers, setLoadingUsers] = useState(new Set());
-  const pendingRequests = useRef(new Map());
-  const [cacheSize, setCacheSize] = useState(0);
   const batchQueue = useRef([]);
   const batchTimeoutRef = useRef(null);
 

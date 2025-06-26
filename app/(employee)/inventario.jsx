@@ -269,6 +269,7 @@ const Inventario = () => {
             </Card.Content>
           </Card>
         </ScrollView>
+        <AddComponent onOpen={() => setOpenForm(true)} />
         <Snackbar
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
@@ -322,8 +323,7 @@ const Inventario = () => {
                   label={field.charAt(0).toUpperCase() + field.slice(1)}
                   placeholder={`Introduce el ${field}`}
                   validationRules={{
-                    required: field !== "descripcion",
-                    ...(field === "descripcion"),
+                    required: true
                   }}
                   errorMessage={`Por favor, introduce un ${field} válido`}
                 />
@@ -344,7 +344,6 @@ const Inventario = () => {
           ]}
         />
       </PaperProvider>
-      <AddComponent onOpen={() => setOpenForm(true)} />
     </>
   );
 };

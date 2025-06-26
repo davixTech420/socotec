@@ -247,6 +247,7 @@ const Task = () => {
             </Card.Content>
           </Card>
         </ScrollView>
+        <AddComponent onOpen={() => setOpenForm(true)} />
         <Snackbar
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
@@ -258,7 +259,6 @@ const Task = () => {
             {snackbarMessage.text}
           </Text>
         </Snackbar>
-
         <AlertaScroll
           onOpen={openForm}
           onClose={resetForm}
@@ -306,10 +306,16 @@ const Task = () => {
             </View>
           }
           actions={[
-            <Button mode="outlined" textColor="black" onPress={resetForm}>
+            <Button
+              key="cancelar"
+              mode="outlined"
+              textColor="black"
+              onPress={resetForm}
+            >
               Cancelar
             </Button>,
             <Button
+              key="aceptar"
               mode="contained"
               style={{ backgroundColor: "#00ACE8" }}
               onPress={handleSubmit}
@@ -319,7 +325,6 @@ const Task = () => {
           ]}
         />
       </PaperProvider>
-      <AddComponent onOpen={() => setOpenForm(true)} />
     </>
   );
 };

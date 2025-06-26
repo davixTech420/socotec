@@ -22,12 +22,11 @@ import InputComponent from "@/components/InputComponent";
 import {
   getAccounts,
   getMotions,
-  deleteMotion,
   activeMotion,
   inactiveMotion,
   updateMotion,
   createMotion,
-} from "@/services/adminServices";
+} from "@/services/employeeService";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
 import DropdownComponent from "@/components/DropdownComponent";
@@ -269,6 +268,7 @@ export default function MotionsE() {
           </Card.Content>
         </Card>
       </ScrollView>
+      <AddComponent onOpen={() => setOpenForm(true)} />
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
@@ -356,7 +356,6 @@ export default function MotionsE() {
           </Button>,
         ]}
       />
-      <AddComponent onOpen={() => setOpenForm(true)} />
     </>
   );
 }

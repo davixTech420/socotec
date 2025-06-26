@@ -373,16 +373,6 @@ export default function CalendarComponent() {
               onSort={console.log}
               onSearch={console.log}
               onFilter={console.log}
-              /* onDelete={async (item) => {
-                try {
-                  await deletePermission(item.id);
-                  showSnackbar("Permiso eliminado correctamente");
-                  return true;
-                } catch (error) {
-                  showSnackbar("Error al eliminar el permiso", "error");
-                  return false;
-                }
-              }} */
               onDataUpdate={handleDataUpdate}
               onEdit={handleEdit}
             />
@@ -485,23 +475,23 @@ export default function CalendarComponent() {
           </>
         }
         actions={[
-          <>
-            <Button
-              mode="outlined"
-              onPress={resetForm}
-              textColor="black"
-              style={styles.cancelButton}
-            >
-              Cancelar
-            </Button>
-            <Button
-              mode="contained"
-              onPress={handleSubmit}
-              style={styles.submitButton}
-            >
-              {isEditing ? "Actualizar" : "Crear"}
-            </Button>
-          </>,
+          <Button
+            key="cancelar"
+            mode="outlined"
+            onPress={resetForm}
+            textColor="black"
+            style={styles.cancelButton}
+          >
+            Cancelar
+          </Button>,
+          <Button
+            key="aceptar"
+            mode="contained"
+            onPress={handleSubmit}
+            style={styles.submitButton}
+          >
+            {isEditing ? "Actualizar" : "Crear"}
+          </Button>,
         ]}
       />
     </PaperProvider>

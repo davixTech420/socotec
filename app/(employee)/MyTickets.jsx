@@ -264,6 +264,7 @@ const MyTickets = () => {
             </Card.Content>
           </Card>
         </ScrollView>
+        <AddComponent onOpen={() => setOpenForm(true)} />
         <Snackbar
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
@@ -314,8 +315,7 @@ const MyTickets = () => {
                   label={field.charAt(0).toUpperCase() + field.slice(1)}
                   placeholder={`Introduce el ${field}`}
                   validationRules={{
-                    required: field !== "descripcion",
-                    ...(field === "descripcion"),
+                    required: true,
                   }}
                   errorMessage={`Por favor, introduce un ${field} válido`}
                 />
@@ -323,10 +323,16 @@ const MyTickets = () => {
             </View>
           }
           actions={[
-            <Button onPress={resetForm} mode="outlined" textColor="black">
+            <Button
+              key="cancelar"
+              onPress={resetForm}
+              mode="outlined"
+              textColor="black"
+            >
               Cancelar
             </Button>,
             <Button
+              key="aceptar"
               onPress={handleSubmit}
               mode="contained"
               style={{ backgroundColor: "#00ACE8" }}
@@ -336,7 +342,6 @@ const MyTickets = () => {
           ]}
         />
       </PaperProvider>
-      <AddComponent onOpen={() => setOpenForm(true)} />
     </>
   );
 };

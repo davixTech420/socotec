@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -9,21 +9,14 @@ import {
   useWindowDimensions,
   Platform,
 } from "react-native";
-import {
-  LineChart,
-  ProgressChart,
-  BarChart,
-  PieChart,
-} from "react-native-chart-kit";
-import Animated, {  
-  FadeInUp, 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming,
+import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
+import Animated, {
+  FadeInUp,
+  useSharedValue,
+  useAnimatedStyle,
   withSpring,
   interpolate,
   Extrapolate,
-  SlideInRight,
   FadeIn,
 } from "react-native-reanimated";
 import {
@@ -31,9 +24,7 @@ import {
   Surface,
   Chip,
   DataTable,
-  Searchbar,
   ActivityIndicator,
-  Divider,
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -51,14 +42,14 @@ export default function AnalyticsDashboardPro() {
   const [activeTab, setActiveTab] = useState("movimientos");
   const [isLoading, setIsLoading] = useState(true);
   const { width: screenWidth } = useWindowDimensions();
-  
+
   // Animation values
   const scrollY = useSharedValue(0);
   const chartAnimation = useSharedValue(0);
   const tabChangeAnimation = useSharedValue(0);
   const periodChangeAnimation = useSharedValue(0);
   const scrollViewRef = useRef(null);
-  
+
   // Data state
   const [dashboardData, setDashboardData] = useState({
     users: [],
@@ -74,7 +65,7 @@ export default function AnalyticsDashboardPro() {
   useEffect(() => {
     // Reset and trigger animation when tab changes
     tabChangeAnimation.value = 0;
-    tabChangeAnimation.value = withSpring(1, { 
+    tabChangeAnimation.value = withSpring(1, {
       damping: 12,
       stiffness: 90,
     });
@@ -96,7 +87,7 @@ export default function AnalyticsDashboardPro() {
     try {
       const data = await getDashboard();
       setDashboardData(data);
-      
+
       // Start chart animation after data is loaded
       chartAnimation.value = withSpring(1, {
         damping: 12,
@@ -113,7 +104,7 @@ export default function AnalyticsDashboardPro() {
   useFocusEffect(
     useCallback(() => {
       fetchDashboardData();
-      
+
       return () => {
         // Reset animation value when component loses focus
         chartAnimation.value = 0;
@@ -124,44 +115,48 @@ export default function AnalyticsDashboardPro() {
   // Filter data based on search query
   const filteredInventory = useCallback(() => {
     if (!searchQuery.trim()) return inventarios;
-    
-    return inventarios.filter(item => 
-      item.nombreMaterial.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.descripcion.toLowerCase().includes(searchQuery.toLowerCase())
+
+    return inventarios.filter(
+      (item) =>
+        item.nombreMaterial.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.descripcion.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [inventarios, searchQuery]);
 
   // Filter data based on selected period
-  const filterDataByPeriod = useCallback((data, dateField = 'fecha') => {
-    if (!data || data.length === 0) return [];
-    
-    const now = new Date();
-    let startDate;
-    
-    switch (selectedPeriod) {
-      case 'daily':
-        startDate = new Date(now);
-        startDate.setHours(0, 0, 0, 0);
-        break;
-      case 'weekly':
-        startDate = new Date(now);
-        startDate.setDate(now.getDate() - 7);
-        break;
-      case 'monthly':
-        startDate = new Date(now);
-        startDate.setMonth(now.getMonth() - 1);
-        break;
-      case 'yearly':
-        startDate = new Date(now);
-        startDate.setFullYear(now.getFullYear() - 1);
-        break;
-      default:
-        startDate = new Date(now);
-        startDate.setMonth(now.getMonth() - 1);
-    }
-    
-    return data.filter(item => new Date(item[dateField]) >= startDate);
-  }, [selectedPeriod]);
+  const filterDataByPeriod = useCallback(
+    (data, dateField = "fecha") => {
+      if (!data || data.length === 0) return [];
+
+      const now = new Date();
+      let startDate;
+
+      switch (selectedPeriod) {
+        case "daily":
+          startDate = new Date(now);
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        case "weekly":
+          startDate = new Date(now);
+          startDate.setDate(now.getDate() - 7);
+          break;
+        case "monthly":
+          startDate = new Date(now);
+          startDate.setMonth(now.getMonth() - 1);
+          break;
+        case "yearly":
+          startDate = new Date(now);
+          startDate.setFullYear(now.getFullYear() - 1);
+          break;
+        default:
+          startDate = new Date(now);
+          startDate.setMonth(now.getMonth() - 1);
+      }
+
+      return data.filter((item) => new Date(item[dateField]) >= startDate);
+    },
+    [selectedPeriod]
+  );
 
   // Handle refresh
   const onRefresh = useCallback(() => {
@@ -174,51 +169,59 @@ export default function AnalyticsDashboardPro() {
   // Calculate percentage change for users
   const calculateUserChange = useCallback(() => {
     if (!users || users.length === 0) return "0.0%";
-    
+
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-    
-    const newUsers = users.filter(user => new Date(user.createdAt) >= oneMonthAgo).length;
-    const oldUsers = users.filter(user => new Date(user.createdAt) < oneMonthAgo).length;
-    
+
+    const newUsers = users.filter(
+      (user) => new Date(user.createdAt) >= oneMonthAgo
+    ).length;
+    const oldUsers = users.filter(
+      (user) => new Date(user.createdAt) < oneMonthAgo
+    ).length;
+
     if (oldUsers === 0) return "+100.0%";
-    
+
     const changePercent = ((newUsers - oldUsers) / oldUsers) * 100;
-    return `${changePercent > 0 ? '+' : ''}${changePercent.toFixed(1)}%`;
+    return `${changePercent > 0 ? "+" : ""}${changePercent.toFixed(1)}%`;
   }, [users]);
 
   // Calculate inventory value
   const calculateInventoryValue = useCallback(() => {
     if (!inventarios || inventarios.length === 0) return 0;
-    
+
     return inventarios.reduce((sum, item) => {
-      return sum + (item.cantidad * item.precioUnidad);
+      return sum + item.cantidad * item.precioUnidad;
     }, 0);
   }, [inventarios]);
 
   // Calculate inventory change
   const calculateInventoryChange = useCallback(() => {
     if (!inventarios || inventarios.length <= 1) return "0.0%";
-    
+
     // Sort by date to get newest and oldest
     const sortedInventory = [...inventarios].sort(
-      (a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
+      (a, b) =>
+        new Date(b.updatedAt || b.createdAt) -
+        new Date(a.updatedAt || a.createdAt)
     );
-    
-    const newestValue = sortedInventory[0].cantidad * sortedInventory[0].precioUnidad;
-    const oldestValue = sortedInventory[sortedInventory.length - 1].cantidad * 
-                        sortedInventory[sortedInventory.length - 1].precioUnidad;
-    
+
+    const newestValue =
+      sortedInventory[0].cantidad * sortedInventory[0].precioUnidad;
+    const oldestValue =
+      sortedInventory[sortedInventory.length - 1].cantidad *
+      sortedInventory[sortedInventory.length - 1].precioUnidad;
+
     if (oldestValue === 0) return "+100.0%";
-    
+
     const changePercent = ((newestValue - oldestValue) / oldestValue) * 100;
-    return `${changePercent > 0 ? '+' : ''}${changePercent.toFixed(1)}%`;
+    return `${changePercent > 0 ? "+" : ""}${changePercent.toFixed(1)}%`;
   }, [inventarios]);
 
   // Calculate account balance
   const calculateAccountBalance = useCallback(() => {
     if (!accounts || accounts.length === 0) return 0;
-    
+
     return accounts.reduce((sum, item) => {
       return sum + (item.saldo || 0);
     }, 0);
@@ -227,248 +230,315 @@ export default function AnalyticsDashboardPro() {
   // Calculate account change
   const calculateAccountChange = useCallback(() => {
     if (!accounts || accounts.length <= 1) return "0.0%";
-    
+
     const sortedAccounts = [...accounts].sort(
       (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
     );
-    
+
     const currentSaldo = sortedAccounts[0].saldo;
     const previousSaldo = sortedAccounts[1].saldo;
-    
+
     if (previousSaldo === 0) return "+100.0%";
-    
-    const changePercent = ((currentSaldo - previousSaldo) / previousSaldo) * 100;
-    return `${changePercent > 0 ? '+' : ''}${changePercent.toFixed(1)}%`;
+
+    const changePercent =
+      ((currentSaldo - previousSaldo) / previousSaldo) * 100;
+    return `${changePercent > 0 ? "+" : ""}${changePercent.toFixed(1)}%`;
   }, [accounts]);
 
   // Format date based on period
-  const formatDateByPeriod = useCallback((dateString) => {
-    const date = new Date(dateString);
-    
-    switch (selectedPeriod) {
-      case 'daily':
-        return `${date.getHours()}:00`;
-      case 'weekly':
-        return ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][date.getDay()];
-      case 'monthly':
-        return `${date.getDate()}/${date.getMonth() + 1}`;
-      case 'yearly':
-        const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-        return months[date.getMonth()];
-      default:
-        return `${date.getDate()}/${date.getMonth() + 1}`;
-    }
-  }, [selectedPeriod]);
+  const formatDateByPeriod = useCallback(
+    (dateString) => {
+      const date = new Date(dateString);
+
+      switch (selectedPeriod) {
+        case "daily":
+          return `${date.getHours()}:00`;
+        case "weekly":
+          return ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"][
+            date.getDay()
+          ];
+        case "monthly":
+          return `${date.getDate()}/${date.getMonth() + 1}`;
+        case "yearly":
+          const months = [
+            "Ene",
+            "Feb",
+            "Mar",
+            "Abr",
+            "May",
+            "Jun",
+            "Jul",
+            "Ago",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dic",
+          ];
+          return months[date.getMonth()];
+        default:
+          return `${date.getDate()}/${date.getMonth() + 1}`;
+      }
+    },
+    [selectedPeriod]
+  );
 
   // Prepare line chart data based on active tab and period
   const prepareLineChartData = useCallback(() => {
     let data = [];
-    let dataKey = 'monto';
-    let dateKey = 'fecha';
-    
+    let dataKey = "monto";
+    let dateKey = "fecha";
+
     // Select data source based on active tab
     switch (activeTab) {
-      case 'movimientos':
+      case "movimientos":
         data = movimientos || [];
-        dataKey = 'monto';
-        dateKey = 'fecha';
+        dataKey = "monto";
+        dateKey = "fecha";
         break;
-      case 'productos':
+      case "productos":
         data = inventarios || [];
-        dataKey = 'precioUnidad';
-        dateKey = 'updatedAt';
+        dataKey = "precioUnidad";
+        dateKey = "updatedAt";
         break;
-      case 'usuarios':
+      case "usuarios":
         data = users || [];
-        dataKey = 'id'; // Using ID as a placeholder for user data
-        dateKey = 'createdAt';
+        dataKey = "id"; // Using ID as a placeholder for user data
+        dateKey = "createdAt";
         break;
       default:
         data = movimientos || [];
     }
-    
+
     // Filter by period
     const filteredData = filterDataByPeriod(data, dateKey);
-    
+
     if (filteredData.length === 0) {
       return {
         labels: ["Sin datos"],
-        datasets: [{ data: [0], color: () => "#6bd9fe", strokeWidth: 2 }]
+        datasets: [{ data: [0], color: () => "#6bd9fe", strokeWidth: 2 }],
       };
     }
-    
+
     // Sort by date
-    const sortedData = [...filteredData].sort((a, b) => new Date(a[dateKey]) - new Date(b[dateKey]));
-    
+    const sortedData = [...filteredData].sort(
+      (a, b) => new Date(a[dateKey]) - new Date(b[dateKey])
+    );
+
     // Limit to last 7 entries or appropriate number based on period
-    const limit = selectedPeriod === 'yearly' ? 12 : 7;
+    const limit = selectedPeriod === "yearly" ? 12 : 7;
     const limitedData = sortedData.slice(-limit);
-    
+
     return {
-      labels: limitedData.map(item => formatDateByPeriod(item[dateKey])),
-      datasets: [{
-        data: limitedData.map(item => {
-          // Handle different data types
-          if (dataKey === 'id') return 1; // Count for users
-          return typeof item[dataKey] === 'number' ? item[dataKey] : 0;
-        }),
-        color: () => "#6bd9fe",
-        strokeWidth: 2
-      }]
+      labels: limitedData.map((item) => formatDateByPeriod(item[dateKey])),
+      datasets: [
+        {
+          data: limitedData.map((item) => {
+            // Handle different data types
+            if (dataKey === "id") return 1; // Count for users
+            return typeof item[dataKey] === "number" ? item[dataKey] : 0;
+          }),
+          color: () => "#6bd9fe",
+          strokeWidth: 2,
+        },
+      ],
     };
-  }, [activeTab, movimientos, inventarios, users, selectedPeriod, filterDataByPeriod, formatDateByPeriod]);
+  }, [
+    activeTab,
+    movimientos,
+    inventarios,
+    users,
+    selectedPeriod,
+    filterDataByPeriod,
+    formatDateByPeriod,
+  ]);
 
   // Prepare bar chart data based on active tab and period
   const prepareBarChartData = useCallback(() => {
     let data = [];
-    let labelKey = '';
-    let valueKey = '';
-    
+    let labelKey = "";
+    let valueKey = "";
+
     // Select data source based on active tab
     switch (activeTab) {
-      case 'movimientos':
+      case "movimientos":
         data = movimientos || [];
-        labelKey = 'fecha';
-        valueKey = 'monto';
+        labelKey = "fecha";
+        valueKey = "monto";
         break;
-      case 'productos':
+      case "productos":
         data = inventarios || [];
-        labelKey = 'nombreMaterial';
-        valueKey = 'precioUnidad';
+        labelKey = "nombreMaterial";
+        valueKey = "precioUnidad";
         break;
-      case 'usuarios':
+      case "usuarios":
         data = users || [];
-        labelKey = 'username';
-        valueKey = 'id'; // Using ID as a placeholder
+        labelKey = "username";
+        valueKey = "id"; // Using ID as a placeholder
         break;
       default:
         data = movimientos || [];
     }
-    
+
     // Filter by period for date-based data
-    if (labelKey === 'fecha' || labelKey === 'createdAt' || labelKey === 'updatedAt') {
+    if (
+      labelKey === "fecha" ||
+      labelKey === "createdAt" ||
+      labelKey === "updatedAt"
+    ) {
       data = filterDataByPeriod(data, labelKey);
     }
-    
+
     if (data.length === 0) {
       return {
         labels: ["Sin datos"],
-        datasets: [{ data: [0] }]
+        datasets: [{ data: [0] }],
       };
     }
-    
+
     // For products, sort by value and take top items
-    if (activeTab === 'productos') {
-      data = [...data].sort((a, b) => (b.cantidad * b.precioUnidad) - (a.cantidad * a.precioUnidad));
+    if (activeTab === "productos") {
+      data = [...data].sort(
+        (a, b) => b.cantidad * b.precioUnidad - a.cantidad * a.precioUnidad
+      );
     }
-    
+
     // Limit to reasonable number of items
     const limitedData = data.slice(0, 7);
-    
+
     return {
-      labels: limitedData.map(item => {
-        if (labelKey === 'fecha' || labelKey === 'createdAt' || labelKey === 'updatedAt') {
+      labels: limitedData.map((item) => {
+        if (
+          labelKey === "fecha" ||
+          labelKey === "createdAt" ||
+          labelKey === "updatedAt"
+        ) {
           return formatDateByPeriod(item[labelKey]);
         }
         // Truncate long names
-        return (item[labelKey] || 'N/A').toString().substring(0, 5);
+        return (item[labelKey] || "N/A").toString().substring(0, 5);
       }),
-      datasets: [{
-        data: limitedData.map(item => {
-          if (valueKey === 'id') return 1; // Count for users
-          if (activeTab === 'productos') return item.cantidad * item.precioUnidad;
-          return typeof item[valueKey] === 'number' ? item[valueKey] : 0;
-        })
-      }]
+      datasets: [
+        {
+          data: limitedData.map((item) => {
+            if (valueKey === "id") return 1; // Count for users
+            if (activeTab === "productos")
+              return item.cantidad * item.precioUnidad;
+            return typeof item[valueKey] === "number" ? item[valueKey] : 0;
+          }),
+        },
+      ],
     };
-  }, [activeTab, movimientos, inventarios, users, selectedPeriod, filterDataByPeriod, formatDateByPeriod]);
+  }, [
+    activeTab,
+    movimientos,
+    inventarios,
+    users,
+    selectedPeriod,
+    filterDataByPeriod,
+    formatDateByPeriod,
+  ]);
 
   // Prepare progress chart data based on active tab
   const prepareProgressData = useCallback(() => {
     let labels = [];
     let data = [];
-    
+
     switch (activeTab) {
-      case 'movimientos':
+      case "movimientos":
         // For movements, show income vs expense ratio
         if (movimientos && movimientos.length > 0) {
-          const income = movimientos.filter(m => m.monto > 0).reduce((sum, m) => sum + m.monto, 0);
-          const expense = Math.abs(movimientos.filter(m => m.monto < 0).reduce((sum, m) => sum + m.monto, 0));
+          const income = movimientos
+            .filter((m) => m.monto > 0)
+            .reduce((sum, m) => sum + m.monto, 0);
+          const expense = Math.abs(
+            movimientos
+              .filter((m) => m.monto < 0)
+              .reduce((sum, m) => sum + m.monto, 0)
+          );
           const total = income + expense;
-          
+
           labels = ["Ingresos", "Gastos", "Balance"];
           data = [
             income / (total || 1),
             expense / (total || 1),
-            Math.max(0, (income - expense) / (total || 1))
+            Math.max(0, (income - expense) / (total || 1)),
           ];
         } else {
           labels = ["Ingresos", "Gastos", "Balance"];
           data = [0.33, 0.33, 0.33];
         }
         break;
-        
-      case 'productos':
+
+      case "productos":
         // For products, show stock levels
         if (inventarios && inventarios.length > 0) {
-          const totalStock = inventarios.reduce((sum, item) => sum + item.cantidad, 0);
-          const lowStock = inventarios.filter(item => item.cantidad < 10).length;
-          const mediumStock = inventarios.filter(item => item.cantidad >= 10 && item.cantidad < 50).length;
-          const highStock = inventarios.filter(item => item.cantidad >= 50).length;
-          
+          const totalStock = inventarios.reduce(
+            (sum, item) => sum + item.cantidad,
+            0
+          );
+          const lowStock = inventarios.filter(
+            (item) => item.cantidad < 10
+          ).length;
+          const mediumStock = inventarios.filter(
+            (item) => item.cantidad >= 10 && item.cantidad < 50
+          ).length;
+          const highStock = inventarios.filter(
+            (item) => item.cantidad >= 50
+          ).length;
+
           labels = ["Stock Bajo", "Stock Medio", "Stock Alto"];
           data = [
             lowStock / inventarios.length,
             mediumStock / inventarios.length,
-            highStock / inventarios.length
+            highStock / inventarios.length,
           ];
         } else {
           labels = ["Stock Bajo", "Stock Medio", "Stock Alto"];
           data = [0.33, 0.33, 0.33];
         }
         break;
-        
-      case 'usuarios':
+
+      case "usuarios":
         // For users, show active vs inactive
         if (users && users.length > 0) {
-          const active = users.filter(user => user.activo).length;
+          const active = users.filter((user) => user.activo).length;
           const inactive = users.length - active;
-          const recent = users.filter(user => {
+          const recent = users.filter((user) => {
             const oneMonthAgo = new Date();
             oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
             return new Date(user.createdAt) >= oneMonthAgo;
           }).length;
-          
+
           labels = ["Activos", "Inactivos", "Recientes"];
           data = [
             active / users.length,
             inactive / users.length,
-            recent / users.length
+            recent / users.length,
           ];
         } else {
           labels = ["Activos", "Inactivos", "Recientes"];
           data = [0.33, 0.33, 0.33];
         }
         break;
-        
+
       default:
         labels = ["Métrica 1", "Métrica 2", "Métrica 3"];
         data = [0.33, 0.33, 0.33];
     }
-    
+
     return {
       labels,
       data,
-      colors: ["#48BB78", "#4299E1", "#ED8936"]
+      colors: ["#48BB78", "#4299E1", "#ED8936"],
     };
   }, [activeTab, movimientos, inventarios, users]);
 
   // Prepare pie chart data based on active tab
   const preparePieChartData = useCallback(() => {
     let chartData = [];
-    
+
     switch (activeTab) {
-      case 'movimientos':
+      case "movimientos":
         // Group movements by type or amount range
         if (movimientos && movimientos.length > 0) {
           const categories = {
@@ -479,11 +549,11 @@ export default function AnalyticsDashboardPro() {
             "Gastos Medios": 0,
             "Gastos Bajos": 0,
           };
-          
-          movimientos.forEach(item => {
+
+          movimientos.forEach((item) => {
             const amount = item.monto;
             let category;
-            
+
             if (amount > 0) {
               if (amount > 1000) category = "Ingresos Altos";
               else if (amount > 500) category = "Ingresos Medios";
@@ -494,106 +564,113 @@ export default function AnalyticsDashboardPro() {
               else if (absAmount > 500) category = "Gastos Medios";
               else category = "Gastos Bajos";
             }
-            
+
             categories[category] += Math.abs(amount);
           });
-          
-          const colors = ["#48BB78", "#68D391", "#9AE6B4", "#F56565", "#FC8181", "#FEB2B2"];
-          
+
+          const colors = [
+            "#48BB78",
+            "#68D391",
+            "#9AE6B4",
+            "#F56565",
+            "#FC8181",
+            "#FEB2B2",
+          ];
+
           chartData = Object.keys(categories)
-            .filter(key => categories[key] > 0)
+            .filter((key) => categories[key] > 0)
             .map((category, index) => ({
               name: category,
               population: categories[category],
               color: colors[index % colors.length],
               legendFontColor: "#7F7F7F",
-              legendFontSize: 12
+              legendFontSize: 12,
             }));
         }
         break;
-        
-      case 'productos':
+
+      case "productos":
         // Group products by price range
         if (inventarios && inventarios.length > 0) {
           const categories = {
-            "Lujo": 0,
-            "Premium": 0,
+            Lujo: 0,
+            Premium: 0,
             "Costo medio": 0,
             "Bajo costo": 0,
           };
-          
-          inventarios.forEach(item => {
+
+          inventarios.forEach((item) => {
             const value = item.precioUnidad;
             let category;
-            
+
             if (value >= 1000) category = "Lujo";
             else if (value >= 500) category = "Premium";
             else if (value >= 100) category = "Costo medio";
             else category = "Bajo costo";
-            
+
             categories[category] += item.cantidad * item.precioUnidad;
           });
-          
+
           const colors = ["#9F7AEA", "#4299E1", "#48BB78", "#ECC94B"];
-          
+
           chartData = Object.keys(categories)
-            .filter(key => categories[key] > 0)
+            .filter((key) => categories[key] > 0)
             .map((category, index) => ({
               name: category,
               population: categories[category],
               color: colors[index % colors.length],
               legendFontColor: "#7F7F7F",
-              legendFontSize: 12
+              legendFontSize: 12,
             }));
         }
         break;
-        
-      case 'usuarios':
+
+      case "usuarios":
         // Group users by join date
         if (users && users.length > 0) {
           const categories = {
             "Este mes": 0,
             "Último trimestre": 0,
             "Este año": 0,
-            "Antiguos": 0,
+            Antiguos: 0,
           };
-          
+
           const now = new Date();
           const oneMonthAgo = new Date(now);
           oneMonthAgo.setMonth(now.getMonth() - 1);
-          
+
           const threeMonthsAgo = new Date(now);
           threeMonthsAgo.setMonth(now.getMonth() - 3);
-          
+
           const oneYearAgo = new Date(now);
           oneYearAgo.setFullYear(now.getFullYear() - 1);
-          
-          users.forEach(user => {
+
+          users.forEach((user) => {
             const joinDate = new Date(user.createdAt);
             let category;
-            
+
             if (joinDate >= oneMonthAgo) category = "Este mes";
             else if (joinDate >= threeMonthsAgo) category = "Último trimestre";
             else if (joinDate >= oneYearAgo) category = "Este año";
             else category = "Antiguos";
-            
+
             categories[category]++;
           });
-          
+
           const colors = ["#48BB78", "#4299E1", "#ECC94B", "#9F7AEA"];
-          
+
           chartData = Object.keys(categories)
-            .filter(key => categories[key] > 0)
+            .filter((key) => categories[key] > 0)
             .map((category, index) => ({
               name: category,
               population: categories[category],
               color: colors[index % colors.length],
               legendFontColor: "#7F7F7F",
-              legendFontSize: 12
+              legendFontSize: 12,
             }));
         }
         break;
-        
+
       default:
         chartData = [
           {
@@ -601,11 +678,11 @@ export default function AnalyticsDashboardPro() {
             population: 100,
             color: "#CCCCCC",
             legendFontColor: "#7F7F7F",
-            legendFontSize: 12
-          }
+            legendFontSize: 12,
+          },
         ];
     }
-    
+
     // If no data, return placeholder
     if (chartData.length === 0) {
       chartData = [
@@ -614,11 +691,11 @@ export default function AnalyticsDashboardPro() {
           population: 100,
           color: "#CCCCCC",
           legendFontColor: "#7F7F7F",
-          legendFontSize: 12
-        }
+          legendFontSize: 12,
+        },
       ];
     }
-    
+
     return chartData;
   }, [activeTab, movimientos, inventarios, users]);
 
@@ -639,8 +716,10 @@ export default function AnalyticsDashboardPro() {
     {
       title: "Productos",
       value: inventarios ? inventarios.length.toString() : "0",
-      change: inventarios && inventarios.length > 0 ? 
-        `+${Math.round(inventarios.length / 10)}%` : "0%",
+      change:
+        inventarios && inventarios.length > 0
+          ? `+${Math.round(inventarios.length / 10)}%`
+          : "0%",
       icon: "package-variant",
     },
     {
@@ -683,15 +762,15 @@ export default function AnalyticsDashboardPro() {
         Extrapolate.CLAMP
       ),
       transform: [
-        { 
+        {
           translateY: interpolate(
             periodChangeAnimation.value,
             [0, 1],
             [20, 0],
             Extrapolate.CLAMP
-          )
-        }
-      ]
+          ),
+        },
+      ],
     };
   });
 
@@ -704,15 +783,15 @@ export default function AnalyticsDashboardPro() {
         Extrapolate.CLAMP
       ),
       transform: [
-        { 
+        {
           translateX: interpolate(
             tabChangeAnimation.value,
             [0, 1],
             [20, 0],
             Extrapolate.CLAMP
-          )
-        }
-      ]
+          ),
+        },
+      ],
     };
   });
 
@@ -725,26 +804,26 @@ export default function AnalyticsDashboardPro() {
         Extrapolate.CLAMP
       ),
       transform: [
-        { 
+        {
           scale: interpolate(
             tabChangeAnimation.value,
             [0, 1],
             [0.95, 1],
             Extrapolate.CLAMP
-          )
-        }
-      ]
+          ),
+        },
+      ],
     };
   });
 
   // Get tab title based on active tab
   const getTabTitle = () => {
     switch (activeTab) {
-      case 'movimientos':
+      case "movimientos":
         return "Movimientos Financieros";
-      case 'productos':
+      case "productos":
         return "Análisis de Inventario";
-      case 'usuarios':
+      case "usuarios":
         return "Actividad de Usuarios";
       default:
         return "Análisis Detallado";
@@ -754,13 +833,13 @@ export default function AnalyticsDashboardPro() {
   // Get period title
   const getPeriodTitle = () => {
     switch (selectedPeriod) {
-      case 'daily':
+      case "daily":
         return "Hoy";
-      case 'weekly':
+      case "weekly":
         return "Esta Semana";
-      case 'monthly':
+      case "monthly":
         return "Este Mes";
-      case 'yearly':
+      case "yearly":
         return "Este Año";
       default:
         return "Período";
@@ -774,9 +853,15 @@ export default function AnalyticsDashboardPro() {
         return (
           <DataTable>
             <DataTable.Header>
-              <DataTable.Title textStyle={styles.cellText}>Fecha</DataTable.Title>
-              <DataTable.Title textStyle={styles.cellText} numeric>Monto</DataTable.Title>
-              <DataTable.Title textStyle={styles.cellText}>Tipo</DataTable.Title>
+              <DataTable.Title textStyle={styles.cellText}>
+                Fecha
+              </DataTable.Title>
+              <DataTable.Title textStyle={styles.cellText} numeric>
+                Monto
+              </DataTable.Title>
+              <DataTable.Title textStyle={styles.cellText}>
+                Tipo
+              </DataTable.Title>
             </DataTable.Header>
             {movimientos && movimientos.length > 0 ? (
               filterDataByPeriod(movimientos).map((item, index) => (
@@ -812,10 +897,18 @@ export default function AnalyticsDashboardPro() {
         return (
           <DataTable>
             <DataTable.Header>
-              <DataTable.Title textStyle={styles.cellText}>Producto</DataTable.Title>
-              <DataTable.Title textStyle={styles.cellText}>Descripción</DataTable.Title>
-              <DataTable.Title textStyle={styles.cellText} numeric>Precio</DataTable.Title>
-              <DataTable.Title textStyle={styles.cellText} numeric>Stock</DataTable.Title>
+              <DataTable.Title textStyle={styles.cellText}>
+                Producto
+              </DataTable.Title>
+              <DataTable.Title textStyle={styles.cellText}>
+                Descripción
+              </DataTable.Title>
+              <DataTable.Title textStyle={styles.cellText} numeric>
+                Precio
+              </DataTable.Title>
+              <DataTable.Title textStyle={styles.cellText} numeric>
+                Stock
+              </DataTable.Title>
             </DataTable.Header>
             {filteredInventory().length > 0 ? (
               filteredInventory().map((item, index) => (
@@ -833,7 +926,8 @@ export default function AnalyticsDashboardPro() {
                     <Chip
                       mode="outlined"
                       style={{
-                        backgroundColor: item.cantidad > 10 ? "#E6FFFA" : "#FFF5F5",
+                        backgroundColor:
+                          item.cantidad > 10 ? "#E6FFFA" : "#FFF5F5",
                       }}
                     >
                       {item.cantidad}
@@ -854,13 +948,21 @@ export default function AnalyticsDashboardPro() {
         return (
           <DataTable>
             <DataTable.Header>
-              <DataTable.Title textStyle={styles.cellText}>Usuario</DataTable.Title>
-              <DataTable.Title textStyle={styles.cellText}>Email</DataTable.Title>
-              <DataTable.Title textStyle={styles.cellText}>Fecha</DataTable.Title>
-              <DataTable.Title textStyle={styles.cellText}>Estado</DataTable.Title>
+              <DataTable.Title textStyle={styles.cellText}>
+                Usuario
+              </DataTable.Title>
+              <DataTable.Title textStyle={styles.cellText}>
+                Email
+              </DataTable.Title>
+              <DataTable.Title textStyle={styles.cellText}>
+                Fecha
+              </DataTable.Title>
+              <DataTable.Title textStyle={styles.cellText}>
+                Estado
+              </DataTable.Title>
             </DataTable.Header>
             {users && users.length > 0 ? (
-              filterDataByPeriod(users, 'createdAt').map((user, index) => (
+              filterDataByPeriod(users, "createdAt").map((user, index) => (
                 <DataTable.Row key={index}>
                   <DataTable.Cell textStyle={styles.cellText}>
                     {user.nombre || user.username || "Usuario"}
@@ -900,11 +1002,11 @@ export default function AnalyticsDashboardPro() {
   // Get chart title based on active tab
   const getChartTitle = () => {
     switch (activeTab) {
-      case 'movimientos':
+      case "movimientos":
         return `Movimientos - ${getPeriodTitle()}`;
-      case 'productos':
+      case "productos":
         return `Inventario - ${getPeriodTitle()}`;
-      case 'usuarios':
+      case "usuarios":
         return `Usuarios - ${getPeriodTitle()}`;
       default:
         return `Análisis - ${getPeriodTitle()}`;
@@ -932,11 +1034,10 @@ export default function AnalyticsDashboardPro() {
         >
           <View style={styles.content}>
             <View style={styles.header}>
-              
-              <Text style={styles.headerSubtitle}>{new Date().toLocaleDateString()}</Text>
+              <Text style={styles.headerSubtitle}>
+                {new Date().toLocaleDateString()}
+              </Text>
             </View>
-            
-         
 
             <View style={styles.statsGrid}>
               {stats.map((stat, index) => (
@@ -946,10 +1047,16 @@ export default function AnalyticsDashboardPro() {
                   entering={FadeInUp.delay(index * 100)}
                   elevation={2}
                 >
-                  <View style={[
-                    styles.statIconContainer,
-                    { backgroundColor: stat.change.includes("+") ? "#F0FFF4" : "#FFF5F5" }
-                  ]}>
+                  <View
+                    style={[
+                      styles.statIconContainer,
+                      {
+                        backgroundColor: stat.change.includes("+")
+                          ? "#F0FFF4"
+                          : "#FFF5F5",
+                      },
+                    ]}
+                  >
                     <MaterialCommunityIcons
                       name={stat.icon}
                       size={22}
@@ -978,16 +1085,24 @@ export default function AnalyticsDashboardPro() {
 
             <View style={styles.tabContainer}>
               {[
-                { id: "movimientos", label: "Movimientos", icon: "cash-multiple" },
-                { id: "productos", label: "Productos", icon: "package-variant" },
-                { id: "usuarios", label: "Usuarios", icon: "account-group" }
+                {
+                  id: "movimientos",
+                  label: "Movimientos",
+                  icon: "cash-multiple",
+                },
+                {
+                  id: "productos",
+                  label: "Productos",
+                  icon: "package-variant",
+                },
+                { id: "usuarios", label: "Usuarios", icon: "account-group" },
               ].map((tab) => (
                 <AnimatedTouchable
                   key={tab.id}
                   onPress={() => setActiveTab(tab.id)}
                   style={[
-                    styles.mainTab, 
-                    activeTab === tab.id && styles.activeMainTab
+                    styles.mainTab,
+                    activeTab === tab.id && styles.activeMainTab,
                   ]}
                 >
                   <MaterialCommunityIcons
@@ -1020,12 +1135,17 @@ export default function AnalyticsDashboardPro() {
                   <Text
                     style={[
                       styles.periodButtonText,
-                      selectedPeriod === period && styles.periodButtonTextActive,
+                      selectedPeriod === period &&
+                        styles.periodButtonTextActive,
                     ]}
                   >
-                    {period === "daily" ? "Diario" : 
-                     period === "weekly" ? "Semanal" : 
-                     period === "monthly" ? "Mensual" : "Anual"}
+                    {period === "daily"
+                      ? "Diario"
+                      : period === "weekly"
+                      ? "Semanal"
+                      : period === "monthly"
+                      ? "Mensual"
+                      : "Anual"}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -1035,7 +1155,11 @@ export default function AnalyticsDashboardPro() {
               <Text style={styles.cardTitle}>{getChartTitle()}</Text>
               <LineChart
                 data={prepareLineChartData()}
-                width={Platform.OS === "android" ? screenWidth * 0.8 : screenWidth * 0.89}
+                width={
+                  Platform.OS === "android"
+                    ? screenWidth * 0.8
+                    : screenWidth * 0.89
+                }
                 height={220}
                 chartConfig={chartConfig}
                 bezier
@@ -1044,24 +1168,32 @@ export default function AnalyticsDashboardPro() {
                 withOuterLines={true}
                 withDots={true}
                 withShadow={true}
-                onDataPointClick={({value, index}) => {
+                onDataPointClick={({ value, index }) => {
                   // Show tooltip or detail on click
-                  alert(`Valor: ${value}\nPeríodo: ${prepareLineChartData().labels[index]}`);
+                  alert(
+                    `Valor: ${value}\nPeríodo: ${
+                      prepareLineChartData().labels[index]
+                    }`
+                  );
                 }}
               />
             </Animated.View>
 
-            <Animated.View 
-              style={[styles.card, barChartStyle]}
-            >
+            <Animated.View style={[styles.card, barChartStyle]}>
               <Text style={styles.cardTitle}>
-                {activeTab === 'movimientos' ? 'Análisis de Transacciones' : 
-                 activeTab === 'productos' ? 'Valor de Inventario por Producto' : 
-                 'Actividad de Usuarios'}
+                {activeTab === "movimientos"
+                  ? "Análisis de Transacciones"
+                  : activeTab === "productos"
+                  ? "Valor de Inventario por Producto"
+                  : "Actividad de Usuarios"}
               </Text>
               <BarChart
                 data={prepareBarChartData()}
-                width={Platform.OS === "android" ? screenWidth * 0.8 : screenWidth * 0.89}
+                width={
+                  Platform.OS === "android"
+                    ? screenWidth * 0.8
+                    : screenWidth * 0.89
+                }
                 height={220}
                 chartConfig={{
                   ...chartConfig,
@@ -1075,13 +1207,13 @@ export default function AnalyticsDashboardPro() {
               />
             </Animated.View>
 
-            <Animated.View 
-              style={[styles.card, pieChartStyle]}
-            >
+            <Animated.View style={[styles.card, pieChartStyle]}>
               <Text style={styles.cardTitle}>
-                {activeTab === 'movimientos' ? 'Distribución de Movimientos' : 
-                 activeTab === 'productos' ? 'Categorías de Productos' : 
-                 'Distribución de Usuarios'}
+                {activeTab === "movimientos"
+                  ? "Distribución de Movimientos"
+                  : activeTab === "productos"
+                  ? "Categorías de Productos"
+                  : "Distribución de Usuarios"}
               </Text>
               <PieChart
                 data={preparePieChartData()}
@@ -1095,10 +1227,7 @@ export default function AnalyticsDashboardPro() {
               />
             </Animated.View>
 
-            <Animated.View 
-              style={styles.card}
-              entering={FadeIn.delay(600)}
-            >
+            <Animated.View style={styles.card} entering={FadeIn.delay(600)}>
               <Text style={styles.cardTitle}>{getTabTitle()}</Text>
               <View style={styles.tabContent}>{renderTabContent()}</View>
             </Animated.View>

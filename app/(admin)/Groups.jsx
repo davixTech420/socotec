@@ -273,6 +273,7 @@ const Groups = () => {
           </Card.Content>
         </Card>
       </ScrollView>
+       <AddComponent onOpen={() => setOpenForm(true)} />
       <AlertaScroll
         onOpen={openForm}
         onClose={resetForm}
@@ -371,7 +372,7 @@ const Groups = () => {
           {snackbarMessage.text}
         </Text>
       </Snackbar>
-      <AddComponent onOpen={() => setOpenForm(true)} />
+     
     </PaperProvider>
   );
 };

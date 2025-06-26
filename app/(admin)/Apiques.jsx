@@ -971,6 +971,7 @@ const Apiques = () => {
             </Card.Content>
           </Card>
         </ScrollView>
+        <AddComponent onOpen={() => updateState({ openForm: true })} />
 
         <Snackbar
           visible={snackbarVisible}
@@ -1174,7 +1175,6 @@ const Apiques = () => {
           isEditing={isEditingSample}
         />
       </PaperProvider>
-      <AddComponent onOpen={() => updateState({ openForm: true })} />
     </>
   );
 };

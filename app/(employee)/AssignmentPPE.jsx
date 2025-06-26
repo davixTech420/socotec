@@ -27,7 +27,6 @@ import {
   getMyAssignment,
   createAssignment,
   updateAssignment,
-  deleteAssignment,
   getActiveInventory,
   getCampoUsers,
 } from "@/services/employeeService";
@@ -510,7 +509,7 @@ export default function Hiring() {
           </Card.Content>
         </Card>
       </ScrollView>
-
+ <AddComponent onOpen={() => setOpenForm(true)} />
       {/* Indicador de carga */}
       {isLoading && (
         <View style={styles.loadingOverlay}>
@@ -719,7 +718,7 @@ export default function Hiring() {
       {profileData.cargo == "Laboratorista" ||
       profileData.cargo == "Campo" ? null : (
         <>
-          <AddComponent onOpen={() => setOpenForm(true)} />
+         
         </>
       )}
     </>

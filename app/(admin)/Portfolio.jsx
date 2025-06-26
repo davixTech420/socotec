@@ -466,6 +466,7 @@ const Portfolio = () => {
             </Card.Content>
           </Card>
         </ScrollView>
+         <AddComponent onOpen={() => setOpenForm(true)} />
 
         <Snackbar
           visible={snackbarVisible}
@@ -639,7 +640,7 @@ const Portfolio = () => {
           ]}
         />
       </PaperProvider>
-      <AddComponent onOpen={() => setOpenForm(true)} />
+     
     </>
   );
 };

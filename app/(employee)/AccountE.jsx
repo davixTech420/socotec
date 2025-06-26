@@ -21,13 +21,11 @@ import { AlertaScroll } from "@/components/alerta";
 import InputComponent from "@/components/InputComponent";
 import {
   getAccounts,
-  deleteAccount,
   activeAccount,
   inactiveAccount,
   updateAccount,
   createAccount,
-  activateGroup,
-} from "@/services/adminServices";
+} from "@/services/employeeService";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
 import DropdownComponent from "@/components/DropdownComponent";
@@ -229,6 +227,7 @@ export default function AccountE() {
           </Card.Content>
         </Card>
       </ScrollView>
+      <AddComponent onOpen={() => setOpenForm(true)} />
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
@@ -306,7 +305,7 @@ export default function AccountE() {
           </Button>,
         ]}
       />
-      <AddComponent onOpen={() => setOpenForm(true)} />
+      
     </>
   );
 }

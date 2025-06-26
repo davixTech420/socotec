@@ -235,6 +235,7 @@ export default function Account() {
           </Card.Content>
         </Card>
       </ScrollView>
+      <AddComponent onOpen={() => setOpenForm(true)} />
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
@@ -312,7 +313,7 @@ export default function Account() {
           </Button>,
         ]}
       />
-      <AddComponent onOpen={() => setOpenForm(true)} />
+      
     </>
   );
 }

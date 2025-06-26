@@ -261,6 +261,7 @@ const Ticket = () => {
             </Card.Content>
           </Card>
         </ScrollView>
+         <AddComponent onOpen={() => setOpenForm(true)} />
         <Snackbar
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
@@ -329,10 +330,11 @@ const Ticket = () => {
             </View>
           }
           actions={[
-            <Button mode="outlined" textColor="black" onPress={resetForm}>
+            <Button key="cancelar" mode="outlined" textColor="black" onPress={resetForm}>
               Cancelar
             </Button>,
             <Button
+            key="aceptar"
               onPress={handleSubmit}
               mode="contained"
               style={{ backgroundColor: "#00ACE8" }}
@@ -342,7 +344,7 @@ const Ticket = () => {
           ]}
         />
       </PaperProvider>
-      <AddComponent onOpen={() => setOpenForm(true)} />
+     
     </>
   );
 };
