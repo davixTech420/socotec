@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Socotec",
-    "slug": "Socotec",
+    "slug": "socotec",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -37,7 +37,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true
@@ -47,7 +48,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "21f3204b-5e7b-4d75-9956-4de26d28455e"
+        "projectId": "fe1254a7-bd4b-4161-b5c1-5d79c20d0b88"
       }
     }
   }
