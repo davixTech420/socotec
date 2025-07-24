@@ -5,8 +5,8 @@ import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-/* const baseUrl = `http://192.168.106.31:${port}/api/admin`; */
-const baseUrl = `https://socotec.alwaysdata.net/api/admin`;
+const baseUrl = `http://192.168.0.111:${port}/api/admin`;
+/* const baseUrl = `https://socotec.alwaysdata.net/api/admin`; */
 
 const makeRequest = async (method, url, data = null) => {
   try {
@@ -38,6 +38,27 @@ const makeRequest = async (method, url, data = null) => {
 export const getDashboard = async () => {
   return makeRequest("get", "/dashboard");
 };
+
+
+
+
+
+export const getEnvironmental = async () => {
+  return makeRequest("get","/environmental");
+}
+
+
+export const createEnvironmental = async (data) => {
+  return makeRequest("post","/environmental",data);
+}
+
+
+export const getSampleEnvironmentalId = async (id) => {
+  return makeRequest("get", `/sampleEnvironmental/${id}`);
+};
+
+
+
 
 //routes for files apique
 
@@ -113,6 +134,11 @@ function arrayBufferToBase64(buffer) {
 
   return btoa(binary);
 }
+
+
+
+
+
 
 export const getSampleApiqueId = async (id) => {
   return makeRequest("get", `/sampleApique/${id}`);

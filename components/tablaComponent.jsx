@@ -29,6 +29,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SrcImagen } from "@/services/publicServices";
 import { useAuth } from "@/context/userContext";
 import ExcelApique from "./ExcelApique";
+import ExcelEnvironmental from "./ExcelEnvironmental";
 import { getUserById as getUserByIdAdmin } from "@/services/adminServices";
 import { getUserById as getUserByIdEmployee } from "@/services/employeeService";
 
@@ -320,7 +321,7 @@ const TablaComponente = ({
 
   // Sistema de cache optimizado
   const [usersCache, setUsersCache] = useState(new Map());
-    const [cacheSize, setCacheSize] = useState(0);
+  const [cacheSize, setCacheSize] = useState(0);
   const [loadingUsers, setLoadingUsers] = useState(new Set());
   const batchQueue = useRef([]);
   const batchTimeoutRef = useRef(null);
@@ -935,6 +936,10 @@ const TablaComponente = ({
 
                             {item.informeNum != null ? (
                               <ExcelApique id={item.id} />
+                            ) : null}
+
+                            {item.especificacion != null ? (
+                              <ExcelEnvironmental id={item.id} />
                             ) : null}
 
                             {(item.estado === true ||

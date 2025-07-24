@@ -52,6 +52,7 @@ import Hirings from "./Hirings";
 import Assignment from "./Assignment";
 import Apiques from "./Apiques";
 import ProfileScreen from "./MyAccount";
+import Environmental from "./Environmental";
 
 const Drawer = createDrawerNavigator();
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -182,6 +183,14 @@ const DRAWER_SCREENS = [
     name: "Apiques",
     title: "Apique",
     component: Apiques,
+    icon: "files-o",
+    iconFamily: "FontAwesome",
+    useAnimatedScreen: false, // Sin AnimatedScreen para evitar conflictos
+  },
+  {
+    name: "Environmental",
+    title: "Environmental",
+    component: Environmental,
     icon: "files-o",
     iconFamily: "FontAwesome",
     useAnimatedScreen: false, // Sin AnimatedScreen para evitar conflictos
