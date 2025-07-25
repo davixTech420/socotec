@@ -5,8 +5,8 @@ import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://192.168.0.111:${port}/api/admin`;
-/* const baseUrl = `https://socotec.alwaysdata.net/api/admin`; */
+/* const baseUrl = `http://192.168.0.115:${port}/api/admin`; */
+const baseUrl = `https://socotec.alwaysdata.net/api/admin`;
 
 const makeRequest = async (method, url, data = null) => {
   try {
@@ -57,7 +57,67 @@ export const getSampleEnvironmentalId = async (id) => {
   return makeRequest("get", `/sampleEnvironmental/${id}`);
 };
 
+export const generateEnvironmental = async (id) => {
+  try {
+    const token = await AsyncStorage.getItem("userToken");
+    if (!token) {
+      throw new Error("No se encontró el token");
+    }
 
+    const apiUrl = `${baseUrl}/generateEnvironmental/${id}`;
+
+    if (Platform.OS === "web") {
+      // 🖥 Solución para Web
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob",
+      });
+
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "Ambiental.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } else {
+      // 📱 Solución para Móviles (iOS/Android)
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "arraybuffer",
+      });
+
+      const fileUri = FileSystem.documentDirectory + "Ambiental.xlsx";
+
+      // Convertir arraybuffer a base64 sin usar Buffer
+      const base64Data = arrayBufferToBase64(response.data);
+
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Compartir archivo
+      await Sharing.shareAsync(fileUri, {
+        mimeType:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        dialogTitle: "Descargar Condiciones Ambientales",
+        UTI: "com.microsoft.excel.xlsx",
+      });
+    }
+
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
 
 
 //routes for files apique

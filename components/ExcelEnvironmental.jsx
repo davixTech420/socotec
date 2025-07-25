@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { IconButton } from "react-native-paper";
-import { generateApique as adminGenerateApique } from "@/services/adminServices";
+import { generateEnvironmental as adminGenerateEnvironmental } from "@/services/adminServices";
 import { generateApique as employeeGenerateApique } from "@/services/employeeService";
 import { useAuth } from "@/context/userContext";
 
@@ -23,7 +23,7 @@ const ExcelEnvironmental = ({ id }) => {
   const handleGenerateApique = async () => {
     try {
       if (userRole === "admin") {
-        await adminGenerateApique(id); // Usa la función de adminServices
+        await adminGenerateEnvironmental(id); // Usa la función de adminServices
       } else if (userRole === "employee") {
         await employeeGenerateApique(id); // Usa la función de employeeService
       } else {
