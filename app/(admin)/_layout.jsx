@@ -189,7 +189,7 @@ const DRAWER_SCREENS = [
   },
   {
     name: "Environmental",
-    title: "Environmental",
+    title: "Condiciones Ambientales",
     component: Environmental,
     icon: "files-o",
     iconFamily: "FontAwesome",

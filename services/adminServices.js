@@ -39,19 +39,21 @@ export const getDashboard = async () => {
   return makeRequest("get", "/dashboard");
 };
 
-
-
-
-
 export const getEnvironmental = async () => {
-  return makeRequest("get","/environmental");
-}
-
+  return makeRequest("get", "/environmental");
+};
 
 export const createEnvironmental = async (data) => {
-  return makeRequest("post","/environmental",data);
-}
+  return makeRequest("post", "/environmental", data);
+};
 
+export const updateEnvironmental = async (id, data) => {
+  return makeRequest("put", `/environmental/${id}`, data);
+};
+
+export const deleteEnvironmental = async (id) => {
+  return makeRequest("delete", `/environmental/${id}`);
+};
 
 export const getSampleEnvironmentalId = async (id) => {
   return makeRequest("get", `/sampleEnvironmental/${id}`);
@@ -118,7 +120,6 @@ export const generateEnvironmental = async (id) => {
     throw error;
   }
 };
-
 
 //routes for files apique
 
@@ -194,11 +195,6 @@ function arrayBufferToBase64(buffer) {
 
   return btoa(binary);
 }
-
-
-
-
-
 
 export const getSampleApiqueId = async (id) => {
   return makeRequest("get", `/sampleApique/${id}`);
@@ -285,10 +281,9 @@ export const createTicket = async (data) => {
   return makeRequest("post", "/ticket", data);
 };
 
-export const updateTicket = async (id,data) => {
+export const updateTicket = async (id, data) => {
   return makeRequest("put", `/ticket/${id}`, data);
 };
-
 
 export const deleteTicket = async (id) => {
   return makeRequest("delete", `/ticket/${id}`);

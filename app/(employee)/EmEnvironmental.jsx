@@ -37,9 +37,8 @@ import {
   updateEnvironmental,
   getEnvironmental,
   createEnvironmental,
-  deleteEnvironmental,
   getSampleEnvironmentalId,
-} from "@/services/adminServices";
+} from "@/services/employeeService";
 import { router } from "expo-router";
 
 // Memoized sample card component
@@ -75,14 +74,7 @@ const SampleCard = memo(
                 onPress={() => onEdit(index)}
                 style={styles.actionButton}
               />
-              <IconButton
-              key="cancel"
-                iconColor="#ff0000"
-                icon="delete"
-                size={16}
-                onPress={() => onDelete(index)}
-                style={styles.actionButton}
-              />
+            
               <IconButton
               key="submit"
                 icon={sample.expanded ? "chevron-up" : "chevron-down"}
@@ -258,7 +250,7 @@ const columns = [
 ];
 
 // Main component
-const Environmental = () => {
+const EmEnvironmental = () => {
   // State management with useReducer for complex state
   const [state, setState] = useState({
     data: [],
@@ -619,10 +611,6 @@ const Environmental = () => {
                 onSort={console.log}
                 onSearch={console.log}
                 onFilter={console.log}
-                onDelete={async (item) => {
-                  await deleteEnvironmental(item.id);
-                  updateState({ data: data.filter((p) => p.id !== item.id) });
-                }}
                 onDataUpdate={(newData) => updateState({ data: newData })}
                 onCreate={() => updateState({ openForm: true })}
                 onEdit={handleEdit}
@@ -630,7 +618,7 @@ const Environmental = () => {
             </Card.Content>
           </Card>
         </ScrollView>
-        <AddComponent onOpen={() => updateState({ openForm: true })} />
+      {/*   <AddComponent onOpen={() => updateState({ openForm: true })} /> */}
 
         <Snackbar
           visible={snackbarVisible}
@@ -981,4 +969,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Environmental;
+export default EmEnvironmental;

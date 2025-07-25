@@ -53,6 +53,7 @@ import Hiring from "./Hiring";
 import AssignmentPPE from "./AssignmentPPE";
 import Apique from "./Apique";
 import Users from "./Users";
+import EmEnvironmental from "./EmEnvironmental";
 
 const Drawer = createDrawerNavigator();
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -274,6 +275,13 @@ const getScreensConfig = (cargo) => {
         name: "Apique",
         component: Apique,
         title: "Apique",
+        icon: "files-o",
+        iconFamily: FontAwesome,
+      },
+      {
+        name: "EmEnvironmental",
+        component: EmEnvironmental,
+        title: "Condiciones Ambientales",
         icon: "files-o",
         iconFamily: FontAwesome,
       },

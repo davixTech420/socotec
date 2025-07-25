@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { IconButton } from "react-native-paper";
 import { generateEnvironmental as adminGenerateEnvironmental } from "@/services/adminServices";
-import { generateApique as employeeGenerateApique } from "@/services/employeeService";
+import { generateEnvironmental as employeeGenerateEnvironmental } from "@/services/employeeService";
 import { useAuth } from "@/context/userContext";
 
 const ExcelEnvironmental = ({ id }) => {
@@ -25,7 +25,7 @@ const ExcelEnvironmental = ({ id }) => {
       if (userRole === "admin") {
         await adminGenerateEnvironmental(id); // Usa la función de adminServices
       } else if (userRole === "employee") {
-        await employeeGenerateApique(id); // Usa la función de employeeService
+        await employeeGenerateEnvironmental(id); // Usa la función de employeeService
       } else {
         console.warn("Rol no válido o no definido");
       }
