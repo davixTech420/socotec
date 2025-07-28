@@ -18,7 +18,7 @@ import {
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAuth } from "@/context/userContext";
-import { updateUser } from "@/services/adminServices";
+import { updateUser } from "@/services/employeeService";
 
 const AnimatedSurface = Animated.createAnimatedComponent(Surface);
 

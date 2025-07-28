@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo, memo } from "react";
+import React, { useCallback, useState, useEffect, useMemo, memo } from "react";
 import {
   View,
   StyleSheet,
@@ -31,8 +31,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import TablaComponente from "@/components/tablaComponent";
 import Breadcrumb from "@/components/BreadcrumbComponent";
 import { AlertaScroll } from "@/components/alerta";
-import AddComponent from "../../components/AddComponent";
 import InputComponent from "@/components/InputComponent";
+import { useAuth } from "@/context/userContext";
 import {
   updateEnvironmental,
   getEnvironmental,
@@ -67,7 +67,8 @@ const SampleCard = memo(
               </Text>
             </View>
             <View style={styles.sampleActions}>
-              <IconButton
+              {/*
+            <IconButton
                 iconColor="#00ACE8"
                 icon="pencil"
                 size={16}
@@ -75,8 +76,10 @@ const SampleCard = memo(
                 style={styles.actionButton}
               />
             
+            */}
+
               <IconButton
-              key="submit"
+                key="submit"
                 icon={sample.expanded ? "chevron-up" : "chevron-down"}
                 size={20}
                 onPress={toggleExpand}
@@ -115,6 +118,9 @@ const SampleCard = memo(
 // Memoized sample form component
 const SampleForm = memo(
   ({ visible, onClose, onSave, editingSample, isEditing }) => {
+    const [profileData, setProfileData] = useState(null);
+    const { user } = useAuth();
+
     const [sampleData, setSampleData] = useState({
       fechaEjecucion: "",
       hora: "",
@@ -123,17 +129,35 @@ const SampleForm = memo(
       firma: "",
       observaciones: "",
     });
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const userData = await user();
+          setProfileData(userData);
+          setSampleData((prev) => ({ ...prev, firma: userData.nombre })); // Actualiza solo la firma
+        } catch (error) {
+          console.error("Error al cargar el usuario:", error);
+        }
+      };
+
+      fetchData();
+    }, [user]);
 
     React.useEffect(() => {
       if (isEditing && editingSample) {
         setSampleData(editingSample);
       } else {
         setSampleData({
-          fechaEjecucion: "",
-          hora: "",
+          fechaEjecucion: new Date().toISOString().split("T")[0],
+          hora: new Date().toLocaleTimeString("es-ES", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          }),
           temperatura: "",
           humedad: "",
-          firma: "",
+          firma: profileData && profileData.nombre,
           observaciones: "",
         });
       }
@@ -159,7 +183,8 @@ const SampleForm = memo(
         title={isEditing ? "Editar Muestra" : "Nueva Muestra"}
         content={
           <View style={styles.sampleFormContainer}>
-            <InputComponent
+            {/* <InputComponent
+              editable={false}
               type="date"
               value={sampleData.fechaEjecucion}
               onChangeText={(text) => handleInputChange("fechaEjecucion", text)}
@@ -167,15 +192,17 @@ const SampleForm = memo(
               placeholder="Ej: 1"
               validationRules={{ required: true }}
               errorMessage="Por favor, introduce una fecha valida"
-            />
+            /> */}
 
-            <InputComponent
+            {/*  <InputComponent
+              editable={false}
               type="profundidad"
               value={sampleData.hora}
               onChangeText={(text) => handleInputChange("hora", text)}
               label="Hora"
               placeholder="Ej: 15"
-            />
+            /> */}
+
             <InputComponent
               type="pdc"
               value={sampleData.temperatura}
@@ -192,13 +219,15 @@ const SampleForm = memo(
               placeholder="Ej: 12.5"
             />
 
-            <InputComponent
+            {/*   <InputComponent
+              editable={false}
               type="nombre"
               value={sampleData.firma}
               onChangeText={(text) => handleInputChange("firma", text)}
               label="Firma"
               placeholder="Firma"
-            />
+            /> */}
+
             <InputComponent
               type="descripcion"
               value={sampleData.observaciones}
@@ -490,7 +519,10 @@ const EmEnvironmental = () => {
               }))
             : [];
         } catch (error) {
-          showMessage("Error al cargar los registros de la condicion ambiental", "error");
+          showMessage(
+            "Error al cargar los registros de la condicion ambiental",
+            "error"
+          );
         }
 
         // Update form data
@@ -618,7 +650,7 @@ const EmEnvironmental = () => {
             </Card.Content>
           </Card>
         </ScrollView>
-      {/*   <AddComponent onOpen={() => updateState({ openForm: true })} /> */}
+        {/*   <AddComponent onOpen={() => updateState({ openForm: true })} /> */}
 
         <Snackbar
           visible={snackbarVisible}
@@ -654,6 +686,7 @@ const EmEnvironmental = () => {
               >
                 {formFields.map((field) => (
                   <InputComponent
+                    editable={false}
                     key={field}
                     type={getFieldType(field)}
                     value={formData[field]}
