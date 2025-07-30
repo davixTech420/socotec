@@ -76,7 +76,7 @@ const SampleCard = memo(
                 style={styles.actionButton}
               />
               <IconButton
-              key="cancel"
+                key="cancel"
                 iconColor="#ff0000"
                 icon="delete"
                 size={16}
@@ -84,7 +84,7 @@ const SampleCard = memo(
                 style={styles.actionButton}
               />
               <IconButton
-              key="submit"
+                key="submit"
                 icon={sample.expanded ? "chevron-up" : "chevron-down"}
                 size={20}
                 onPress={toggleExpand}
@@ -469,7 +469,11 @@ const Environmental = () => {
       updateState({ data: updatedData });
       resetForm();
     } catch (error) {
-      showMessage("Error al procesar los datos", "error");
+      updateState({ sampleFormVisible: false, openForm: false });
+      showMessage(
+        `Error al procesar los datos ${error.response.data.message}`,
+        "error"
+      );
     } finally {
       updateState({ loading: false });
     }
@@ -498,7 +502,10 @@ const Environmental = () => {
               }))
             : [];
         } catch (error) {
-          showMessage("Error al cargar los registros de la condicion ambiental", "error");
+          showMessage(
+            "Error al cargar los registros de la condicion ambiental",
+            "error"
+          );
         }
 
         // Update form data

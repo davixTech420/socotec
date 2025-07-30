@@ -26,6 +26,7 @@ import {
   useAnimatedStyle,
   withTiming,
   withSpring,
+  setNativeProps,
 } from "react-native-reanimated";
 import { MaterialIcons } from "@expo/vector-icons";
 import TablaComponente from "@/components/tablaComponent";
@@ -490,7 +491,9 @@ const EmEnvironmental = () => {
       updateState({ data: updatedData });
       resetForm();
     } catch (error) {
-      showMessage("Error al procesar los datos", "error");
+      console.log(error);
+      updateState({sampleFormVisible:false,openForm:false});
+      showMessage(`Error al procesar los datos ${error.response.data.message}`, "error");
     } finally {
       updateState({ loading: false });
     }
