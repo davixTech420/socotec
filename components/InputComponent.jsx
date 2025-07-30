@@ -12,6 +12,7 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
   Entypo,
+  FontAwesome6,
 } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
@@ -131,7 +132,37 @@ const INPUT_CONFIGS = {
       }
       return validText.replace(/(\..*)\./g, "$1");
     },
+    maxLength:6,
   },
+  code:{
+    icon: {
+      family: MaterialCommunityIcons,
+      name: "code-tags",
+    },
+    maxLength:10
+  },
+rango:{
+  icon: {
+    family: FontAwesome6,
+    name: "ranking-star",
+},
+maxLength:20
+},
+temperature:{
+  icon: {
+    family: FontAwesome6,
+    name: "temperature-high",
+},
+keyboardType: "numeric",
+    filter: (text) => {
+      let validText = text.replace(/[^0-9.]/g, "");
+      if (validText.startsWith(".")) {
+        validText = "0" + validText;
+      }
+      return validText.replace(/(\..*)\./g, "$1");
+    },
+    maxLength:4,
+},
   textarea: {
     multiline: true,
   },

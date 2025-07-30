@@ -180,7 +180,7 @@ const SampleForm = memo(
       <AlertaScroll
         onOpen={visible}
         onClose={onClose}
-        title={isEditing ? "Editar Muestra" : "Nueva Muestra"}
+        title={isEditing ? "Editar registro" : "Nuevo registro"}
         content={
           <View style={styles.sampleFormContainer}>
             {/* <InputComponent
@@ -204,7 +204,7 @@ const SampleForm = memo(
             /> */}
 
             <InputComponent
-              type="pdc"
+              type="temperature"
               value={sampleData.temperatura}
               onChangeText={(text) => handleInputChange("temperatura", text)}
               label="Temperatura)"

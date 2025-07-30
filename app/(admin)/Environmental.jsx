@@ -557,10 +557,10 @@ const Environmental = () => {
   const getFieldType = useCallback((field) => {
     const typeMap = {
       nombre: "muestra",
-      codigo: "numberNum",
+      codigo: "code",
       norma: "descripcion",
       especificacion: "descripcion",
-      rangoMedicion: "espresor",
+      rangoMedicion: "rango",
       lugarMedicion: "ubicacion",
       conclusion: "descripcion",
     };
