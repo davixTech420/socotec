@@ -5,8 +5,8 @@ import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-const baseUrl = `http://192.168.0.117:${port}/api/admin`;
-/* const baseUrl = `https://socotec.alwaysdata.net/api/admin`; */
+/* const baseUrl = `http://192.168.0.117:${port}/api/admin`; */
+const baseUrl = `https://socotec.alwaysdata.net/api/admin`;
 
 const makeRequest = async (method, url, data = null) => {
   try {
