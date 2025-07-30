@@ -9,8 +9,8 @@ const baseUrl = `https://socotec.alwaysdata.net/api/public`;
 
 /* export const SrcImagen = (path) => {
   return `http://192.168.0.117:${port}${path}`;
-} */
-
+}
+ */
 export const SrcImagen = (path) => {
   return `https://socotec.alwaysdata.net${path}`;
 };

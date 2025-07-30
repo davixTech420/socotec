@@ -76,7 +76,7 @@ export const generateEnvironmental = async (id) => {
 
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "Ambiental.xlsx");
+      link.setAttribute("download", "BAC-COL-FT-85 CONDICIONES AMBIENTALES.xlsx");
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -89,7 +89,7 @@ export const generateEnvironmental = async (id) => {
         responseType: "arraybuffer",
       });
 
-      const fileUri = FileSystem.documentDirectory + "Ambiental.xlsx";
+      const fileUri = FileSystem.documentDirectory + "BAC-COL-FT-85 CONDICIONES AMBIENTALES.xlsx";
 
       // Convertir arraybuffer a base64 sin usar Buffer
       const base64Data = arrayBufferToBase64(response.data);
