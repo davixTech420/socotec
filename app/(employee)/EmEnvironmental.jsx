@@ -264,19 +264,14 @@ const SampleForm = memo(
 
 // Table columns definition
 const columns = [
-  { key: "id", title: "ID", sortable: true, width: 50 },
+ /*  { key: "id", title: "ID", sortable: true, width: 50 }, */
   { key: "nombre", title: "Nombre Equipamento", sortable: true },
   { key: "codigo", title: "Codigo Equipamento", sortable: true, width: 80 },
-  { key: "norma", title: "Norma", sortable: true, width: 100 },
-  { key: "especificacion", title: "Especificacion", sortable: true },
-  { key: "rangoMedicion", title: "Rango Medicion", sortable: true },
   {
     key: "lugarMedicion",
     title: "Lugar Medicion",
     sortable: true,
   },
-  { key: "createdAt", title: "Creado", sortable: true },
-  { key: "updatedAt", title: "Modificado", sortable: true },
 ];
 
 // Main component
@@ -492,8 +487,11 @@ const EmEnvironmental = () => {
       resetForm();
     } catch (error) {
       console.log(error);
-      updateState({sampleFormVisible:false,openForm:false});
-      showMessage(`Error al procesar los datos ${error.response.data.message}`, "error");
+      updateState({ sampleFormVisible: false, openForm: false });
+      showMessage(
+        `Error al procesar los datos ${error.response.data.message}`,
+        "error"
+      );
     } finally {
       updateState({ loading: false });
     }
@@ -687,7 +685,7 @@ const EmEnvironmental = () => {
                   flexWrap: "wrap",
                 }}
               >
-                {formFields.map((field) => (
+                {/*  {formFields.map((field) => (
                   <InputComponent
                     editable={false}
                     key={field}
@@ -699,7 +697,7 @@ const EmEnvironmental = () => {
                     validationRules={{ required: true }}
                     errorMessage={`Por favor, introduce un ${field} válido`}
                   />
-                ))}
+                ))} */}
               </View>
 
               {/* Sección de Muestras */}

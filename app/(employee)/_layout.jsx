@@ -76,7 +76,7 @@ const getScreensConfig = (cargo) => {
       icon: "view-dashboard-outline",
       iconFamily: MaterialCommunityIcons,
     },
-    {
+   /*  {
       name: "CalendarE",
       component: Calendar,
       title: cargo === "TeamLider" ? "Permisos" : "Mis Permisos",
@@ -103,7 +103,7 @@ const getScreensConfig = (cargo) => {
       title: "Mi Cuenta",
       icon: "account-box",
       iconFamily: MaterialIcons,
-    },
+    }, */
   ];
 
   const roleScreens = {
@@ -264,7 +264,7 @@ const getScreensConfig = (cargo) => {
       },
     ],
     Laboratorista: [
-      {
+     /*  {
         name: "AssignmentPPE",
         component: AssignmentPPE,
         title: "Proteccion Personal",
@@ -277,7 +277,7 @@ const getScreensConfig = (cargo) => {
         title: "Apique",
         icon: "files-o",
         iconFamily: FontAwesome,
-      },
+      }, */
       {
         name: "EmEnvironmental",
         component: EmEnvironmental,

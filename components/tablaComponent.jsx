@@ -938,7 +938,7 @@ const TablaComponente = ({
                               <ExcelApique id={item.id} />
                             ) : null}
 
-                            {item.especificacion != null ? (
+                            {item.especificacion != null && logueado?.cargo != "Laboratorista" ? (
                               <ExcelEnvironmental id={item.id} />
                             ) : null}
 
