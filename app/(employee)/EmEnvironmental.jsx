@@ -149,13 +149,8 @@ const SampleForm = memo(
         setSampleData(editingSample);
       } else {
         setSampleData({
-          fechaEjecucion: new Date().toISOString().split("T")[0],
-          hora: new Date().toLocaleTimeString("es-ES", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false,
-          }),
+          fechaEjecucion: "",
+          hora: "",
           temperatura: "",
           humedad: "",
           firma: profileData && profileData.nombre,
@@ -165,10 +160,7 @@ const SampleForm = memo(
     }, [isEditing, editingSample, visible]);
 
     const handleSave = useCallback(() => {
-      if (!sampleData.fechaEjecucion) {
-        alert("Por favor, ingresa un fecha para la muestra");
-        return;
-      }
+      
       onSave(sampleData);
       onClose();
     }, [sampleData, onSave, onClose]);

@@ -4,11 +4,11 @@ import { useAuth } from "@/context/userContext";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-/* const baseUrl = `http://192.168.0.117:${port}/api/public`; */
+/* const baseUrl = `http://192.168.0.8:${port}/api/public`; */
 const baseUrl = `https://socotec.alwaysdata.net/api/public`;
 
 /* export const SrcImagen = (path) => {
-  return `http://192.168.0.117:${port}${path}`;
+  return `http://192.168.0.8:${port}${path}`;
 }
  */
 export const SrcImagen = (path) => {
