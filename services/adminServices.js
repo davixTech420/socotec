@@ -5,7 +5,7 @@ import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-/* const baseUrl = `http://192.168.0.8:${port}/api/admin`; */
+/* const baseUrl = `http://192.168.202.31:${port}/api/admin`; */
 const baseUrl = `https://socotecback.onrender.com/api/admin`;
 
 const makeRequest = async (method, url, data = null) => {
@@ -59,59 +59,51 @@ export const getSampleEnvironmentalId = async (id) => {
   return makeRequest("get", `/sampleEnvironmental/${id}`);
 };
 
+
 export const generateEnvironmental = async (id) => {
   try {
     const token = await AsyncStorage.getItem("userToken");
-    if (!token) {
-      throw new Error("No se encontró el token");
-    }
+    if (!token) throw new Error("No se encontró el token");
 
     const apiUrl = `${baseUrl}/generateEnvironmental/${id}`;
 
+    const response = await axios.get(apiUrl, {
+      headers: { Authorization: `Bearer ${token}` },
+      responseType: Platform.OS === "web" ? "blob" : "arraybuffer",
+    });
+
+    // Detectar si es ZIP o Excel
+    const contentType =
+      response.headers["content-type"] ||
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+    const isZip = contentType.includes("zip");
+    const fileName = isZip
+      ? "Condiciones_Ambientales.zip"
+      : "BAC-COL-FT-85 CONDICIONES AMBIENTALES.xlsx";
+
     if (Platform.OS === "web") {
-      // 🖥 Solución para Web
-      const response = await axios.get(apiUrl, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        responseType: "blob",
-      });
-
-      const blob = new Blob([response.data], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
+      // 🖥 Web
+      const blob = new Blob([response.data], { type: contentType });
       const url = window.URL.createObjectURL(blob);
-
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "BAC-COL-FT-85 CONDICIONES AMBIENTALES.xlsx");
+      link.setAttribute("download", fileName);
       document.body.appendChild(link);
       link.click();
       link.remove();
     } else {
-      // 📱 Solución para Móviles (iOS/Android)
-      const response = await axios.get(apiUrl, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        responseType: "arraybuffer",
-      });
-
-      const fileUri = FileSystem.documentDirectory + "BAC-COL-FT-85 CONDICIONES AMBIENTALES.xlsx";
-
-      // Convertir arraybuffer a base64 sin usar Buffer
+      // 📱 Móviles (Expo)
+      const fileUri = FileSystem.documentDirectory + fileName;
       const base64Data = arrayBufferToBase64(response.data);
 
       await FileSystem.writeAsStringAsync(fileUri, base64Data, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      // Compartir archivo
       await Sharing.shareAsync(fileUri, {
-        mimeType:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        mimeType: contentType,
         dialogTitle: "Descargar Condiciones Ambientales",
-        UTI: "com.microsoft.excel.xlsx",
       });
     }
 

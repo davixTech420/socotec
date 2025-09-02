@@ -4,13 +4,13 @@ import { useAuth } from "@/context/userContext";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-/* const baseUrl = `http://192.168.0.8:${port}/api/public`; */
+/* const baseUrl = `http://192.168.202.31:${port}/api/public`; */
 const baseUrl = `https://socotecback.onrender.com/api/public`;
 
 /* export const SrcImagen = (path) => {
-  return `http://192.168.0.8:${port}${path}`;
-}
- */
+  return `http://192.168.202.31:${port}${path}`;
+} */
+
 export const SrcImagen = (path) => {
   return `https://socotecback.onrender.com${path}`;
 };
