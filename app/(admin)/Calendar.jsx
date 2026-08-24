@@ -460,7 +460,7 @@ export default function CalendarComponent() {
           </>
         }
         actions={[
-          <View style={styles.actions}>
+          <View style={styles.actions} key="actions">
             <Button
             key="cancelar"
               mode="outlined"

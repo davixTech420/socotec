@@ -122,6 +122,7 @@ const SignUp = () => {
           </Button>
         )}
       </View>
+
     </Animated.View>
   );
 

@@ -503,10 +503,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     ...Platform.select({
       ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        boxShadow: "0px 2px 3.84px rgba(0, 0, 0, 0.25)",
       },
       android: {
         elevation: 4,
@@ -533,11 +530,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
     width: width * 0.7,
     maxWidth: 300,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
   },
   memberInfo: {
     marginLeft: 12,

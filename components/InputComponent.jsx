@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
     boxSizing: "border-box",
     ...(Platform.OS === "web" && {
       WebkitAppearance: "none",
-      outline: "none",
+      outlineStyle: "none",
     }),
   },
 });

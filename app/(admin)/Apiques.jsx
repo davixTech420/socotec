@@ -770,7 +770,7 @@ const Apiques = () => {
       }
 
       const pickerOptions = {
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsMultipleSelection: true,
         quality: 0.7,
         allowsEditing: false,

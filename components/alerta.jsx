@@ -47,7 +47,8 @@ const styles = StyleSheet.create({
     maxWidth: Platform.OS === "web" ? "min(600px, 90vw)" : 600,
     maxHeight: Platform.OS === "web" ? "80vh" : "80%", // vh se adapta al viewport
     borderRadius: 8,
-    margin: Platform.OS === "web" ? "2vh 5vw" : 20,
+    marginVertical: Platform.OS === 'web' ? '2vh' : 20,
+marginHorizontal: Platform.OS === 'web' ? '5vw' : 20,
   },
   scrollContent: {
     paddingHorizontal: Platform.OS === "web" ? "4vw" : 24,
