@@ -1,0 +1,70 @@
+diff --git a/node_modules/react-native-svg/lib/commonjs/web/utils/prepare.js b/node_modules/react-native-svg/lib/commonjs/web/utils/prepare.js
+index 00f1f60..7f05d46 100644
+--- a/node_modules/react-native-svg/lib/commonjs/web/utils/prepare.js
++++ b/node_modules/react-native-svg/lib/commonjs/web/utils/prepare.js
+@@ -32,17 +32,22 @@ const prepare = (self, props = self.props) => {
+     gradientTransform,
+     patternTransform,
+     onPress,
++    onPressIn,
++    onPressOut,
++    onLongPress,
++    onStartShouldSetResponder,
++    onStartShouldSetResponderCapture,
++    onMoveShouldSetResponder,
++    onMoveShouldSetResponderCapture,
++    onResponderGrant,
++    onResponderReject,
++    onResponderMove,
++    onResponderRelease,
++    onResponderTerminationRequest,
++    onResponderTerminate,
+     ...rest
+   } = props;
+   const clean = {
+-    ...((0, _hasProperty.hasTouchableProperty)(props) ? {
+-      onStartShouldSetResponder: self.touchableHandleStartShouldSetResponder,
+-      onResponderTerminationRequest: self.touchableHandleResponderTerminationRequest,
+-      onResponderGrant: self.touchableHandleResponderGrant,
+-      onResponderMove: self.touchableHandleResponderMove,
+-      onResponderRelease: self.touchableHandleResponderRelease,
+-      onResponderTerminate: self.touchableHandleResponderTerminate
+-    } : null),
+     ...rest
+   };
+   if (origin != null) {
+diff --git a/node_modules/react-native-svg/lib/module/web/utils/prepare.js b/node_modules/react-native-svg/lib/module/web/utils/prepare.js
+index 41289b6..dcce3f1 100644
+--- a/node_modules/react-native-svg/lib/module/web/utils/prepare.js
++++ b/node_modules/react-native-svg/lib/module/web/utils/prepare.js
+@@ -26,17 +26,22 @@ export const prepare = (self, props = self.props) => {
+     gradientTransform,
+     patternTransform,
+     onPress,
++    onPressIn,
++    onPressOut,
++    onLongPress,
++    onStartShouldSetResponder,
++    onStartShouldSetResponderCapture,
++    onMoveShouldSetResponder,
++    onMoveShouldSetResponderCapture,
++    onResponderGrant,
++    onResponderReject,
++    onResponderMove,
++    onResponderRelease,
++    onResponderTerminationRequest,
++    onResponderTerminate,
+     ...rest
+   } = props;
+   const clean = {
+-    ...(hasTouchableProperty(props) ? {
+-      onStartShouldSetResponder: self.touchableHandleStartShouldSetResponder,
+-      onResponderTerminationRequest: self.touchableHandleResponderTerminationRequest,
+-      onResponderGrant: self.touchableHandleResponderGrant,
+-      onResponderMove: self.touchableHandleResponderMove,
+-      onResponderRelease: self.touchableHandleResponderRelease,
+-      onResponderTerminate: self.touchableHandleResponderTerminate
+-    } : null),
+     ...rest
+   };
+   if (origin != null) {

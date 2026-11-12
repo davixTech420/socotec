@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -10,6 +11,7 @@ import { useAuth } from "@/context/userContext";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
   const [role, setRole] = useState(null);
   const { isAuthenticated, user } = useAuth();
 
@@ -29,8 +31,8 @@ export default function TabLayout() {
     }
   }, [isAuthenticated, user]);
 
-  const getHref = () => {
-    if (!isAuthenticated) return "/(tabs)/singUp";
+  const getDashboardOrLoginHref = () => {
+    if (!isAuthenticated) return undefined;
 
     // Si está autenticado, devolver la ruta según el rol
     if (role === "admin") {
@@ -38,8 +40,7 @@ export default function TabLayout() {
     } else if (role === "employee") {
       return "/(employee)/DashboardE";
     }
-    // Si está autenticado pero aún no tenemos el rol, ir al login temporalmente
-    return "/(tabs)/singIn";
+    return undefined;
   };
 
   return (
@@ -47,25 +48,46 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: "white",
+          tabBarInactiveTintColor: "rgba(255, 255, 255, 0.7)",
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarBackground: TabBarBackground,
           tabBarStyle: {
-            borderRadius: 20,
-            left: 35,
-            right: 35,
+            position: "absolute",
+            borderRadius: 24,
+            height: 60,
+            paddingBottom: Platform.OS === "ios" ? 16 : 6,
+            paddingTop: 6,
             backgroundColor: "#00ACE8",
+            elevation: 10,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.18,
+            shadowRadius: 12,
             ...Platform.select({
               web: {
                 top: 15,
-                position: "absolute",
+                bottom: "auto",
+                left: "10%",
+                right: "10%",
+                maxWidth: 800,
+                alignSelf: "center",
+              },
+              ios: {
+                bottom: Math.max(insets.bottom, 20) + 4,
+                left: 20,
+                right: 20,
               },
               android: {
-                bottom: 10,
-                position: "absolute",
-                marginInline: 15,
+                bottom: Math.max(insets.bottom, 16) + 12,
+                left: 16,
+                right: 16,
               },
-              default: {},
+              default: {
+                bottom: Math.max(insets.bottom, 16) + 8,
+                left: 20,
+                right: 20,
+              },
             }),
           },
         }}
@@ -95,11 +117,11 @@ export default function TabLayout() {
         <Tabs.Screen
           name="singIn"
           options={{
-            href: getHref(),
+            href: getDashboardOrLoginHref(),
             title: isAuthenticated ? "Dashboard" : "Login",
             tabBarIcon: ({ color }) => (
               <MaterialCommunityIcons
-                name={isAuthenticated ? "view-dashboard" : "account"}
+                name={isAuthenticated ? "view-dashboard" : "login"}
                 size={28}
                 color={color}
               />
@@ -109,10 +131,10 @@ export default function TabLayout() {
         <Tabs.Screen
           name="singUp"
           options={{
-            href: null,
-            title: "Registrar",
+            href: isAuthenticated ? null : undefined,
+            title: "Registro",
             tabBarIcon: ({ color }) => (
-              <MaterialCommunityIcons name="account" size={28} color={color} />
+              <MaterialCommunityIcons name="account-plus" size={28} color={color} />
             ),
           }}
         />

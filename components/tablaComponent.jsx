@@ -75,7 +75,7 @@ const useResponsiveLayout = (itemsPerPage = 5) => {
           estado: 100,
           creado: 140,
           modificado: 140,
-          acciones: 120,
+          acciones: 190,
         };
       case "tablet":
         return {
@@ -86,7 +86,7 @@ const useResponsiveLayout = (itemsPerPage = 5) => {
           estado: 120,
           creado: 160,
           modificado: 160,
-          acciones: 140,
+          acciones: 210,
         };
       case "desktop":
         return {
@@ -97,7 +97,7 @@ const useResponsiveLayout = (itemsPerPage = 5) => {
           estado: 140,
           creado: 180,
           modificado: 180,
-          acciones: 160,
+          acciones: 230,
         };
       default: // large
         return {
@@ -108,7 +108,7 @@ const useResponsiveLayout = (itemsPerPage = 5) => {
           estado: 160,
           creado: 200,
           modificado: 200,
-          acciones: 180,
+          acciones: 250,
         };
     }
   }, [deviceType]);
@@ -297,9 +297,22 @@ const TablaComponente = ({
   const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
   const [sortBy, setSortBy] = useState(null);
   const [sortOrder, setSortOrder] = useState("ascending");
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({});
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
+
+  // Debounce para la búsqueda: typing a 60fps instantáneo sin congelar la interfaz
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+      setPage(0);
+      if (onSearch) {
+        onSearch(searchInput);
+      }
+    }, 180);
+    return () => clearTimeout(timer);
+  }, [searchInput, onSearch]);
 
   // HOOK CORREGIDO - Ahora recibe itemsPerPage actual
   const { deviceType, columnWidths, tableHeight, rowHeight, screenWidth } =
@@ -319,10 +332,10 @@ const TablaComponente = ({
     type: "success",
   });
 
-  // Sistema de cache optimizado
-  const [usersCache, setUsersCache] = useState(new Map());
-  const [cacheSize, setCacheSize] = useState(0);
-  const [loadingUsers, setLoadingUsers] = useState(new Set());
+  // Sistema de cache ultra-optimizado con refs para evitar renders en cascada
+  const usersCacheRef = useRef(new Map());
+  const loadingUsersRef = useRef(new Set());
+  const [, setCacheTick] = useState(0);
   const batchQueue = useRef([]);
   const batchTimeoutRef = useRef(null);
 
@@ -340,21 +353,20 @@ const TablaComponente = ({
     fetchUser();
   }, [user]);
 
-  // Sistema de cache optimizado
+  // Sistema de cache optimizado en lotes
   const fetchUsersInBatch = useCallback(
     async (userIds) => {
       if (!userIds || userIds.length === 0 || !role) return;
 
+      const cache = usersCacheRef.current;
+      const loading = loadingUsersRef.current;
       const uniqueIds = [...new Set(userIds)].filter(
-        (id) => id && !usersCache.has(id) && !loadingUsers.has(id)
+        (id) => id && !cache.has(id) && !loading.has(id)
       );
       if (uniqueIds.length === 0) return;
 
-      setLoadingUsers((prev) => {
-        const newSet = new Set(prev);
-        uniqueIds.forEach((id) => newSet.add(id));
-        return newSet;
-      });
+      uniqueIds.forEach((id) => loading.add(id));
+      setCacheTick((t) => t + 1);
 
       try {
         const batches = [];
@@ -362,12 +374,13 @@ const TablaComponente = ({
           batches.push(uniqueIds.slice(i, i + BATCH_SIZE));
         }
 
+        const getUserById =
+          role === "employee" ? getUserByIdEmployee : getUserByIdAdmin;
+
         await Promise.all(
           batches.map(async (batch) => {
             const promises = batch.map(async (userId) => {
               try {
-                const getUserById =
-                  role === "employee" ? getUserByIdEmployee : getUserByIdAdmin;
                 const userData = await getUserById(userId);
                 return { userId, user: userData, error: null };
               } catch (error) {
@@ -376,37 +389,28 @@ const TablaComponente = ({
             });
 
             const results = await Promise.all(promises);
-
-            setUsersCache((prev) => {
-              const newCache = new Map(prev);
-              const now = Date.now();
-              results.forEach(({ userId, user, error }) => {
-                if (userId) {
-                  newCache.set(userId, { user, error, timestamp: now });
-                }
-              });
-              setCacheSize(newCache.size);
-              return newCache;
+            const now = Date.now();
+            results.forEach(({ userId, user, error }) => {
+              if (userId) {
+                cache.set(userId, { user, error, timestamp: now });
+              }
             });
           })
         );
       } finally {
-        setLoadingUsers((prev) => {
-          const newSet = new Set(prev);
-          uniqueIds.forEach((id) => newSet.delete(id));
-          return newSet;
-        });
+        uniqueIds.forEach((id) => loading.delete(id));
+        setCacheTick((t) => t + 1);
       }
     },
-    [usersCache, loadingUsers, role]
+    [role]
   );
 
   const queueUserFetch = useCallback(
     (userId) => {
       if (
         !userId ||
-        usersCache.has(userId) ||
-        loadingUsers.has(userId) ||
+        usersCacheRef.current.has(userId) ||
+        loadingUsersRef.current.has(userId) ||
         !role
       )
         return;
@@ -423,51 +427,57 @@ const TablaComponente = ({
         fetchUsersInBatch(idsToFetch);
       }, DEBOUNCE_TIME);
     },
-    [fetchUsersInBatch, usersCache, loadingUsers, role]
+    [fetchUsersInBatch, role]
   );
 
-  const getUser = useCallback(
-    (userId) => {
-      if (!userId) return null;
-      return usersCache.get(userId) || null;
-    },
-    [usersCache]
-  );
+  const getUser = useCallback((userId) => {
+    if (!userId) return null;
+    return usersCacheRef.current.get(userId) || null;
+  }, []);
 
-  const isLoadingUser = useCallback(
-    (userId) => {
-      return loadingUsers.has(userId);
-    },
-    [loadingUsers]
-  );
+  const isLoadingUser = useCallback((userId) => {
+    return loadingUsersRef.current.has(userId);
+  }, []);
 
-  // Datos filtrados y paginados
+  // Datos filtrados y ordenados a máxima velocidad (sin allocaciones innecesarias)
   const filteredAndSortedData = useMemo(() => {
     if (!data || data.length === 0) return [];
 
-    const result = searchQuery
-      ? data.filter((item) =>
-          Object.entries(item).some(([key, value]) => {
-            if (value === null || value === undefined) return false;
-            return String(value)
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase());
-          })
-        )
-      : [...data];
+    let result = data;
+    const query = searchQuery.trim().toLowerCase();
+
+    if (query) {
+      result = data.filter((item) => {
+        if (!item) return false;
+        for (const key in item) {
+          const val = item[key];
+          if (val !== null && val !== undefined) {
+            if (String(val).toLowerCase().includes(query)) {
+              return true;
+            }
+          }
+        }
+        return false;
+      });
+    }
 
     if (sortBy) {
-      result.sort((a, b) => {
+      const isAsc = sortOrder === "ascending";
+      result = [...result].sort((a, b) => {
         const aVal = a[sortBy];
         const bVal = b[sortBy];
 
-        if (aVal === null && bVal === null) return 0;
-        if (aVal === null) return sortOrder === "ascending" ? -1 : 1;
-        if (bVal === null) return sortOrder === "ascending" ? 1 : -1;
+        if (aVal === bVal) return 0;
+        if (aVal === null || aVal === undefined) return isAsc ? -1 : 1;
+        if (bVal === null || bVal === undefined) return isAsc ? 1 : -1;
 
-        if (aVal < bVal) return sortOrder === "ascending" ? -1 : 1;
-        if (aVal > bVal) return sortOrder === "ascending" ? 1 : -1;
-        return 0;
+        if (typeof aVal === "number" && typeof bVal === "number") {
+          return isAsc ? aVal - bVal : bVal - aVal;
+        }
+
+        const strA = String(aVal);
+        const strB = String(bVal);
+        return isAsc ? strA.localeCompare(strB) : strB.localeCompare(strA);
       });
     }
 
@@ -521,13 +531,9 @@ const TablaComponente = ({
 
   const handleSearch = useCallback(
     (query) => {
-      setSearchQuery(query);
-      setPage(0);
-      if (onSearch) {
-        onSearch(query);
-      }
+      setSearchInput(query);
     },
-    [onSearch]
+    []
   );
 
   // Función para obtener el ancho de columna
@@ -774,7 +780,7 @@ const TablaComponente = ({
           <Searchbar
             placeholder="Buscar..."
             onChangeText={handleSearch}
-            value={searchQuery}
+            value={searchInput}
             style={[styles.searchBar, { maxWidth: screenWidth * 0.7 }]}
             iconColor="#5bfff3"
             inputStyle={{
@@ -887,11 +893,9 @@ const TablaComponente = ({
                     />
                   </View>
                 ) : (
-                  paginatedData.map((item, index) => (
-                    <Animated.View
+                  paginatedData.map((item) => (
+                    <View
                       key={keyExtractor(item)}
-                      entering={FadeInUp.delay(index * 20)}
-                      layout={Layout.springify()}
                     >
                       <DataTable.Row
                         style={[styles.row, { height: rowHeight }]}
@@ -919,6 +923,7 @@ const TablaComponente = ({
                                 icon="delete-outline"
                                 size={deviceType === "mobile" ? 18 : 20}
                                 iconColor="red"
+                                style={styles.actionBtn}
                                 onPress={() => {
                                   setItemToDelete(item);
                                   setDeleteConfirmVisible(true);
@@ -930,16 +935,16 @@ const TablaComponente = ({
                               icon="pencil-outline"
                               size={deviceType === "mobile" ? 18 : 20}
                               iconColor="#00ACE8"
+                              style={styles.actionBtn}
                               onPress={() => onEdit && onEdit(item)}
-                              te
                             />
 
                             {item.informeNum != null ? (
-                              <ExcelApique id={item.id} />
+                              <ExcelApique id={item.id} size={deviceType === "mobile" ? 18 : 20} style={styles.actionBtn} />
                             ) : null}
 
                             {item.especificacion != null && logueado?.cargo != "Laboratorista" ? (
-                              <ExcelEnvironmental id={item.id} />
+                              <ExcelEnvironmental id={item.id} size={deviceType === "mobile" ? 18 : 20} style={styles.actionBtn} />
                             ) : null}
 
                             {(item.estado === true ||
@@ -952,6 +957,7 @@ const TablaComponente = ({
                                 }
                                 size={deviceType === "mobile" ? 18 : 20}
                                 iconColor={item.estado ? "#00ACE8" : "#666"}
+                                style={styles.actionBtn}
                                 onPress={() => {
                                   setItemToToggle(item);
                                   if (item.estado) {
@@ -966,7 +972,7 @@ const TablaComponente = ({
                         </DataTable.Cell>
                       </DataTable.Row>
                       <Divider />
-                    </Animated.View>
+                    </View>
                   ))
                 )}
               </DataTable>
@@ -981,7 +987,7 @@ const TablaComponente = ({
           label={`${page + 1} de ${Math.ceil(
             filteredAndSortedData.length / itemsPerPage
           )}`}
-          showFastPaginationControls
+          showFastPaginationControls={deviceType !== "mobile"}
           numberOfItemsPerPageList={itemsPerPageOptions}
           numberOfItemsPerPage={itemsPerPage}
           onItemsPerPageChange={(newItemsPerPage) => {
@@ -1112,7 +1118,8 @@ const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
     width: "100%",
-    margin: 8,
+    alignSelf: "stretch",
+    marginVertical: 8,
     borderRadius: 12,
   },
   container: {
@@ -1210,10 +1217,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   actionButtons: {
-    flexDirection: Platform.OS == "android" ? "collumn" : "row",
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
+    gap: 2,
+  },
+  actionBtn: {
+    margin: 0,
+    padding: 0,
   },
 });
 

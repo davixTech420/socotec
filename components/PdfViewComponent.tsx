@@ -112,7 +112,7 @@ const PDFViewComponent: React.FC<PDFViewComponentProps> = ({
     <View>
       <TouchableOpacity onPress={toggleModal}>
         <AntDesign
-          name="pdffile1"
+          name={"pdffile1" as any}
           size={24}
           color="red"
           style={[styles.icon, iconStyle]}

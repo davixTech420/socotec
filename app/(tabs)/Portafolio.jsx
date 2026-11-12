@@ -33,10 +33,10 @@ import Animated, {
   withTiming,
   withSpring,
   interpolate,
-  Extrapolate,
+  Extrapolation,
   cancelAnimation,
 } from "react-native-reanimated";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "expo-router";
 import { getPortfolioActive, SrcImagen } from "@/services/publicServices";
 
 const AnimatedSurface = Animated.createAnimatedComponent(Surface);
@@ -269,13 +269,13 @@ const ProjectDetailsModal = React.memo(({ visible, project, onDismiss }) => {
         scrollY.value,
         [0, 100],
         [300, 200],
-        Extrapolate.CLAMP
+        Extrapolation.CLAMP
       ),
       opacity: interpolate(
         scrollY.value,
         [0, 100],
         [1, 0.8],
-        Extrapolate.CLAMP
+        Extrapolation.CLAMP
       ),
     };
   });
@@ -860,8 +860,8 @@ export default function Portafolio() {
         ListEmptyComponent={renderContent}
         contentContainerStyle={{
           paddingHorizontal: Platform.OS === "web" ? windowWidth * 0.05 : 16,
-          paddingBottom: 40,
-          paddingTop: 20,
+          paddingBottom: Platform.OS === "web" ? 40 : 110,
+          paddingTop: Platform.OS === "web" ? 95 : 20,
         }}
         initialNumToRender={4}
         maxToRenderPerBatch={2}

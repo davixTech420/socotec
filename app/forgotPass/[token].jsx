@@ -69,71 +69,76 @@ const PasswordResetScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <Animated.View
-          entering={FadeInDown.duration(1000).springify()}
-          style={styles.iconContainer}
+          entering={FadeInDown.duration(600).springify()}
+          style={styles.iconHalo}
         >
-          <MaterialCommunityIcons name="lock-reset" size={80} color="#00ACE8" />
+          <MaterialCommunityIcons name="lock-reset" size={44} color="#00ACE8" />
         </Animated.View>
 
         <Animated.View
-          entering={FadeInUp.duration(1000).springify()}
+          entering={FadeInUp.duration(600).springify()}
           style={styles.formContainer}
         >
           <Text style={styles.title}>Restablecer Contraseña</Text>
           <Text style={styles.subtitle}>
-            Crea una nueva contraseña segura para tu cuenta
+            Crea una nueva contraseña segura para tu cuenta corporativa
           </Text>
 
-          <TextInput
-            label="Nueva Contraseña"
-            underlineColor="#00ACE8"
-            outlineColor="#00ACE8"
-            cursorColor="#00ACE8"
-            activeUnderlineColor="#00ACE8"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            mode="underlined"
-            right={
-              <TextInput.Icon
-                icon={showPassword ? "eye-off" : "eye"}
-                onPress={() => setShowPassword(!showPassword)}
-                color="#00ACE8"
-              />
-            }
-            style={styles.input}
-          />
-          <HelperText type="info" visible={true}>
-            La contraseña debe tener al menos 8 caracteres
-          </HelperText>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              label="Nueva Contraseña"
+              placeholder="••••••••"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              mode="outlined"
+              activeOutlineColor="#00ACE8"
+              cursorColor="#00ACE8"
+              style={styles.input}
+              left={<TextInput.Icon icon="lock-outline" color="#00ACE8" />}
+              right={
+                <TextInput.Icon
+                  icon={showPassword ? "eye-off" : "eye"}
+                  onPress={() => setShowPassword(!showPassword)}
+                  color="#64748B"
+                />
+              }
+            />
+            {password.length > 0 && password.length < 8 && (
+              <Text style={styles.errorText}>Debe tener al menos 8 caracteres</Text>
+            )}
+          </View>
 
-          <TextInput
-            label="Confirmar Nueva Contraseña"
-            underlineColor="#00ACE8"
-            outlineColor="#00ACE8"
-            cursorColor="#00ACE8"
-            activeUnderlineColor="#00ACE8"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry={!showConfirmPassword}
-            mode="underlined"
-            right={
-              <TextInput.Icon
-                icon={showConfirmPassword ? "eye-off" : "eye"}
-                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                color="#00ACE8"
-              />
-            }
-            style={styles.input}
-          />
-          <HelperText
-            type="error"
-            visible={!passwordsMatch && confirmPassword !== ""}
-          >
-            Las contraseñas no coinciden
-          </HelperText>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              label="Confirmar Contraseña"
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirmPassword}
+              mode="outlined"
+              activeOutlineColor="#00ACE8"
+              cursorColor="#00ACE8"
+              style={styles.input}
+              left={<TextInput.Icon icon="lock-check-outline" color="#00ACE8" />}
+              right={
+                <TextInput.Icon
+                  icon={showConfirmPassword ? "eye-off" : "eye"}
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  color="#64748B"
+                />
+              }
+            />
+            {!passwordsMatch && confirmPassword !== "" && (
+              <Text style={styles.errorText}>Las contraseñas no coinciden</Text>
+            )}
+          </View>
 
           <Button
             mode="contained"
@@ -142,77 +147,154 @@ const PasswordResetScreen = () => {
             loading={isSubmitting}
             disabled={isSubmitting || !passwordsMatch || !isPasswordValid}
             style={styles.button}
+            contentStyle={{ height: 48 }}
+            labelStyle={{ fontSize: 15, fontWeight: "bold", color: "#FFFFFF" }}
           >
-            Cambiar Contraseña
+            Guardar Contraseña
           </Button>
 
-          <Text style={styles.securityInfo}>
-            Para mayor seguridad, tu contraseña debe incluir:
-          </Text>
-          <View style={styles.securityList}>
-            <Text style={styles.securityItem}>• Al menos 8 caracteres</Text>
-            <Text style={styles.securityItem}>• Una letra mayúscula</Text>
-            <Text style={styles.securityItem}>• Una letra minúscula</Text>
-            <Text style={styles.securityItem}>• Un número</Text>
-            <Text style={styles.securityItem}>• Un carácter especial</Text>
+          <View style={styles.securityBox}>
+            <Text style={styles.securityInfo}>Requisitos de seguridad:</Text>
+            <View style={styles.securityItem}>
+              <MaterialCommunityIcons
+                name={password.length >= 8 ? "check-circle" : "checkbox-blank-circle-outline"}
+                size={16}
+                color={password.length >= 8 ? "#10B981" : "#94A3B8"}
+              />
+              <Text style={[styles.securityText, password.length >= 8 && styles.securityMet]}>
+                Al menos 8 caracteres
+              </Text>
+            </View>
+            <View style={styles.securityItem}>
+              <MaterialCommunityIcons
+                name={/[A-Z]/.test(password) ? "check-circle" : "checkbox-blank-circle-outline"}
+                size={16}
+                color={/[A-Z]/.test(password) ? "#10B981" : "#94A3B8"}
+              />
+              <Text style={[styles.securityText, /[A-Z]/.test(password) && styles.securityMet]}>
+                Una letra mayúscula
+              </Text>
+            </View>
+            <View style={styles.securityItem}>
+              <MaterialCommunityIcons
+                name={/\d/.test(password) ? "check-circle" : "checkbox-blank-circle-outline"}
+                size={16}
+                color={/\d/.test(password) ? "#10B981" : "#94A3B8"}
+              />
+              <Text style={[styles.securityText, /\d/.test(password) && styles.securityMet]}>
+                Al menos un número
+              </Text>
+            </View>
           </View>
         </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F1F5F9",
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: "center",
-    padding: 20,
-  },
-  iconContainer: {
     alignItems: "center",
+    padding: 20,
+    paddingVertical: 40,
+  },
+  iconHalo: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#E0F2FE",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#BAE6FD",
     marginBottom: 20,
   },
   formContainer: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    boxShadow: "0px 2px 3.84px rgba(0, 0, 0, 0.25)",
+    backgroundColor: "#FFFFFF",
+    padding: 32,
+    borderRadius: 24,
+    width: "100%",
+    maxWidth: 460,
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.8)",
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 8,
     textAlign: "center",
+    color: "#0F172A",
   },
   subtitle: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 20,
+    fontSize: 13,
+    color: "#64748B",
+    marginBottom: 24,
     textAlign: "center",
+    lineHeight: 18,
+  },
+  inputWrapper: {
+    marginBottom: 14,
   },
   input: {
-    marginBottom: 5,
+    backgroundColor: "#F8FAFC",
+    fontSize: 14,
+  },
+  errorText: {
+    color: "#E53E3E",
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+    fontWeight: "500",
   },
   button: {
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 20,
+    borderRadius: 12,
+    shadowColor: "#00ACE8",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  securityBox: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    gap: 8,
   },
   securityInfo: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  securityList: {
-    marginLeft: 10,
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#475569",
+    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   securityItem: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  securityText: {
+    fontSize: 13,
+    color: "#64748B",
+  },
+  securityMet: {
+    color: "#10B981",
+    fontWeight: "600",
   },
 });
 

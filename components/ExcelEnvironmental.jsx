@@ -4,7 +4,7 @@ import { generateEnvironmental as adminGenerateEnvironmental } from "@/services/
 import { generateEnvironmental as employeeGenerateEnvironmental } from "@/services/employeeService";
 import { useAuth } from "@/context/userContext";
 
-const ExcelEnvironmental = ({ id }) => {
+const ExcelEnvironmental = ({ id, size = 20, style }) => {
   const [userRole, setUserRole] = useState(null);
   const { user } = useAuth();
 
@@ -39,6 +39,8 @@ const ExcelEnvironmental = ({ id }) => {
       icon="file-excel"
       onPress={handleGenerateApique}
       iconColor="green"
+      size={size}
+      style={[{ margin: 0 }, style]}
     />
   );
 };

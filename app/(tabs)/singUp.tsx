@@ -80,30 +80,30 @@ const SignUp = () => {
 
   // Breakpoints responsive mejorados
   const responsive = useMemo(() => {
-    const { isSmallPhone, isMediumPhone, isLargePhone, isTablet, isLandscape } = deviceInfo
+    const isTablet = width >= 768
 
     return {
       // Padding y márgenes
-      containerPadding: isSmallPhone ? 12 : isMediumPhone ? 16 : isTablet ? 24 : 20,
-      cardPadding: isSmallPhone ? 16 : isMediumPhone ? 20 : isTablet ? 32 : 24,
-      inputMargin: isSmallPhone ? 12 : 16,
+      containerPadding: isTablet ? 24 : 16,
+      cardPadding: isTablet ? 36 : 24,
+      inputMargin: 14,
 
       // Tamaños de fuente
-      titleSize: isSmallPhone ? 20 : isMediumPhone ? 24 : isTablet ? 32 : 28,
-      subtitleSize: isSmallPhone ? 14 : isMediumPhone ? 16 : isTablet ? 20 : 18,
-      bodySize: isSmallPhone ? 12 : isMediumPhone ? 14 : isTablet ? 16 : 14,
+      titleSize: isTablet ? 28 : 24,
+      subtitleSize: isTablet ? 15 : 13,
+      bodySize: 14,
 
       // Dimensiones de componentes
-      inputHeight: isSmallPhone ? 48 : isMediumPhone ? 52 : isTablet ? 60 : 56,
-      buttonHeight: isSmallPhone ? 44 : isMediumPhone ? 48 : isTablet ? 56 : 52,
-      logoSize: isSmallPhone ? 40 : isMediumPhone ? 50 : isTablet ? 70 : 60,
+      inputHeight: 52,
+      buttonHeight: 48,
+      logoSize: isTablet ? 56 : 48,
 
       // Layout
-      showSideBySide: isTablet && isLandscape,
-      maxCardWidth: isTablet ? 900 : 400,
-      leftSideMinHeight: isTablet ? 300 : 200,
+      showSideBySide: width >= 768,
+      maxCardWidth: width >= 768 ? 980 : 440,
+      leftSideMinHeight: 320,
     }
-  }, [deviceInfo])
+  }, [width])
 
   // Efectos de animación inicial
   useEffect(() => {
@@ -211,7 +211,7 @@ const SignUp = () => {
         setFormData({ nombre: "", email: "", telefono: "", password: "" })
         setErrors({})
       } else {
-        setMessageError(response.response?.data.message || "Error desconocido")
+        setMessageError(response.data?.message || "Error desconocido")
         setIsOpenError(true)
       }
     } catch (error: any) {
@@ -253,7 +253,7 @@ const SignUp = () => {
           entering={FadeInUp.delay(200).duration(600)}
           
         >
-          <View style={[animatedInputStyle, { marginBottom: responsive.inputMargin }]}>
+          <Animated.View style={[animatedInputStyle, { marginBottom: responsive.inputMargin }]}>
 
 
 
@@ -308,7 +308,7 @@ const SignUp = () => {
               </Text>
             </Animated.View>
           )}
-          </View>
+          </Animated.View>
         </Animated.View>
       )
     },
@@ -321,51 +321,83 @@ const SignUp = () => {
 
     return (
       <Animated.View
-        entering={FadeIn.duration(1000)}
+        entering={FadeIn.duration(800)}
         style={{
-          flex: 1,
-          backgroundColor: "#1a75ff",
-          padding: responsive.cardPadding,
-          justifyContent: "center",
+          flex: 1.1,
+          backgroundColor: "#0B2545",
+          padding: 36,
+          justifyContent: "space-between",
           minHeight: responsive.leftSideMinHeight,
         }}
       >
         <View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 24 }}>
+            <Image
+              source={require("@/assets/images/favicon.png")}
+              style={{ width: 32, height: 32 }}
+              resizeMode="contain"
+            />
+            <Text style={{ color: "#00ACE8", fontSize: 13, fontWeight: "800", letterSpacing: 1.5 }}>
+              SOCOTEC COLOMBIA
+            </Text>
+          </View>
           <Text
             style={{
               color: "white",
               fontSize: responsive.titleSize,
               fontWeight: "bold",
-              marginBottom: 16,
-              lineHeight: responsive.titleSize * 1.2,
+              marginBottom: 14,
+              lineHeight: responsive.titleSize * 1.25,
             }}
           >
-            Bienvenidos a Socotec Colombia
+            Únete a Nuestra Comunidad Técnica
           </Text>
           <Text
             style={{
-              color: "rgba(255, 255, 255, 0.9)",
+              color: "rgba(255, 255, 255, 0.75)",
               fontSize: responsive.subtitleSize,
-              lineHeight: responsive.subtitleSize * 1.4,
-              marginBottom: 32,
+              lineHeight: responsive.subtitleSize * 1.5,
+              marginBottom: 24,
             }}
           >
-            Únete a nuestra comunidad de más de{"\n"}10,000 suscriptores y aprende cosas nuevas
+            Regístrate con tu correo institucional para acceder al ecosistema de informes, proyectos e inventarios.
+          </Text>
+
+          <View style={{ gap: 14, marginBottom: 24 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: "rgba(0, 172, 232, 0.15)", alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="checkmark-sharp" size={14} color="#00ACE8" />
+              </View>
+              <Text style={{ color: "#E2E8F0", fontSize: 13, flex: 1 }}>Acceso a herramientas de campo y laboratorio</Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: "rgba(0, 172, 232, 0.15)", alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="checkmark-sharp" size={14} color="#00ACE8" />
+              </View>
+              <Text style={{ color: "#E2E8F0", fontSize: 13, flex: 1 }}>Generación automatizada de reportes normativos</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ paddingTop: 20, borderTopWidth: 1, borderTopColor: "rgba(255, 255, 255, 0.1)" }}>
+          <Text style={{ color: "rgba(255, 255, 255, 0.7)", fontSize: 13, marginBottom: 10 }}>
+            ¿Ya tienes una cuenta activa?
           </Text>
           <Button
             mode="outlined"
-            onPress={() => router.navigate("/singIn")}
-            buttonColor="transparent"
-            textColor="white"
+            onPress={() => router.push("/(tabs)/singIn")}
             style={{
-              borderColor: "white",
-              borderWidth: 2,
-              height: responsive.buttonHeight,
+              borderColor: "#00ACE8",
+              borderWidth: 1.5,
+              borderRadius: 12,
+              height: 46,
             }}
             labelStyle={{
-              fontSize: responsive.bodySize + 2,
+              fontSize: 14,
               fontWeight: "600",
+              color: "#FFFFFF",
             }}
+            icon="login-variant"
           >
             Iniciar Sesión
           </Button>
@@ -385,22 +417,22 @@ const SignUp = () => {
       /\d/.test(formData.password),
     ].filter(Boolean).length
 
-    const colors = ["#ef4444", "#f59e0b", "#3b82f6", "#10b981"]
-    const labels = ["Débil", "Regular", "Buena", "Fuerte"]
+    const colors = ["#ef4444", "#f59e0b", "#00ACE8", "#10b981"]
+    const labels = ["Débil", "Regular", "Buena", "Segura"]
 
     return (
       <Animated.View entering={FadeIn.duration(300)} style={{ marginBottom: responsive.inputMargin }}>
-        <Text style={{ fontSize: responsive.bodySize - 2, color: theme.colors.onSurfaceVariant, marginBottom: 8 }}>
-          Fortaleza: {labels[strength - 1] || "Muy débil"}
+        <Text style={{ fontSize: 12, color: "#64748B", marginBottom: 6, fontWeight: "500" }}>
+          Seguridad: <Text style={{ color: colors[strength - 1] || "#ef4444", fontWeight: "700" }}>{labels[strength - 1] || "Muy débil"}</Text>
         </Text>
-        <View style={{ flexDirection: "row", gap: 4 }}>
+        <View style={{ flexDirection: "row", gap: 6 }}>
           {[1, 2, 3, 4].map((level) => (
             <View
               key={level}
               style={{
                 flex: 1,
                 height: 4,
-                backgroundColor: level <= strength ? colors[strength - 1] || "#ef4444" : "#e5e7eb",
+                backgroundColor: level <= strength ? colors[strength - 1] || "#ef4444" : "#E2E8F0",
                 borderRadius: 2,
               }}
             />
@@ -408,11 +440,11 @@ const SignUp = () => {
         </View>
       </Animated.View>
     )
-  }, [formData.password, responsive, theme])
+  }, [formData.password, responsive])
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#1a75ff" />
+      <StatusBar barStyle="light-content" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -421,10 +453,12 @@ const SignUp = () => {
         <ScrollView
           contentContainerStyle={{
             flexGrow: 1,
-            backgroundColor: "#d1f9ff",
+            backgroundColor: "#F1F5F9",
             alignItems: "center",
             justifyContent: "center",
             padding: responsive.containerPadding,
+            paddingTop: Platform.OS === "web" ? 95 : responsive.containerPadding,
+            paddingBottom: Platform.OS === "web" ? 40 : 120,
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -433,80 +467,82 @@ const SignUp = () => {
             style={[
               animatedCardStyle,
               {
-                backgroundColor: "white",
-                borderRadius: 20,
+                backgroundColor: "#FFFFFF",
+                borderRadius: 24,
                 overflow: "hidden",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.15,
-                shadowRadius: 20,
-                elevation: 10,
+                shadowColor: "#0F172A",
+                shadowOffset: { width: 0, height: 10 },
+                shadowOpacity: 0.1,
+                shadowRadius: 24,
+                elevation: 8,
                 width: "100%",
                 maxWidth: responsive.maxCardWidth,
                 flexDirection: responsive.showSideBySide ? "row" : "column",
-                minHeight: deviceInfo.isTablet ? 600 : "auto",
+                borderWidth: 1,
+                borderColor: "rgba(226, 232, 240, 0.8)",
               },
             ]}
           >
             {renderLeftSide()}
 
             <Animated.View
-              entering={FadeInDown.duration(1000)}
+              entering={FadeInDown.duration(800)}
               style={{
                 flex: 1,
                 padding: responsive.cardPadding,
                 justifyContent: "center",
               }}
             >
-              <Animated.View style={[animatedFormStyle, { width: "100%", alignSelf: "center" }]}>
+              <Animated.View style={[animatedFormStyle, { width: "100%", alignSelf: "center", maxWidth: 400 }]}>
                 {/* Header del formulario */}
-                <View style={{ alignItems: "center", marginBottom: responsive.cardPadding }}>
+                <View style={{ alignItems: "center", marginBottom: 22 }}>
                   <View
                     style={{
-                      flexDirection: "row",
+                      width: 54,
+                      height: 54,
+                      borderRadius: 27,
+                      backgroundColor: "#F0F9FF",
                       alignItems: "center",
                       justifyContent: "center",
-                      marginBottom: 16,
-                      gap: 12,
+                      borderWidth: 1,
+                      borderColor: "#BAE6FD",
+                      marginBottom: 12,
                     }}
                   >
-                    <Text
-                      style={{
-                        fontSize: responsive.titleSize,
-                        fontWeight: "bold",
-                        color: "#333",
-                        textAlign: "center",
-                      }}
-                    >
-                      ¡Bienvenido!
-                    </Text>
                     <Image
-                      style={{
-                        width: responsive.logoSize,
-                        height: responsive.logoSize,
-                        borderRadius: responsive.logoSize / 2,
-                      }}
+                      style={{ width: 30, height: 30 }}
                       source={require("@/assets/images/favicon.png")}
+                      resizeMode="contain"
                     />
                   </View>
                   <Text
                     style={{
-                      fontSize: responsive.bodySize,
-                      color: theme.colors.onSurfaceVariant,
+                      fontSize: responsive.titleSize,
+                      fontWeight: "bold",
+                      color: "#0F172A",
                       textAlign: "center",
-                      lineHeight: responsive.bodySize * 1.4,
                     }}
                   >
-                    Completa todos los campos para crear tu cuenta
+                    Crear Cuenta
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: responsive.bodySize,
+                      color: "#64748B",
+                      textAlign: "center",
+                      marginTop: 4,
+                    }}
+                  >
+                    Completa tus datos para el registro corporativo
                   </Text>
                 </View>
 
                 {/* Formulario */}
-                <View style={{ flex: 1, justifyContent: "space-between" }}>
+                <View>
                   <View>
                     {renderInput("nombre", "Nombre completo", "person-outline")}
-                    {renderInput("email", "Email corporativo", "mail-outline", "email-address")}
-                    {renderInput("telefono", "Teléfono", "call-outline", "phone-pad")}
+                    {renderInput("email", "Email corporativo (@socotec.com)", "mail-outline", "email-address")}
+                    {renderInput("telefono", "Teléfono de contacto", "call-outline", "phone-pad")}
                     {renderInput(
                       "password",
                       "Contraseña",
@@ -516,74 +552,60 @@ const SignUp = () => {
                       <TextInput.Icon
                         icon={visiblePass ? "eye-off" : "eye"}
                         onPress={() => setVisiblePass(!visiblePass)}
-                        iconColor={theme.colors.onSurfaceVariant}
+                        color="#64748B"
                       />,
                     )}
                     {renderPasswordStrength()}
                   </View>
 
-                  <View style={{ marginTop: responsive.inputMargin }}>
+                  <View style={{ marginTop: 12 }}>
                     <Button
                       mode="contained"
                       onPress={handleSubmit}
                       disabled={isLoading}
                       buttonColor="#00ACE8"
                       style={{
-                        height: responsive.buttonHeight,
+                        height: 48,
                         justifyContent: "center",
                         marginBottom: 16,
                         borderRadius: 12,
+                        shadowColor: "#00ACE8",
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 8,
+                        elevation: 4,
                       }}
                       labelStyle={{
-                        fontSize: responsive.bodySize + 2,
-                        fontWeight: "600",
+                        fontSize: 15,
+                        fontWeight: "bold",
+                        color: "#FFFFFF",
                       }}
+                      icon={isLoading ? undefined : "account-check-outline"}
                     >
                       {isLoading ? (
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                           <ActivityIndicator size="small" color="white" />
-                          <Text style={{ color: "white", fontSize: responsive.bodySize + 2 }}>Creando cuenta...</Text>
+                          <Text style={{ color: "white", fontSize: 14 }}>Creando cuenta...</Text>
                         </View>
                       ) : (
-                        "Crear Cuenta"
+                        "Registrarme"
                       )}
                     </Button>
 
-                    <View style={{ alignItems: "center", gap: 8 }}>
-                      <Text style={{ color: "#666", fontSize: responsive.bodySize }}>¿Ya tienes una cuenta?</Text>
+                    <View style={{ alignItems: "center", gap: 6 }}>
+                      <Text style={{ color: "#64748B", fontSize: 13 }}>¿Ya tienes una cuenta?</Text>
                       <Button
                         mode="text"
-                        onPress={() => router.navigate("/singIn")}
-                        textColor="#1a75ff"
+                        onPress={() => router.push("/(tabs)/singIn")}
+                        textColor="#00ACE8"
                         labelStyle={{
-                          fontSize: responsive.bodySize,
-                          fontWeight: "600",
+                          fontSize: 14,
+                          fontWeight: "700",
                         }}
                       >
                         Iniciar sesión
                       </Button>
                     </View>
-
-                    {/* Botón adicional para móvil */}
-                    {!responsive.showSideBySide && (
-                      <Button
-                        mode="outlined"
-                        onPress={() => router.navigate("/singIn")}
-                        style={{
-                          marginTop: 16,
-                          borderColor: "#1a75ff",
-                          height: responsive.buttonHeight,
-                          borderRadius: 12,
-                        }}
-                        textColor="#1a75ff"
-                        labelStyle={{
-                          fontSize: responsive.bodySize + 2,
-                          fontWeight: "600",
-                        }}
-                      >
-                        Iniciar Sesión
-                      </Button>
-                    )}
                   </View>
                 </View>
               </Animated.View>

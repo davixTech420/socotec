@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }) => {
 
     if (tokenExpiration) {
       const timeRemaining = tokenExpiration - Date.now();
-      
+
       if (timeRemaining > 0) {
         timeoutId = setTimeout(() => {
           logout(); // Cierra sesión cuando expire el token
@@ -127,14 +127,14 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem("userToken");
-      
+
       if (token) {
         const decodedToken = jwtDecode(token);
         const isTokenValid = decodedToken.exp * 1000 > Date.now();
-        
+
         setIsAuthenticated(isTokenValid);
         setTokenExpiration(decodedToken.exp * 1000);
-        
+
         if (!isTokenValid) {
           await AsyncStorage.removeItem("userToken"); // Elimina token expirado
         }
@@ -155,7 +155,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const decodedToken = jwtDecode(token);
       const expirationTime = decodedToken.exp * 1000;
-      
+
       await AsyncStorage.setItem("userToken", token);
       setIsAuthenticated(true);
       setTokenExpiration(expirationTime);
@@ -168,12 +168,13 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("userToken");
-      setIsAuthenticated(false);
-      setTokenExpiration(null);
-      router.navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
-      throw error;
+    } finally {
+      setIsAuthenticated(false);
+      setTokenExpiration(null);
+      setIsLoading(false);
+      router.replace("/(tabs)/singIn");
     }
   };
 
@@ -181,7 +182,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = await AsyncStorage.getItem("userToken");
       if (!token) return null;
-      
+
       const decodedToken = jwtDecode(token);
       if (decodedToken.exp * 1000 < Date.now()) {
         await logout(); // Cierra sesión si el token expiró
@@ -191,7 +192,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error("Error getting user:", error);
       await logout(); // Limpieza en caso de error
-      throw error;
+      return null;
     }
   };
 
@@ -213,17 +214,15 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => useContext(AuthContext);
 
-export const useProtectedRoute = (redirectPath = "/") => {
-  const { isAuthenticated, isLoading, checkAuthStatus } = useAuth();
+export const useProtectedRoute = (redirectPath = "/(tabs)/singIn") => {
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    checkAuthStatus(); // Verifica el estado de autenticación al montar
-    
     if (!isLoading && !isAuthenticated) {
       router.replace(redirectPath);
     }
   }, [isAuthenticated, isLoading, redirectPath, router]);
 
-  return { isAuthenticated, isLoading };
+  return isAuthenticated;
 };

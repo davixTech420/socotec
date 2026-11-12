@@ -53,7 +53,8 @@ const ExcelPreviewButton: React.FC<ExcelPreviewButtonProps> = ({ columns, data, 
       URL.revokeObjectURL(url);
     } else {
       // 📱 **Solución para móviles**: Guardar y compartir con `expo-file-system`
-      const filePath = `${FileSystem.documentDirectory}${fileName}`;
+      const docDir = (FileSystem as any).documentDirectory || "";
+      const filePath = `${docDir}${fileName}`;
       await FileSystem.writeAsStringAsync(filePath, wbout, {
         encoding: FileSystem.EncodingType.Base64,
       });

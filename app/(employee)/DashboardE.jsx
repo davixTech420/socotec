@@ -4,7 +4,7 @@ import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
+  useWindowDimensions,
   TouchableOpacity,
   RefreshControl,
 } from "react-native";
@@ -17,14 +17,14 @@ import Animated, {
   withSequence,
   withDelay,
   interpolate,
-  Extrapolate,
+  Extrapolation,
 } from "react-native-reanimated";
 import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 
-const { width } = Dimensions.get("window");
-const chartWidth = width - 40;
-
 const DashboardE = () => {
+  const { width: screenWidth } = useWindowDimensions();
+  const chartWidth = Math.min(Math.max(screenWidth - 48, 280), 960);
+
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState("week");
   const [expandedSection, setExpandedSection] = useState(null);
@@ -76,7 +76,7 @@ const DashboardE = () => {
           headerOpacity.value,
           [0, 1],
           [-20, 0],
-          Extrapolate.CLAMP
+          Extrapolation.CLAMP
         ),
       },
     ],
@@ -90,7 +90,7 @@ const DashboardE = () => {
           kpiOpacity.value,
           [0, 1],
           [20, 0],
-          Extrapolate.CLAMP
+          Extrapolation.CLAMP
         ),
       },
     ],
@@ -104,7 +104,7 @@ const DashboardE = () => {
           statsOpacity.value,
           [0, 1],
           [20, 0],
-          Extrapolate.CLAMP
+          Extrapolation.CLAMP
         ),
       },
     ],
@@ -118,7 +118,7 @@ const DashboardE = () => {
           chartOpacity.value,
           [0, 1],
           [20, 0],
-          Extrapolate.CLAMP
+          Extrapolation.CLAMP
         ),
       },
     ],
@@ -132,7 +132,7 @@ const DashboardE = () => {
           progressOpacity.value,
           [0, 1],
           [20, 0],
-          Extrapolate.CLAMP
+          Extrapolation.CLAMP
         ),
       },
     ],

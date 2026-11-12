@@ -1,19 +1,20 @@
 import axios from "axios";
 import { router } from "expo-router";
 import { useAuth } from "@/context/userContext";
+import { jwtDecode } from "jwt-decode";
 
 //esta es el puerto al que se comunica con el back y la url
 const port = 3000;
-/* const baseUrl = `http://192.168.0.133:${port}/api/public`; */
- const baseUrl = `https://socotecback.onrender.com/api/public`; 
+const baseUrl = `http://192.168.0.133:${port}/api/public`;
+ /* const baseUrl = `https://socotecback.onrender.com/api/public`;  */
 
-/* export const SrcImagen = (path) => {
+export const SrcImagen = (path) => {
   return `http://192.168.0.133:${port}${path}`;
-} */
+}
 
- export const SrcImagen = (path) => {
+/*  export const SrcImagen = (path) => {
   return `https://socotecback.onrender.com${path}`;
-}; 
+};  */
 //end point para enviar el email recien se registra un usuario
 export const emailRegistro = async (user) => {
   try {
@@ -31,8 +32,18 @@ export const useLogin = () => {
     try {
       const response = await axios.post(`${baseUrl}/login`, user);
       if (response.data && response.data.token) {
-        await login(response?.data.token);
-        router.replace("/(admin)/Dashboard");
+        const token = response.data.token;
+        await login(token);
+        try {
+          const decoded = jwtDecode(token);
+          if (decoded?.role === "employee") {
+            router.replace("/(employee)/DashboardE");
+          } else {
+            router.replace("/(admin)/Dashboard");
+          }
+        } catch {
+          router.replace("/(admin)/Dashboard");
+        }
         return { success: true };
       } else {
         return { success: false, message: "No se recibió token" };

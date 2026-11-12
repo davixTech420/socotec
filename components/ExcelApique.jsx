@@ -4,7 +4,7 @@ import { generateApique as adminGenerateApique } from "@/services/adminServices"
 import { generateApique as employeeGenerateApique } from "@/services/employeeService";
 import { useAuth } from "@/context/userContext";
 
-const ExcelApique = ({ id }) => {
+const ExcelApique = ({ id, size = 20, style }) => {
   const [userRole, setUserRole] = useState(null);
   const { user } = useAuth();
 
@@ -39,6 +39,8 @@ const ExcelApique = ({ id }) => {
       icon="file-excel"
       onPress={handleGenerateApique}
       iconColor="green"
+      size={size}
+      style={[{ margin: 0 }, style]}
     />
   );
 };

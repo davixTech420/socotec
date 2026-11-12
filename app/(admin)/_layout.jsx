@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { NavigationContainer, NavigationIndependentTree } from "@react-navigation/native";
 import {
   Provider as PaperProvider,
   Avatar,
@@ -30,7 +31,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   interpolate,
-  Extrapolate,
+  Extrapolation,
 } from "react-native-reanimated";
 import { router } from "expo-router";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
@@ -264,7 +265,7 @@ const CustomDrawerContent = React.memo((props) => {
           setUserData(data);
         }
       } catch (error) {
-        router.replace("/singIn");
+        router.replace("/(tabs)/singIn");
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -360,7 +361,7 @@ const CustomAppBar = React.memo(({ title, navigation, drawerProgress }) => {
       drawerProgress.value,
       [0, 1],
       [0, 180],
-      Extrapolate.CLAMP
+      Extrapolation.CLAMP
     );
     return {
       transform: [{ rotate: `${rotate}deg` }],
@@ -391,7 +392,7 @@ const CustomAppBar = React.memo(({ title, navigation, drawerProgress }) => {
 
 // Componente principal optimizado
 export default function AdminLayout() {
-  const isAuthenticated = useProtectedRoute("/singIn");
+  const isAuthenticated = useProtectedRoute("/(tabs)/singIn");
   const { user } = useAuth();
   const theme = useTheme();
   const [userRole, setUserRole] = useState(null);
@@ -411,7 +412,7 @@ export default function AdminLayout() {
           }
         }
       } catch (error) {
-        router.replace("/singIn");
+        router.replace("/(tabs)/singIn");
       }
     };
 
@@ -490,30 +491,34 @@ export default function AdminLayout() {
   return (
     <PaperProvider theme={theme}>
       <SafeAreaView style={styles.container}>
-        <Drawer.Navigator
-          initialRouteName="Dashboard"
-          drawerContent={(props) => <CustomDrawerContent {...props} />}
-          screenOptions={{
-            drawerStyle: {
-              backgroundColor: "transparent",
-              width: DRAWER_WIDTH,
-            },
-            drawerType: "slide",
-            overlayColor: "transparent",
-            sceneContainerStyle: { backgroundColor: "transparent" },
-            header: ({ navigation, route, options }) => (
-              <CustomAppBar
-                title={options.title}
-                navigation={navigation}
-                drawerProgress={drawerProgress}
-              />
-            ),
-          }}
-          drawerPosition="left"
-          onStateChange={handleDrawerStateChange}
-        >
-          {renderDrawerScreens}
-        </Drawer.Navigator>
+        <NavigationIndependentTree>
+          <NavigationContainer>
+            <Drawer.Navigator
+              initialRouteName="Dashboard"
+              drawerContent={(props) => <CustomDrawerContent {...props} />}
+              screenOptions={{
+                drawerStyle: {
+                  backgroundColor: "transparent",
+                  width: DRAWER_WIDTH,
+                },
+                drawerType: "slide",
+                overlayColor: "transparent",
+                sceneContainerStyle: { backgroundColor: "transparent" },
+                header: ({ navigation, route, options }) => (
+                  <CustomAppBar
+                    title={options.title}
+                    navigation={navigation}
+                    drawerProgress={drawerProgress}
+                  />
+                ),
+              }}
+              drawerPosition="left"
+              onStateChange={handleDrawerStateChange}
+            >
+              {renderDrawerScreens}
+            </Drawer.Navigator>
+          </NavigationContainer>
+        </NavigationIndependentTree>
       </SafeAreaView>
     </PaperProvider>
   );

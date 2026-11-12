@@ -1,19 +1,23 @@
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack} from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import React ,{ useEffect } from 'react';
+import React, { useEffect } from 'react';
 import 'react-native-reanimated';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Provider } from "react-native-paper";
 import { AuthProvider } from '@/context/userContext';
+
 SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -23,24 +27,27 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
+
   return (
+    <SafeAreaProvider>
       <AuthProvider>
-    <Provider theme={{ dark: false, mode: 'exact' }}>
-      <ThemeProvider value={DefaultTheme}>
-      <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(admin)" options={{ headerShown: false }} />
-        <Stack.Screen name="(employee)" options={{ headerShown: false }} />
-        <Stack.Screen name="forgotPass/[token]" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-    </Provider>
-    </AuthProvider>
-  )
+        <Provider theme={{ dark: false, mode: 'exact' }}>
+          <ThemeProvider value={DefaultTheme}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+              <Stack.Screen name="(employee)" options={{ headerShown: false }} />
+              <Stack.Screen name="forgotPass/[token]" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </Provider>
+      </AuthProvider>
+    </SafeAreaProvider>
+  );
 }

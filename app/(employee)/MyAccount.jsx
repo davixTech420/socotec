@@ -187,6 +187,9 @@ const ProfileScreen = () => {
                 }
                 mode="outlined"
                 editable={false}
+                activeOutlineColor="#00ACE8"
+                outlineColor="#CBD5E1"
+                cursorColor="#00ACE8"
                 style={styles.formInput}
                 disabled={!isEditing}
               />
@@ -206,6 +209,9 @@ const ProfileScreen = () => {
                   setProfileData({ ...profileData, email: text })
                 }
                 mode="outlined"
+                activeOutlineColor="#00ACE8"
+                outlineColor="#CBD5E1"
+                cursorColor="#00ACE8"
                 style={styles.formInput}
                 disabled={!isEditing}
               />
@@ -232,6 +238,9 @@ const ProfileScreen = () => {
                   }
                 }}
                 mode="outlined"
+                activeOutlineColor="#00ACE8"
+                outlineColor="#CBD5E1"
+                cursorColor="#00ACE8"
                 style={styles.formInput}
                 disabled={!isEditing}
               />
@@ -251,6 +260,9 @@ const ProfileScreen = () => {
                   setProfileData({ ...profileData, role: text })
                 }
                 mode="outlined"
+                activeOutlineColor="#00ACE8"
+                outlineColor="#CBD5E1"
+                cursorColor="#00ACE8"
                 style={styles.formInput}
                 disabled={!isEditing}
               />
@@ -413,6 +425,8 @@ const styles = StyleSheet.create({
   },
   formInput: {
     flex: 1,
+    backgroundColor: "#F8FAFC",
+    fontSize: 14,
   },
   section: {
     padding: 20,

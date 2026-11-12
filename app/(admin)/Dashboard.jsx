@@ -16,7 +16,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   interpolate,
-  Extrapolate,
+  Extrapolation,
   FadeIn,
 } from "react-native-reanimated";
 import {
@@ -27,7 +27,7 @@ import {
   ActivityIndicator,
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "expo-router";
 import { getDashboard } from "@/services/adminServices";
 
 const AnimatedSurface = Animated.createAnimatedComponent(Surface);
@@ -759,7 +759,7 @@ export default function AnalyticsDashboardPro() {
         periodChangeAnimation.value,
         [0, 1],
         [0.5, 1],
-        Extrapolate.CLAMP
+        Extrapolation.CLAMP
       ),
       transform: [
         {
@@ -767,7 +767,7 @@ export default function AnalyticsDashboardPro() {
             periodChangeAnimation.value,
             [0, 1],
             [20, 0],
-            Extrapolate.CLAMP
+            Extrapolation.CLAMP
           ),
         },
       ],
@@ -780,7 +780,7 @@ export default function AnalyticsDashboardPro() {
         tabChangeAnimation.value,
         [0, 1],
         [0.5, 1],
-        Extrapolate.CLAMP
+        Extrapolation.CLAMP
       ),
       transform: [
         {
@@ -788,7 +788,7 @@ export default function AnalyticsDashboardPro() {
             tabChangeAnimation.value,
             [0, 1],
             [20, 0],
-            Extrapolate.CLAMP
+            Extrapolation.CLAMP
           ),
         },
       ],
@@ -801,7 +801,7 @@ export default function AnalyticsDashboardPro() {
         tabChangeAnimation.value,
         [0, 1],
         [0.5, 1],
-        Extrapolate.CLAMP
+        Extrapolation.CLAMP
       ),
       transform: [
         {
@@ -809,7 +809,7 @@ export default function AnalyticsDashboardPro() {
             tabChangeAnimation.value,
             [0, 1],
             [0.95, 1],
-            Extrapolate.CLAMP
+            Extrapolation.CLAMP
           ),
         },
       ],
@@ -1013,6 +1013,8 @@ export default function AnalyticsDashboardPro() {
     }
   };
 
+  const responsiveChartWidth = Math.min(Math.max(screenWidth - 48, 280), 960);
+
   return (
     <PaperProvider>
       {isLoading && !refreshing ? (
@@ -1023,6 +1025,7 @@ export default function AnalyticsDashboardPro() {
       ) : (
         <ScrollView
           style={styles.container}
+          contentContainerStyle={{ paddingBottom: 60 }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -1155,11 +1158,7 @@ export default function AnalyticsDashboardPro() {
               <Text style={styles.cardTitle}>{getChartTitle()}</Text>
               <LineChart
                 data={prepareLineChartData()}
-                width={
-                  Platform.OS === "android"
-                    ? screenWidth * 0.8
-                    : screenWidth * 0.89
-                }
+                width={responsiveChartWidth}
                 height={220}
                 chartConfig={chartConfig}
                 bezier
@@ -1189,11 +1188,7 @@ export default function AnalyticsDashboardPro() {
               </Text>
               <BarChart
                 data={prepareBarChartData()}
-                width={
-                  Platform.OS === "android"
-                    ? screenWidth * 0.8
-                    : screenWidth * 0.89
-                }
+                width={responsiveChartWidth}
                 height={220}
                 chartConfig={{
                   ...chartConfig,
@@ -1217,7 +1212,7 @@ export default function AnalyticsDashboardPro() {
               </Text>
               <PieChart
                 data={preparePieChartData()}
-                width={screenWidth - 40}
+                width={responsiveChartWidth}
                 height={220}
                 chartConfig={chartConfig}
                 accessor="population"
@@ -1320,7 +1315,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
-    boxShadow: "0px 1px 1.41px rgba(0, 0, 0, 0.2)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   cardTitle: {
     fontSize: 18,
@@ -1331,6 +1330,7 @@ const styles = StyleSheet.create({
   chart: {
     marginVertical: 8,
     borderRadius: 16,
+    alignSelf: "center",
   },
   periodSelector: {
     flexDirection: "row",
@@ -1347,7 +1347,11 @@ const styles = StyleSheet.create({
   },
   periodButtonActive: {
     backgroundColor: "white",
-    boxShadow: "0px 1px 1.41px rgba(0, 0, 0, 0.2)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   periodButtonText: {
     textAlign: "center",

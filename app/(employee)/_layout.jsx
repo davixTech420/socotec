@@ -10,6 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { NavigationContainer, NavigationIndependentTree } from "@react-navigation/native";
 import {
   Provider as PaperProvider,
   Avatar,
@@ -33,7 +34,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   interpolate,
-  Extrapolate,
+  Extrapolation,
 } from "react-native-reanimated";
 import { router } from "expo-router";
 import { useProtectedRoute, useAuth } from "@/context/userContext";
@@ -416,7 +417,7 @@ const CustomAppBar = ({ title, navigation, drawerProgress }) => {
             drawerProgress.value,
             [0, 1],
             [0, 180],
-            Extrapolate.CLAMP
+            Extrapolation.CLAMP
           )}deg`,
         },
       ],
@@ -443,7 +444,7 @@ const CustomAppBar = ({ title, navigation, drawerProgress }) => {
 
 // Main App Component
 export default function App() {
-  const isAuthenticated = useProtectedRoute("/singIn");
+  const isAuthenticated = useProtectedRoute("/(tabs)/singIn");
   const { user } = useAuth();
   const theme = useTheme();
   const [userData, setUserData] = useState(null);
@@ -518,8 +519,12 @@ export default function App() {
     [drawerProgress]
   );
 
+  if (!isAuthenticated) {
+    return null;
+  }
+
   // Render loading state
-  if (!isAuthenticated || isLoading) {
+  if (isLoading) {
     return (
       <View style={[styles.container, styles.centered]}>
         <ActivityIndicator size="large" color="#00ACE8" />
@@ -543,54 +548,58 @@ export default function App() {
   return (
     <PaperProvider theme={theme}>
       <SafeAreaView style={styles.container}>
-        <Drawer.Navigator
-          initialRouteName="DashboardE"
-          drawerContent={(props) => <CustomDrawerContent {...props} />}
-          screenOptions={{
-            drawerStyle: {
-              backgroundColor: "transparent",
-              width: DRAWER_WIDTH,
-            },
-            drawerType: "slide",
-            overlayColor: "transparent",
-            sceneContainerStyle: { backgroundColor: "transparent" },
-            header: ({ navigation, route, options }) => (
-              <CustomAppBar
-                title={options.title}
-                navigation={navigation}
-                drawerProgress={drawerProgress}
-              />
-            ),
-          }}
-          onStateChange={handleDrawerStateChange}
-        >
-          {screensConfig.map(
-            ({
-              name,
-              component: Component,
-              title,
-              icon,
-              iconFamily: IconComponent,
-            }) => (
-              <Drawer.Screen
-                key={name}
-                name={name}
-                options={{
+        <NavigationIndependentTree>
+          <NavigationContainer>
+            <Drawer.Navigator
+              initialRouteName="DashboardE"
+              drawerContent={(props) => <CustomDrawerContent {...props} />}
+              screenOptions={{
+                drawerStyle: {
+                  backgroundColor: "transparent",
+                  width: DRAWER_WIDTH,
+                },
+                drawerType: "slide",
+                overlayColor: "transparent",
+                sceneContainerStyle: { backgroundColor: "transparent" },
+                header: ({ navigation, route, options }) => (
+                  <CustomAppBar
+                    title={options.title}
+                    navigation={navigation}
+                    drawerProgress={drawerProgress}
+                  />
+                ),
+              }}
+              onStateChange={handleDrawerStateChange}
+            >
+              {screensConfig.map(
+                ({
+                  name,
+                  component: Component,
                   title,
-                  drawerIcon: ({ color, size }) => (
-                    <IconComponent name={icon} size={size} color={color} />
-                  ),
-                }}
-              >
-                {(props) => (
-                  <>
-                    <Component {...props} />
-                  </>
-                )}
-              </Drawer.Screen>
-            )
-          )}
-        </Drawer.Navigator>
+                  icon,
+                  iconFamily: IconComponent,
+                }) => (
+                  <Drawer.Screen
+                    key={name}
+                    name={name}
+                    options={{
+                      title,
+                      drawerIcon: ({ color, size }) => (
+                        <IconComponent name={icon} size={size} color={color} />
+                      ),
+                    }}
+                  >
+                    {(props) => (
+                      <>
+                        <Component {...props} />
+                      </>
+                    )}
+                  </Drawer.Screen>
+                )
+              )}
+            </Drawer.Navigator>
+          </NavigationContainer>
+        </NavigationIndependentTree>
       </SafeAreaView>
     </PaperProvider>
   );

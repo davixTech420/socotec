@@ -18,7 +18,7 @@ import Animated, {
   withTiming,
   Easing,
   interpolate,
-  Extrapolate,
+  Extrapolation,
 } from "react-native-reanimated";
 import Breadcrumb from "@/components/BreadcrumbComponent";
 import { router } from "expo-router";
@@ -470,7 +470,7 @@ export default function GeneratorReport() {
             optionsAnimation.value,
             [0, 1],
             [50, 0],
-            Extrapolate.CLAMP
+            Extrapolation.CLAMP
           ),
         },
       ],
@@ -493,7 +493,7 @@ export default function GeneratorReport() {
             contractTypeAnimation.value,
             [0, 1],
             [20, 0],
-            Extrapolate.CLAMP
+            Extrapolation.CLAMP
           ),
         },
       ],
@@ -1161,7 +1161,7 @@ export default function GeneratorReport() {
                   contractTypeAnimation.value,
                   [0, 1],
                   [20, 0],
-                  Extrapolate.CLAMP
+                  Extrapolation.CLAMP
                 ),
               },
             ],
@@ -1169,7 +1169,7 @@ export default function GeneratorReport() {
               contractTypeAnimation.value,
               [0, 1],
               [0, 1],
-              Extrapolate.CLAMP
+              Extrapolation.CLAMP
             ),
           },
         ]}
@@ -1893,14 +1893,15 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   customFieldInput: {
-    backgroundColor: "#f9fafb",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 14,
+    color: "#0F172A",
     width: "100%",
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: "#CBD5E1",
   },
   textareaInput: {
     minHeight: 100,

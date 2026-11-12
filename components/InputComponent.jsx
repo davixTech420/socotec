@@ -5,7 +5,7 @@ import React, {
   useRef,
   useEffect,
 } from "react";
-import { View, StyleSheet, Platform } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import { TextInput, HelperText } from "react-native-paper";
 import {
   Ionicons,
@@ -247,6 +247,7 @@ function OptimizedInputComponent({
   const [inputValue, setInputValue] = useState(String(value || ""));
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [visiblePass, setVisiblePass] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   // Sincronizar con prop value cuando cambie
   useEffect(() => {
@@ -308,6 +309,13 @@ function OptimizedInputComponent({
     setVisiblePass((prev) => !prev);
   }, []);
 
+  // Icon color dinámico
+  const iconColor = useMemo(() => {
+    if (!isValid) return "#E53E3E";
+    if (isFocused) return "#00ACE8";
+    return "#64748B";
+  }, [isValid, isFocused]);
+
   // Renderizar icono izquierdo
   const renderLeftIcon = useCallback(() => {
     if (!config.icon) return null;
@@ -316,12 +324,12 @@ function OptimizedInputComponent({
     return (
       <TextInput.Icon
         icon={() => (
-          <IconComponent name={config.icon.name} size={24} color="#666" />
+          <IconComponent name={config.icon.name} size={20} color={iconColor} />
         )}
         onPress={config.isDate ? showDatePicker : undefined}
       />
     );
-  }, [config, showDatePicker]);
+  }, [config, showDatePicker, iconColor]);
 
   // Renderizar icono derecho (para password)
   const renderRightIcon = useCallback(() => {
@@ -332,8 +340,8 @@ function OptimizedInputComponent({
         icon={() => (
           <Ionicons
             name={visiblePass ? "eye-off" : "eye"}
-            size={24}
-            color="#666"
+            size={20}
+            color="#64748B"
           />
         )}
         onPress={togglePasswordVisibility}
@@ -352,9 +360,20 @@ function OptimizedInputComponent({
       editable: config.editable !== undefined ? config.editable : editable,
       value: inputValue,
       onChangeText: handleChange,
+      onFocus: () => setIsFocused(true),
+      onBlur: () => setIsFocused(false),
       left: renderLeftIcon(),
       right: renderRightIcon(),
-      ...style,
+      cursorColor: "#00ACE8",
+      activeOutlineColor: "#00ACE8",
+      outlineColor: !isValid ? "#E53E3E" : isFocused ? "#00ACE8" : "#CBD5E1",
+      textColor: "#0F172A",
+      style: {
+        backgroundColor: isFocused ? "#FFFFFF" : "#F8FAFC",
+        fontSize: 14,
+        borderRadius: 12,
+        ...style,
+      },
     };
 
     return props;
@@ -367,6 +386,8 @@ function OptimizedInputComponent({
     editable,
     renderLeftIcon,
     renderRightIcon,
+    isValid,
+    isFocused,
   ]);
 
   // Estilos responsivos memoizados
@@ -382,6 +403,7 @@ function OptimizedInputComponent({
   if (type === "date" && Platform.OS === "web") {
     return (
       <View style={containerStyles}>
+        {label ? <View style={{ marginBottom: 4 }}><Text style={styles.webLabel}>{label}</Text></View> : null}
         <input
           type="date"
           readOnly={!editable}
@@ -389,10 +411,15 @@ function OptimizedInputComponent({
           value={inputValue}
           onChange={(e) => handleChange(e.target.value)}
           placeholder={placeholder}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
-        <HelperText type="error" visible={!isValid}>
-          {errorMessage}
-        </HelperText>
+        {!isValid && (
+          <View style={styles.errorRow}>
+            <Ionicons name="alert-circle" size={13} color="#E53E3E" />
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          </View>
+        )}
       </View>
     );
   }
@@ -407,9 +434,12 @@ function OptimizedInputComponent({
         {...inputProps}
       />
 
-      <HelperText type="error" visible={!isValid}>
-        {errorMessage}
-      </HelperText>
+      {!isValid && (
+        <View style={styles.errorRow}>
+          <Ionicons name="alert-circle" size={13} color="#E53E3E" />
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        </View>
+      )}
 
       {editable && isDatePickerVisible && (
         <DateTimePicker
@@ -426,29 +456,48 @@ function OptimizedInputComponent({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 7,
+    marginBottom: 10,
     width: "100%",
     minWidth: 200,
-    maxWidth: 400, // Reducido para inputs normales
+    maxWidth: 420,
   },
   containerFullWidth: {
-    marginBottom: 7,
+    marginBottom: 10,
     width: "100%",
-    minWidth: 250,
-    // Sin maxWidth para ocupar todo el espacio disponible
+    minWidth: 240,
+  },
+  webLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#475569",
+    marginLeft: 2,
+  },
+  errorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  errorText: {
+    color: "#E53E3E",
+    fontSize: 12,
+    fontWeight: "500",
   },
   inputDate: {
-    borderRadius: 4,
-    padding: 16,
-    fontSize: 16,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    height: 48,
+    fontSize: 14,
     borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
+    borderColor: "#CBD5E1",
+    backgroundColor: "#F8FAFC",
+    color: "#0F172A",
     width: "100%",
-    boxSizing: "border-box",
+    outlineStyle: "none",
     ...(Platform.OS === "web" && {
+      boxSizing: "border-box",
       WebkitAppearance: "none",
-      outlineStyle: "none",
     }),
   },
 });
